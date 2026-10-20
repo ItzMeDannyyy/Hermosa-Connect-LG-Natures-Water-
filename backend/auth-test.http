@@ -1,0 +1,93 @@
+### ====================================================================
+### LG Nature's Water — Authentication, RBAC & Security Test Suite
+### Base URL: http://localhost:3000/api/auth
+### Works with: VS Code REST Client, Postman, Insomnia, or Bruno
+### ====================================================================
+
+@baseUrl = http://localhost:3000/api/auth
+
+### 1. Login as Pre-Seeded Demo Station Operator
+# @name operatorLogin
+POST {{baseUrl}}/login
+Content-Type: application/json
+
+{
+  "phoneNumber": "+639170000001",
+  "password": "password123"
+}
+
+### 2. Login as Pre-Seeded Demo Rider (J. Cruz)
+# @name riderLogin
+POST {{baseUrl}}/login
+Content-Type: application/json
+
+{
+  "phoneNumber": "+639170000002",
+  "password": "password123"
+}
+
+### 3. Login as Pre-Seeded Demo Customer (Maria Santos)
+# @name customerLogin
+POST {{baseUrl}}/login
+Content-Type: application/json
+
+{
+  "phoneNumber": "+639170000003",
+  "password": "password123"
+}
+
+### 4. Register a New Customer (Auto-calculates Nearest Station + Sets Up 1-Click Profile)
+POST {{baseUrl}}/register/customer
+Content-Type: application/json
+
+{
+  "fullName": "Carlo Mendoza",
+  "phoneNumber": "+639178889900",
+  "password": "password123",
+  "deliveryAddress": "18 Xavierville Ave, Loyola Heights, Quezon City",
+  "latitude": 14.6401,
+  "longitude": 121.0729,
+  "defaultOrderQty": 8
+}
+
+### 5. Get Current Logged-In Profile (/me)
+@operatorToken = {{operatorLogin.response.body.accessToken}}
+GET {{baseUrl}}/me
+Authorization: Bearer {{operatorToken}}
+
+### 6. Provision a New Staff Account (RIDER or OPERATOR) — Requires OPERATOR Token
+POST {{baseUrl}}/register/staff
+Authorization: Bearer {{operatorToken}}
+Content-Type: application/json
+
+{
+  "fullName": "Rico Blanco (Delivery Rider)",
+  "phoneNumber": "+639175554433",
+  "password": "password123",
+  "role": "RIDER"
+}
+
+### 7. Verify Operator-Only RBAC Route (Should return 200 for OPERATOR, 403 for CUSTOMER/RIDER)
+GET {{baseUrl}}/verify/operator-only
+Authorization: Bearer {{operatorToken}}
+
+### 8. Ideathon 1-Click Demo Role Switcher (CUSTOMER | RIDER | OPERATOR)
+POST {{baseUrl}}/demo-switch
+Content-Type: application/json
+
+{
+  "role": "RIDER"
+}
+
+### 9. Refresh Access Token
+@refreshToken = {{operatorLogin.response.body.refreshToken}}
+POST {{baseUrl}}/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "{{refreshToken}}"
+}
+
+### 10. Logout (Revokes Refresh Token in PostgreSQL)
+POST {{baseUrl}}/logout
+Authorization: Bearer {{operatorToken}}

@@ -1,0 +1,241 @@
+/**
+ * ============================================================================
+ * FILE: src/styles/auth.styles.ts
+ * PURPOSE: Modular CSS/StyleSheet rules for Screen M0 (Shared Mobile Login
+ *          & 2-Step Customer Delivery Profile Setup).
+ * ============================================================================
+ */
+
+import { StyleSheet } from 'react-native';
+import { COLORS } from './theme.styles';
+
+export const authStyles = StyleSheet.create({
+  scrollContainer: {
+    flexGrow: 1,
+    backgroundColor: COLORS.navyPrimary,
+    paddingHorizontal: 20,
+    paddingVertical: 28,
+    justifyContent: 'center',
+  },
+  contentMaxWrapper: {
+    width: '100%',
+    maxWidth: 460,
+    alignSelf: 'center',
+  },
+  brandHeaderBlock: {
+    alignItems: 'flex-start',
+    marginBottom: 22,
+  },
+  brandTopLockup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 10,
+  },
+  logoPlaceholderBox: {
+    width: 56,
+    height: 56,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderStyle: 'dashed',
+    borderColor: '#38bdf8',
+    backgroundColor: 'rgba(14, 165, 233, 0.12)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  logoPlaceholderLabel: {
+    fontSize: 8,
+    fontWeight: '800',
+    color: '#bae6fd',
+    letterSpacing: 1,
+    marginTop: 2,
+  },
+  brandColoredTitleRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'baseline',
+  },
+  brandTextLg: {
+    fontSize: 30,
+    fontWeight: '800',
+    fontStyle: 'italic',
+    color: '#7dd3fc',
+  },
+  brandTextNatures: {
+    fontSize: 30,
+    fontWeight: '800',
+    fontStyle: 'italic',
+    color: '#6ee7b7',
+  },
+  brandTextWater: {
+    fontSize: 30,
+    fontWeight: '800',
+    fontStyle: 'italic',
+    color: '#38bdf8',
+  },
+  brandTaglineSubtitle: {
+    color: '#cbd5e1',
+    fontSize: 13,
+    lineHeight: 19,
+    marginTop: 4,
+  },
+  loginOuterRing: {
+    padding: 5,
+    borderRadius: 24,
+    backgroundColor: 'rgba(255, 255, 255, 0.14)',
+  },
+  loginWhiteCard: {
+    backgroundColor: COLORS.white,
+    borderRadius: 20,
+    padding: 22,
+  },
+  cardTopHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 14,
+  },
+  cardIconBadge: {
+    width: 42,
+    height: 42,
+    borderRadius: 12,
+    backgroundColor: '#eff6ff',
+    borderWidth: 1,
+    borderColor: '#dbeafe',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  onlineStatusPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: COLORS.emeraldLight,
+    borderWidth: 1,
+    borderColor: COLORS.emeraldBorder,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 999,
+  },
+  onlineDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 999,
+    backgroundColor: COLORS.emeraldPrimary,
+  },
+  onlineStatusText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#065f46',
+  },
+  cardHeading: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: COLORS.textPrimary,
+  },
+  cardSubtitle: {
+    fontSize: 12,
+    color: COLORS.textSecondary,
+    marginTop: 4,
+    marginBottom: 16,
+  },
+  fieldBlock: {
+    marginBottom: 14,
+  },
+  fieldLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#334155',
+    marginBottom: 6,
+  },
+  inputRowBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f8fafc',
+    borderWidth: 1,
+    borderColor: COLORS.borderLight,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    height: 46,
+    gap: 8,
+  },
+  textInputField: {
+    flex: 1,
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.textPrimary,
+  },
+  primaryLoginButton: {
+    backgroundColor: COLORS.bluePrimary,
+    borderRadius: 12,
+    height: 48,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    marginTop: 4,
+  },
+  primaryLoginButtonText: {
+    color: COLORS.white,
+    fontSize: 14,
+    fontWeight: '800',
+  },
+  signupDividerBlock: {
+    borderTopWidth: 1,
+    borderTopColor: '#f1f5f9',
+    marginTop: 18,
+    paddingTop: 16,
+  },
+  signupPromptText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: COLORS.textSecondary,
+    marginBottom: 8,
+  },
+  secondaryOutlineButton: {
+    borderWidth: 1,
+    borderColor: '#bfdbfe',
+    backgroundColor: '#eff6ff',
+    borderRadius: 12,
+    paddingVertical: 11,
+    paddingHorizontal: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  secondaryOutlineButtonText: {
+    color: COLORS.bluePrimary,
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  stepTwoProfileBox: {
+    marginTop: 12,
+    padding: 14,
+    borderRadius: 14,
+    backgroundColor: '#f8fafc',
+    borderWidth: 1,
+    borderColor: COLORS.borderLight,
+    gap: 10,
+  },
+  stepTwoTitle: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: COLORS.textPrimary,
+  },
+  gpsPinPreviewCard: {
+    backgroundColor: '#e0f2fe',
+    borderWidth: 1,
+    borderColor: '#bae6fd',
+    borderRadius: 10,
+    padding: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  gpsPinText: {
+    flex: 1,
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#0369a1',
+  },
+});
