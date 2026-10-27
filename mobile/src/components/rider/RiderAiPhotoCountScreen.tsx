@@ -32,7 +32,7 @@ import {
   countGallonsFromPhotoBase64,
   GeminiGallonCountResult,
 } from '../../services/geminiVisionService';
-import { customerStyles } from '../../styles/customer.styles';
+import { cardStyles } from '../../styles/card.styles';
 import { riderStyles } from '../../styles/rider.styles';
 import type { MobileOrderItem } from '../../types/mobile.types';
 
@@ -40,7 +40,7 @@ interface RiderAiPhotoCountScreenProps {
   order: MobileOrderItem;
   onUpdateVerifiedCount: (orderId: string, newCount: number) => void;
   onIssueInvoiceAndProceedToDoorstep: () => void;
-  onBackToRoute: () => void;
+  onBackToDeliveries: () => void;
 }
 
 export function RiderAiPhotoCountScreen(props: RiderAiPhotoCountScreenProps) {
@@ -191,16 +191,16 @@ export function RiderAiPhotoCountScreen(props: RiderAiPhotoCountScreenProps) {
     <ScrollView contentContainerStyle={riderStyles.scrollBody}>
       {/* Top Back Bar */}
       <Pressable
-        onPress={props.onBackToRoute}
-        style={customerStyles.secondaryActionCard}
+        onPress={props.onBackToDeliveries}
+        style={cardStyles.secondaryActionCard}
       >
-        <View style={customerStyles.secondaryActionLeft}>
+        <View style={cardStyles.secondaryActionLeft}>
           <ArrowLeft size={18} color="#0f172a" />
           <View>
-            <Text style={customerStyles.secondaryActionTitle}>
+            <Text style={cardStyles.secondaryActionTitle}>
               AI Photo Container Count (Order #{props.order.orderNumber})
             </Text>
-            <Text style={customerStyles.secondaryActionSub}>
+            <Text style={cardStyles.secondaryActionSub}>
               Customer: {props.order.customerName}
             </Text>
           </View>
@@ -300,8 +300,8 @@ export function RiderAiPhotoCountScreen(props: RiderAiPhotoCountScreenProps) {
       ) : null}
 
       {/* 2. Real Camera & Gallery Capture Actions (NO SIMULATION) */}
-      <View style={customerStyles.whitePanelCard}>
-        <Text style={customerStyles.sectionLabel}>
+      <View style={cardStyles.whitePanelCard}>
+        <Text style={cardStyles.sectionLabel}>
           CAMERA CAPTURE & AI COUNTING
         </Text>
 
@@ -346,7 +346,7 @@ export function RiderAiPhotoCountScreen(props: RiderAiPhotoCountScreenProps) {
           <Text style={riderStyles.adjusterTitle}>
             VERIFIED CONTAINER COUNT (MANUAL OVERRIDE)
           </Text>
-          <Text style={customerStyles.secondaryActionSub}>
+          <Text style={cardStyles.secondaryActionSub}>
             Tap + or – to adjust
           </Text>
         </View>
@@ -386,31 +386,31 @@ export function RiderAiPhotoCountScreen(props: RiderAiPhotoCountScreenProps) {
       </View>
 
       {/* 4. Auto-Generated Pre-Dispatch Bill (#INV) */}
-      <View style={customerStyles.whitePanelCard}>
-        <Text style={customerStyles.sectionLabel}>
+      <View style={cardStyles.whitePanelCard}>
+        <Text style={cardStyles.sectionLabel}>
           AUTO-GENERATED BILL (PRE-DISPATCH #{props.order.invoiceNumber})
         </Text>
 
-        <View style={customerStyles.billRow}>
-          <Text style={customerStyles.billRowLabel}>
+        <View style={cardStyles.billRow}>
+          <Text style={cardStyles.billRowLabel}>
             {props.order.verifiedCount} containers refilled (× PHP{' '}
             {props.order.unitPrice})
           </Text>
-          <Text style={customerStyles.billRowValue}>
+          <Text style={cardStyles.billRowValue}>
             PHP {billBreakdown.subtotalAmount.toFixed(2)}
           </Text>
         </View>
 
-        <View style={customerStyles.billRow}>
-          <Text style={customerStyles.billRowLabel}>Delivery fee</Text>
-          <Text style={customerStyles.billRowValue}>
+        <View style={cardStyles.billRow}>
+          <Text style={cardStyles.billRowLabel}>Delivery fee</Text>
+          <Text style={cardStyles.billRowValue}>
             PHP {billBreakdown.deliveryFee.toFixed(2)}
           </Text>
         </View>
 
-        <View style={customerStyles.billTotalRow}>
-          <Text style={customerStyles.billTotalLabel}>TOTAL DUE</Text>
-          <Text style={customerStyles.billTotalValue}>
+        <View style={cardStyles.billTotalRow}>
+          <Text style={cardStyles.billTotalLabel}>TOTAL DUE</Text>
+          <Text style={cardStyles.billTotalValue}>
             PHP {billBreakdown.totalDue.toFixed(2)}
           </Text>
         </View>

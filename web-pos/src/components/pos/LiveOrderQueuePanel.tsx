@@ -20,9 +20,7 @@ import {
   FileText,
   MapPin,
   Receipt,
-  Route,
   Search,
-  Smartphone,
   User,
 } from 'lucide-react';
 import { useState } from 'react';
@@ -35,7 +33,6 @@ interface LiveOrderQueuePanelProps {
     orderId: string,
     selectedPaymentState: PaymentState,
   ) => void;
-  onSimulateRiderRouteOptimization: () => void;
   onOpenRegisterCustomer?: () => void;
 }
 
@@ -91,7 +88,6 @@ export function LiveOrderQueuePanel(props: LiveOrderQueuePanelProps) {
 
   function getReadablePaymentLabel(paymentState: PaymentState): string {
     if (paymentState === 'PAID_CASH') return 'Paid · Cash';
-    if (paymentState === 'E_PAYMENT') return 'E-Payment';
     if (paymentState === 'PARTIAL') return 'Partial Deposit';
     return 'Unpaid Charge Slip';
   }
@@ -107,20 +103,8 @@ export function LiveOrderQueuePanel(props: LiveOrderQueuePanelProps) {
             Dispatch &amp; Counter Orders
           </h1>
           <p className="text-[12px] text-[#64748b] mt-0.5">
-            Active water refilling queue, delivery routes, and official receipt conversion.
+            Active water refilling queue, delivery dispatch, and official receipt conversion.
           </p>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={props.onSimulateRiderRouteOptimization}
-            className="btn-secondary text-[12px] py-1.5"
-            title="Sequences active stops for delivery rider"
-          >
-            <Route size={14} className="text-[#0284c7]" />
-            <span>Optimize Delivery Route</span>
-          </button>
         </div>
       </div>
 
@@ -348,20 +332,6 @@ export function LiveOrderQueuePanel(props: LiveOrderQueuePanelProps) {
                             >
                               <Banknote size={13} />
                               <span>Paid Full (Cash)</span>
-                            </button>
-
-                            <button
-                              type="button"
-                              onClick={() =>
-                                props.onConvertInvoiceToReceipt(
-                                  order.id,
-                                  'E_PAYMENT',
-                                )
-                              }
-                              className="btn-secondary text-[11px] py-1.5 px-3"
-                            >
-                              <Smartphone size={13} className="text-[#0284c7]" />
-                              <span>GCash / Maya QR</span>
                             </button>
 
                             <button

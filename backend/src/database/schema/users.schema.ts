@@ -7,7 +7,7 @@ export const users = pgTable('users', {
   branchId: uuid('branch_id').references(() => stationBranches.id, {
     onDelete: 'set null',
   }),
-  role: userRoleEnum('role').default('CUSTOMER').notNull(),
+  role: userRoleEnum('role').default('OPERATOR').notNull(),
   fullName: text('full_name').notNull(),
   phoneNumber: text('phone_number').notNull().unique(),
   passwordHash: text('password_hash').notNull(),

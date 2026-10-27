@@ -21,7 +21,6 @@ import React, { useState } from 'react';
 import {
   DEFAULT_DELIVERY_FEE_PHP,
   DEFAULT_REFILL_PRICE_PHP,
-  TOTAL_OPERATIONAL_COST_PER_JUG_PHP,
 } from '../../data/initialPosData';
 import type { CreateOrderBackendInput } from '../../services/posApiService';
 import type { PaymentState, TimeSlotLabel } from '../../types/pos.types';
@@ -65,10 +64,6 @@ export function QuickCounterRegisterPanel(
   const subtotalAmount = containerCount * DEFAULT_REFILL_PRICE_PHP;
   const deliveryFee = includeDeliveryFee ? DEFAULT_DELIVERY_FEE_PHP : 0;
   const totalDue = subtotalAmount + deliveryFee;
-
-  const operationalCostTotal =
-    containerCount * TOTAL_OPERATIONAL_COST_PER_JUG_PHP;
-  const trueNetProfit = totalDue - operationalCostTotal;
 
   let exactChange = 0;
 
@@ -309,7 +304,7 @@ export function QuickCounterRegisterPanel(
           <label className="block text-[11px] font-semibold text-[#64748b] uppercase tracking-wider mb-1.5">
             Payment Method
           </label>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+          <div className="grid grid-cols-3 gap-1.5">
             <button
               type="button"
               onClick={() => setPaymentState('PAID_CASH')}
@@ -320,17 +315,6 @@ export function QuickCounterRegisterPanel(
               }`}
             >
               Cash (Tendered)
-            </button>
-            <button
-              type="button"
-              onClick={() => setPaymentState('E_PAYMENT')}
-              className={`py-2 px-2 rounded-[5px] border text-center text-[11px] font-medium cursor-pointer transition-colors ${
-                paymentState === 'E_PAYMENT'
-                  ? 'border-[#0284c7] bg-[#f0f9ff] text-[#0284c7] font-semibold'
-                  : 'border-[#e2e8f0] bg-white text-[#475569] hover:bg-[#f8fafc]'
-              }`}
-            >
-              GCash / Maya QR
             </button>
             <button
               type="button"
@@ -409,9 +393,9 @@ export function QuickCounterRegisterPanel(
             </div>
           </div>
           <div className="text-right">
-            <div className="text-[11px] text-[#64748b]">Net Station Margin</div>
-            <div className="text-[13px] font-semibold text-[#15803d] num-mono">
-              +₱{trueNetProfit.toFixed(2)}
+            <div className="text-[11px] text-[#64748b]">Breakdown</div>
+            <div className="text-[12px] font-medium text-[#475569] num-mono">
+              ₱{subtotalAmount.toFixed(2)} + ₱{deliveryFee.toFixed(2)} fee
             </div>
           </div>
         </div>

@@ -1,20 +1,16 @@
 /**
  * ============================================================================
  * FILE: src/types/mobile.types.ts
- * PURPOSE: Type definitions for the LG Nature's Water Mobile Application
- *          (Customer View, Delivery Rider View, and Shared Auth M0).
+ * PURPOSE: Type definitions for the LG Nature's Water Rider Mobile Application.
  * ============================================================================
  */
 
-export type MobileUserRole = 'CUSTOMER' | 'RIDER' | 'OPERATOR';
+export type MobileUserRole = 'RIDER' | 'OPERATOR';
 
-export type CustomerTabName = 'HOME' | 'PICKUP' | 'RECEIPTS';
-
-export type RiderTabName = 'ROUTE' | 'AI_COUNT' | 'DOORSTEP_OR';
+export type RiderTabName = 'DELIVERIES' | 'AI_COUNT' | 'DOORSTEP_OR';
 
 export type PaymentStateType =
   | 'PAID_CASH'
-  | 'E_PAYMENT'
   | 'PARTIAL'
   | 'UNPAID_CHARGE_SLIP';
 
@@ -56,75 +52,5 @@ export interface MobileOrderItem {
   scheduledTimeSlot: TimeSlotOption;
   assignedRiderName: string;
   aiConfidencePercent: number;
-  stopSequenceNumber: number;
   createdAtLabel: string;
-  latitude?: number;
-  longitude?: number;
-  etaMinutes?: number;
-  distanceKm?: number;
-}
-
-export interface MapCoordinate {
-  latitude: number;
-  longitude: number;
-}
-
-export interface RouteWaypoint extends MapCoordinate {
-  id: string;
-  label: string;
-  title: string;
-  subtitle: string;
-  type: 'STATION_HUB' | 'DELIVERY_STOP';
-  sequenceNumber: number;
-  orderId?: string;
-  isDelivered?: boolean;
-}
-
-export interface RouteManeuver {
-  instruction: string;
-  distanceMeters: number;
-  durationSeconds: number;
-  streetName: string;
-  type: string;
-  modifier?: string;
-}
-
-export interface RouteLeg {
-  fromWaypointId: string;
-  toWaypointId: string;
-  distanceMeters: number;
-  durationSeconds: number;
-  summary: string;
-  coordinates: MapCoordinate[];
-  maneuvers: RouteManeuver[];
-}
-
-export interface OptimizedRouteData {
-  totalDistanceMeters: number;
-  totalDurationSeconds: number;
-  fullCoordinates: MapCoordinate[];
-  legs: RouteLeg[];
-  allManeuvers: RouteManeuver[];
-  waypoints: RouteWaypoint[];
-}
-
-export interface CustomerAccountSummary {
-  customerName: string;
-  phoneNumber: string;
-  address: string;
-  nearestStationLabel: string;
-  emptyContainersOut: number;
-  containersDueDateLabel: string;
-  unpaidBalanceAmount: number;
-  unpaidFromReceiptCode: string;
-  usualOrderGallons: number;
-  usualPresetName: string;
-}
-
-export interface PickupScheduleFormState {
-  selectedDayCode: string;
-  selectedDayLabel: string;
-  selectedTimeSlot: TimeSlotOption;
-  containersToReturn: number;
-  reminderEnabled: boolean;
 }

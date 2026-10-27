@@ -1,9 +1,9 @@
 /**
  * ============================================================================
  * FILE: src/components/rider/RiderDoorstepReceiptScreen.tsx
- * PURPOSE: Doorstep Proof of Delivery & 4-State Smart Receipt.
+ * PURPOSE: Doorstep Proof of Delivery & Cash-Only Smart Receipt.
  *          Converts Station Pre-Dispatch Invoice (#INV) into Official
- *          Receipt (#OR) with 4 payment states (Cash, GCash, Partial, Credit),
+ *          Receipt (#OR) with 3 cash payment states (Cash COD, Partial, Charge Slip),
  *          empty jug return tracking, and 58mm thermal print preview.
  *          Strict Lucide icons (lucide-react-native).
  * ============================================================================
@@ -19,7 +19,6 @@ import {
   Plus,
   Printer,
   Send,
-  Smartphone,
 } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
@@ -31,7 +30,7 @@ import {
 } from 'react-native';
 import { calculateDoorstepPaymentAmounts } from '../../data/mobileInitialData';
 import { authStyles } from '../../styles/auth.styles';
-import { customerStyles } from '../../styles/customer.styles';
+import { cardStyles } from '../../styles/card.styles';
 import { riderStyles } from '../../styles/rider.styles';
 import type {
   MobileOrderItem,
@@ -48,7 +47,7 @@ interface RiderDoorstepReceiptScreenProps {
     emptyCollectedCount: number,
   ) => void;
   onSimulateBluetoothThermalPrint: (receiptCode: string) => void;
-  onBackToRoute: () => void;
+  onBackToDeliveries: () => void;
 }
 
 export function RiderDoorstepReceiptScreen(
@@ -101,16 +100,16 @@ export function RiderDoorstepReceiptScreen(
     <ScrollView contentContainerStyle={riderStyles.scrollBody}>
       {/* Top Back Navigation Bar */}
       <Pressable
-        onPress={props.onBackToRoute}
-        style={customerStyles.secondaryActionCard}
+        onPress={props.onBackToDeliveries}
+        style={cardStyles.secondaryActionCard}
       >
-        <View style={customerStyles.secondaryActionLeft}>
+        <View style={cardStyles.secondaryActionLeft}>
           <ArrowLeft size={18} color="#0f172a" />
           <View>
-            <Text style={customerStyles.secondaryActionTitle}>
+            <Text style={cardStyles.secondaryActionTitle}>
               Confirm Delivery &bull; Order #{props.order.orderNumber}
             </Text>
-            <Text style={customerStyles.secondaryActionSub}>
+            <Text style={cardStyles.secondaryActionSub}>
               Customer: {props.order.customerName} &bull; #{props.order.invoiceNumber} &rarr; #{officialReceiptCode}
             </Text>
           </View>
@@ -118,16 +117,16 @@ export function RiderDoorstepReceiptScreen(
       </Pressable>
 
       {/* 1. Verified Load & Empty Containers Collected */}
-      <View style={customerStyles.whitePanelCard}>
-        <View style={customerStyles.billRow}>
-          <Text style={customerStyles.billRowLabel}>AI Verified Refills</Text>
-          <Text style={customerStyles.billRowValue}>
+      <View style={cardStyles.whitePanelCard}>
+        <View style={cardStyles.billRow}>
+          <Text style={cardStyles.billRowLabel}>AI Verified Refills</Text>
+          <Text style={cardStyles.billRowValue}>
             {props.order.verifiedCount} Containers Refilled
           </Text>
         </View>
 
-        <View style={customerStyles.billRow}>
-          <Text style={customerStyles.billRowLabel}>
+        <View style={cardStyles.billRow}>
+          <Text style={cardStyles.billRowLabel}>
             Empty Carboys Collected
           </Text>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
@@ -137,37 +136,37 @@ export function RiderDoorstepReceiptScreen(
               }}
               disabled={emptyCollected <= 0}
               style={[
-                customerStyles.stepperButton,
+                cardStyles.stepperButton,
                 emptyCollected <= 0 ? { opacity: 0.4 } : null,
               ]}
             >
               <Minus size={15} color="#0f172a" />
             </Pressable>
-            <Text style={[customerStyles.billRowValue, { minWidth: 20, textAlign: 'center' }]}>
+            <Text style={[cardStyles.billRowValue, { minWidth: 20, textAlign: 'center' }]}>
               {emptyCollected}
             </Text>
             <Pressable
               onPress={() => {
                 handleAdjustEmptyCollected(1);
               }}
-              style={customerStyles.stepperButton}
+              style={cardStyles.stepperButton}
             >
               <Plus size={15} color="#0f172a" />
             </Pressable>
           </View>
         </View>
 
-        <View style={customerStyles.billTotalRow}>
-          <Text style={customerStyles.billTotalLabel}>Total Due</Text>
-          <Text style={customerStyles.billTotalValue}>
+        <View style={cardStyles.billTotalRow}>
+          <Text style={cardStyles.billTotalLabel}>Total Due</Text>
+          <Text style={cardStyles.billTotalValue}>
             PHP {props.order.totalDue.toFixed(2)}
           </Text>
         </View>
       </View>
 
       {/* 2. Select Doorstep Payment State */}
-      <View style={customerStyles.whitePanelCard}>
-        <Text style={customerStyles.sectionLabel}>
+      <View style={cardStyles.whitePanelCard}>
+        <Text style={cardStyles.sectionLabel}>
           Doorstep Payment State
         </Text>
 
@@ -202,37 +201,7 @@ export function RiderDoorstepReceiptScreen(
             </Text>
           </Pressable>
 
-          {/* State 2: E_PAYMENT */}
-          <Pressable
-            onPress={() => {
-              setSelectedPaymentState('E_PAYMENT');
-            }}
-            style={[
-              riderStyles.paymentStateButton,
-              selectedPaymentState === 'E_PAYMENT'
-                ? riderStyles.paymentStateButtonActive
-                : null,
-            ]}
-          >
-            <Smartphone
-              size={15}
-              color={
-                selectedPaymentState === 'E_PAYMENT' ? '#0284c7' : '#475569'
-              }
-            />
-            <Text
-              style={[
-                riderStyles.paymentStateButtonText,
-                selectedPaymentState === 'E_PAYMENT'
-                  ? riderStyles.paymentStateButtonTextActive
-                  : null,
-              ]}
-            >
-              GCash / E-Pay
-            </Text>
-          </Pressable>
-
-          {/* State 3: PARTIAL */}
+          {/* State 2: PARTIAL */}
           <Pressable
             onPress={() => {
               setSelectedPaymentState('PARTIAL');
@@ -260,7 +229,7 @@ export function RiderDoorstepReceiptScreen(
             </Text>
           </Pressable>
 
-          {/* State 4: UNPAID_CHARGE_SLIP */}
+          {/* State 3: UNPAID_CHARGE_SLIP */}
           <Pressable
             onPress={() => {
               setSelectedPaymentState('UNPAID_CHARGE_SLIP');
@@ -306,7 +275,7 @@ export function RiderDoorstepReceiptScreen(
                 style={authStyles.textInputField}
               />
             </View>
-            <Text style={customerStyles.secondaryActionSub}>
+            <Text style={cardStyles.secondaryActionSub}>
               Remaining balance due: PHP{' '}
               {paymentComputation.balanceDue.toFixed(2)}
             </Text>
@@ -315,8 +284,8 @@ export function RiderDoorstepReceiptScreen(
       </View>
 
       {/* 3. Authentic 58mm Thermal Receipt Preview */}
-      <View style={customerStyles.whitePanelCard}>
-        <Text style={customerStyles.sectionLabel}>
+      <View style={cardStyles.whitePanelCard}>
+        <Text style={cardStyles.sectionLabel}>
           Thermal Receipt Preview (#{officialReceiptCode})
         </Text>
 
@@ -328,55 +297,55 @@ export function RiderDoorstepReceiptScreen(
             BIR OFFICIAL RECEIPT #{officialReceiptCode}
           </Text>
 
-          <View style={customerStyles.billRow}>
-            <Text style={customerStyles.billRowLabel}>Customer:</Text>
-            <Text style={customerStyles.billRowValue}>
+          <View style={cardStyles.billRow}>
+            <Text style={cardStyles.billRowLabel}>Customer:</Text>
+            <Text style={cardStyles.billRowValue}>
               {props.order.customerName}
             </Text>
           </View>
 
-          <View style={customerStyles.billRow}>
-            <Text style={customerStyles.billRowLabel}>Rider / Hub:</Text>
-            <Text style={customerStyles.billRowValue}>
+          <View style={cardStyles.billRow}>
+            <Text style={cardStyles.billRowLabel}>Rider / Hub:</Text>
+            <Text style={cardStyles.billRowValue}>
               {props.order.assignedRiderName} &bull; Station 1 Hub
             </Text>
           </View>
 
-          <View style={customerStyles.billRow}>
-            <Text style={customerStyles.billRowLabel}>
+          <View style={cardStyles.billRow}>
+            <Text style={cardStyles.billRowLabel}>
               {props.order.verifiedCount} containers refilled
             </Text>
-            <Text style={customerStyles.billRowValue}>
+            <Text style={cardStyles.billRowValue}>
               PHP {props.order.subtotalAmount.toFixed(2)}
             </Text>
           </View>
 
-          <View style={customerStyles.billRow}>
-            <Text style={customerStyles.billRowLabel}>Delivery fee</Text>
-            <Text style={customerStyles.billRowValue}>
+          <View style={cardStyles.billRow}>
+            <Text style={cardStyles.billRowLabel}>Delivery fee</Text>
+            <Text style={cardStyles.billRowValue}>
               PHP {props.order.deliveryFee.toFixed(2)}
             </Text>
           </View>
 
-          <View style={customerStyles.billTotalRow}>
-            <Text style={customerStyles.billTotalLabel}>TOTAL DUE</Text>
-            <Text style={customerStyles.billTotalValue}>
+          <View style={cardStyles.billTotalRow}>
+            <Text style={cardStyles.billTotalLabel}>TOTAL DUE</Text>
+            <Text style={cardStyles.billTotalValue}>
               PHP {props.order.totalDue.toFixed(2)}
             </Text>
           </View>
 
-          <View style={customerStyles.billRow}>
-            <Text style={customerStyles.billRowLabel}>Amount Paid</Text>
-            <Text style={customerStyles.billRowValue}>
+          <View style={cardStyles.billRow}>
+            <Text style={cardStyles.billRowLabel}>Amount Paid</Text>
+            <Text style={cardStyles.billRowValue}>
               PHP {paymentComputation.amountPaid.toFixed(2)}
             </Text>
           </View>
 
-          <View style={customerStyles.billRow}>
-            <Text style={customerStyles.billRowLabel}>Balance Due</Text>
+          <View style={cardStyles.billRow}>
+            <Text style={cardStyles.billRowLabel}>Balance Due</Text>
             <Text
               style={[
-                customerStyles.billRowValue,
+                cardStyles.billRowValue,
                 paymentComputation.balanceDue > 0
                   ? { color: '#dc2626' }
                   : { color: '#059669' },

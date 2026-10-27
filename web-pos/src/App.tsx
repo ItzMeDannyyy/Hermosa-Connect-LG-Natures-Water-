@@ -28,7 +28,6 @@ import {
 import { OperatorLoginPage } from './components/auth/OperatorLoginPage';
 import { ProtectedOperatorRoute } from './components/auth/ProtectedOperatorRoute';
 import { StaffRegistrationModal } from './components/auth/StaffRegistrationModal';
-import { CustomerAccountabilityTable } from './components/pos/CustomerAccountabilityTable';
 import { EndOfDayReportModal } from './components/pos/EndOfDayReportModal';
 import {
   FloatingToastNotification,
@@ -41,7 +40,6 @@ import { RegisterCustomerModalDrawer } from './components/pos/RegisterCustomerMo
 import { TopNavigationBar } from './components/pos/TopNavigationBar';
 import { TransactionLogsPanel } from './components/pos/TransactionLogsPanel';
 import {
-  INITIAL_CUSTOMER_ACCOUNTABILITY,
   INITIAL_POS_ORDERS,
   calculateProfitSummaryMetrics,
   filterActiveOrders,
@@ -57,8 +55,6 @@ import {
   convertInvoiceToReceiptOnBackend,
   createPosOrderOnBackend,
   fetchPosDashboardFromBackend,
-  sendCustomerPickupReminderOnBackend,
-  settleCustomerBalanceOnBackend,
   type CreateOrderBackendInput,
 } from './services/posApiService';
 import type {
@@ -68,7 +64,6 @@ import type {
   UserRole,
 } from './types/auth.types';
 import type {
-  CustomerAccountabilityRecord,
   PaymentState,
   PosOrderItem,
 } from './types/pos.types';
@@ -96,21 +91,16 @@ function PosApplicationRouterContent() {
   const [notificationToast, setNotificationToast] =
     useState<ToastNotificationData | null>(null);
 
-  // Live POS Orders & Customer Accountability State
+  // Live POS Orders State
   const [orders, setOrders] = useState<PosOrderItem[]>(INITIAL_POS_ORDERS);
-  const [customerRecords, setCustomerRecords] = useState<
-    CustomerAccountabilityRecord[]
-  >(INITIAL_CUSTOMER_ACCOUNTABILITY);
 
   /**
-   * Loads live POS orders and customer accountability records from NestJS
-   * GET http://localhost:3000/api/pos/dashboard
+   * Loads live POS orders from NestJS GET /api/pos/dashboard
    */
   async function loadPosDataFromPostgreSql() {
     try {
       const dashboardData = await fetchPosDashboardFromBackend();
       setOrders(dashboardData.orders);
-      setCustomerRecords(dashboardData.customerRecords);
     } catch {
       // Fallback to initial data if backend is offline or unauthorized
     }
@@ -216,7 +206,6 @@ function PosApplicationRouterContent() {
         selectedPaymentState,
       );
       setOrders(updatedDashboard.orders);
-      setCustomerRecords(updatedDashboard.customerRecords);
       showToastNotification(
         `Official Receipt issued (${selectedPaymentState})! Order completed and archived.`,
         'success',
@@ -232,7 +221,6 @@ function PosApplicationRouterContent() {
     try {
       const updatedDashboard = await createPosOrderOnBackend(newOrderInput);
       setOrders(updatedDashboard.orders);
-      setCustomerRecords(updatedDashboard.customerRecords);
       showToastNotification(
         `Order logged for ${newOrderInput.customerName} (${newOrderInput.containerCount} containers)`,
         'success',
@@ -241,64 +229,6 @@ function PosApplicationRouterContent() {
       const message =
         error instanceof Error ? error.message : 'Failed to create order.';
       showToastNotification(message, 'error');
-    }
-  }
-
-  async function handleSettleCustomerBalance(profileId: string) {
-    try {
-      const updatedDashboard = await settleCustomerBalanceOnBackend(profileId);
-      setOrders(updatedDashboard.orders);
-      setCustomerRecords(updatedDashboard.customerRecords);
-      showToastNotification(
-        'Customer unpaid balance marked as settled!',
-        'success',
-      );
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : 'Failed to settle balance.';
-      showToastNotification(message, 'error');
-    }
-  }
-
-  function handleSimulateRiderRouteOptimization() {
-    showToastNotification(
-      'Smart Routing: Sequenced delivery stops along Katipunan & Pansol St for Rider J. Cruz.',
-      'info',
-    );
-  }
-
-  async function handleTriggerPickupReminder(
-    profileId: string,
-    customerName: string,
-    isRemindAgain: boolean,
-  ) {
-    const timeLabel = new Date().toLocaleTimeString([], {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-
-    setCustomerRecords((prevRecords) =>
-      prevRecords.map((rec) =>
-        rec.id === profileId
-          ? { ...rec, pickupReminderSent: true, lastRemindedAt: timeLabel }
-          : rec,
-      ),
-    );
-
-    showToastNotification(
-      isRemindAgain
-        ? `Sent follow-up container pickup reminder to ${customerName}!`
-        : `Sent container pickup reminder via SMS to ${customerName}!`,
-      'success',
-    );
-
-    try {
-      const updatedDashboard =
-        await sendCustomerPickupReminderOnBackend(profileId);
-      setOrders(updatedDashboard.orders);
-      setCustomerRecords(updatedDashboard.customerRecords);
-    } catch {
-      // Keep optimistic local state offline
     }
   }
 
@@ -343,10 +273,7 @@ function PosApplicationRouterContent() {
         {/* Framed Inset Work Surface */}
         <main className="p-4 sm:p-6 max-w-[1560px] w-full mx-auto flex flex-col gap-5 flex-1">
           {/* Top Ledger Strip */}
-          <ProfitTrackerCards
-            metrics={profitMetrics}
-            customerRecords={customerRecords}
-          />
+          <ProfitTrackerCards metrics={profitMetrics} />
 
           {/* Page Work Surface */}
           <div key={location.pathname} className="pos-page-transition w-full">
@@ -378,7 +305,7 @@ function PosApplicationRouterContent() {
           onClick={() => setIsRegisterDrawerOpen(true)}
           className="edge-pos-trigger"
           title="Open Counter POS Register"
-          aria-label="Register Customer & Counter POS"
+          aria-label="Counter POS"
         >
           <div className="edge-pos-trigger__pip" />
           <UserPlus size={15} className="text-[#38bdf8]" />
@@ -437,9 +364,6 @@ function PosApplicationRouterContent() {
               <LiveOrderQueuePanel
                 orders={orders}
                 onConvertInvoiceToReceipt={handleConvertInvoiceToReceipt}
-                onSimulateRiderRouteOptimization={
-                  handleSimulateRiderRouteOptimization
-                }
                 onOpenRegisterCustomer={() => setIsRegisterDrawerOpen(true)}
               />,
             )}
@@ -455,21 +379,6 @@ function PosApplicationRouterContent() {
               <TransactionLogsPanel
                 orders={orders}
                 onOpenRegisterCustomer={() => setIsRegisterDrawerOpen(true)}
-              />,
-            )}
-          </ProtectedOperatorRoute>
-        }
-      />
-
-      <Route
-        path="/pos/accountability"
-        element={
-          <ProtectedOperatorRoute currentUser={currentUser}>
-            {renderPosShell(
-              <CustomerAccountabilityTable
-                records={customerRecords}
-                onSettleCustomerBalance={handleSettleCustomerBalance}
-                onTriggerPickupReminder={handleTriggerPickupReminder}
               />,
             )}
           </ProtectedOperatorRoute>
@@ -493,7 +402,7 @@ function PosApplicationRouterContent() {
                   Counter POS Restricted to Station Operators
                 </h2>
                 <p className="text-[12px] text-[#64748b] mb-4">
-                  Authenticated as <strong>{currentUser.fullName}</strong> ({currentUser.role}). Station operational margins, utilities, and EOD reconciliations require operator credentials.
+                  Authenticated as <strong>{currentUser.fullName}</strong> ({currentUser.role}). Station operational access and EOD reconciliations require operator credentials.
                   {rbacBackendStatus && (
                     <span className="block mt-1 font-mono text-[11px] text-[#b91c1c]">
                       {rbacBackendStatus}

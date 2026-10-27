@@ -2,30 +2,18 @@
  * ============================================================================
  * FILE: src/data/initialPosData.ts
  * PURPOSE: Realistic initial data for the Station Counter Web POS matching
- *          the LG Nature's Water pitch deck (Slides 7 to 12), plus clear
- *          helper functions to compute True Net Profit step by step.
+ *          the LG Nature's Water pitch deck (Slides 7 to 12).
  * ============================================================================
  */
 
 import type {
-  CustomerAccountabilityRecord,
   PosOrderItem,
   ProfitSummaryMetrics,
   TransactionLogsFilter,
 } from '../types/pos.types';
 
-/**
- * Cost per container refill (from Slide 9: Water, Electricity, and Container Wear)
- */
 export const DEFAULT_REFILL_PRICE_PHP = 25;
 export const DEFAULT_DELIVERY_FEE_PHP = 30;
-export const WATER_COST_PER_JUG_PHP = 3;
-export const ELECTRICITY_COST_PER_JUG_PHP = 3;
-export const CONTAINER_WEAR_COST_PER_JUG_PHP = 2;
-export const TOTAL_OPERATIONAL_COST_PER_JUG_PHP =
-  WATER_COST_PER_JUG_PHP +
-  ELECTRICITY_COST_PER_JUG_PHP +
-  CONTAINER_WEAR_COST_PER_JUG_PHP; // PHP 8.00 per jug
 
 export const INITIAL_POS_ORDERS: PosOrderItem[] = [
   {
@@ -49,8 +37,7 @@ export const INITIAL_POS_ORDERS: PosOrderItem[] = [
     totalDue: 230,
     amountPaid: 130,
     balanceDue: 100,
-    operationalCostTotal: 64,
-    netProfit: 166,
+    netProfit: 230,
     assignedRiderName: 'J. Cruz',
     invoicedAt: '9:42 AM',
     deliveredAt: '11:15 AM',
@@ -72,14 +59,13 @@ export const INITIAL_POS_ORDERS: PosOrderItem[] = [
     documentStage: 'INVOICE_ONLY',
     invoiceNumber: 'INV-1043',
     receiptNumber: null,
-    paymentState: 'E_PAYMENT',
+    paymentState: 'UNPAID_CHARGE_SLIP',
     subtotalAmount: 150,
     deliveryFee: 30,
     totalDue: 180,
     amountPaid: 0,
     balanceDue: 180,
-    operationalCostTotal: 48,
-    netProfit: 132,
+    netProfit: 180,
     assignedRiderName: 'J. Cruz',
     invoicedAt: '10:05 AM',
     deliveredAt: null,
@@ -107,8 +93,7 @@ export const INITIAL_POS_ORDERS: PosOrderItem[] = [
     totalDue: 330,
     amountPaid: 330,
     balanceDue: 0,
-    operationalCostTotal: 96,
-    netProfit: 234,
+    netProfit: 330,
     assignedRiderName: 'J. Cruz',
     invoicedAt: '8:15 AM',
     deliveredAt: '9:02 AM',
@@ -128,14 +113,13 @@ export const INITIAL_POS_ORDERS: PosOrderItem[] = [
     documentStage: 'OFFICIAL_RECEIPT',
     invoiceNumber: 'INV-1045',
     receiptNumber: 'OR-1045',
-    paymentState: 'E_PAYMENT',
+    paymentState: 'PAID_CASH',
     subtotalAmount: 250,
     deliveryFee: 30,
     totalDue: 280,
     amountPaid: 280,
     balanceDue: 0,
-    operationalCostTotal: 80,
-    netProfit: 200,
+    netProfit: 280,
     assignedRiderName: 'J. Cruz',
     invoicedAt: '10:30 AM',
     deliveredAt: '11:40 AM',
@@ -161,8 +145,7 @@ export const INITIAL_POS_ORDERS: PosOrderItem[] = [
     totalDue: 155,
     amountPaid: 155,
     balanceDue: 0,
-    operationalCostTotal: 40,
-    netProfit: 115,
+    netProfit: 155,
     assignedRiderName: 'J. Cruz',
     invoicedAt: '8:35 AM',
     deliveredAt: '9:18 AM',
@@ -188,8 +171,7 @@ export const INITIAL_POS_ORDERS: PosOrderItem[] = [
     totalDue: 405,
     amountPaid: 0,
     balanceDue: 405,
-    operationalCostTotal: 120,
-    netProfit: 285,
+    netProfit: 405,
     assignedRiderName: 'J. Cruz',
     invoicedAt: '12:50 PM',
     deliveredAt: null,
@@ -198,308 +180,84 @@ export const INITIAL_POS_ORDERS: PosOrderItem[] = [
     id: 'order-1048',
     orderNumber: '1048',
     customerName: 'Patricia Lim',
-    customerPhone: '+639179990011',
-    deliveryAddress: '9B Varsity Hills, Loyola Heights, QC',
+    customerPhone: '+639172223344',
+    deliveryAddress: '31 B. Gonzales St, Loyola Heights, QC',
     presetName: '5-Gallon Slim Container (Refill)',
     unitPrice: 25,
-    verifiedCount: 4,
-    emptyContainersToPickup: 4,
+    verifiedCount: 7,
+    emptyContainersToPickup: 7,
     scheduledTimeSlot: '1:00 – 3:00 PM',
     status: 'DELIVERED',
     documentStage: 'OFFICIAL_RECEIPT',
     invoiceNumber: 'INV-1048',
     receiptNumber: 'OR-1048',
-    paymentState: 'E_PAYMENT',
-    subtotalAmount: 100,
+    paymentState: 'PAID_CASH',
+    subtotalAmount: 175,
     deliveryFee: 30,
-    totalDue: 130,
-    amountPaid: 130,
+    totalDue: 205,
+    amountPaid: 205,
     balanceDue: 0,
-    operationalCostTotal: 32,
-    netProfit: 98,
+    netProfit: 205,
     assignedRiderName: 'J. Cruz',
     invoicedAt: '1:10 PM',
-    deliveredAt: '1:45 PM',
+    deliveredAt: '1:55 PM',
   },
   {
     id: 'order-1049',
     orderNumber: '1049',
-    customerName: 'Blue Ridge Cafe',
-    customerPhone: '+639172223344',
-    deliveryAddress: '210 Katipunan Ave, Quezon City',
+    customerName: 'Dr. Gregory Santos Clinic',
+    customerPhone: '+639173339911',
+    deliveryAddress: '55 F. Dela Rosa St, Quezon City',
     presetName: '5-Gallon Round Dispenser Jug (Refill)',
     unitPrice: 25,
-    verifiedCount: 10,
-    emptyContainersToPickup: 10,
+    verifiedCount: 8,
+    emptyContainersToPickup: 8,
     scheduledTimeSlot: '1:00 – 3:00 PM',
     status: 'DELIVERED',
     documentStage: 'OFFICIAL_RECEIPT',
     invoiceNumber: 'INV-1049',
     receiptNumber: 'OR-1049',
-    paymentState: 'UNPAID_CHARGE_SLIP',
-    subtotalAmount: 250,
+    paymentState: 'PAID_CASH',
+    subtotalAmount: 200,
     deliveryFee: 30,
-    totalDue: 280,
-    amountPaid: 0,
-    balanceDue: 280,
-    operationalCostTotal: 80,
-    netProfit: 200,
+    totalDue: 230,
+    amountPaid: 230,
+    balanceDue: 0,
+    netProfit: 230,
     assignedRiderName: 'J. Cruz',
-    invoicedAt: '1:25 PM',
-    deliveredAt: '2:05 PM',
+    invoicedAt: '1:40 PM',
+    deliveredAt: '2:25 PM',
   },
   {
     id: 'order-1050',
     orderNumber: '1050',
-    customerName: 'Grace Tan',
-    customerPhone: '+639178123456',
-    deliveryAddress: '31Gonzales St, Loyola Heights, QC',
-    presetName: '5-Gallon Slim Container (Refill)',
+    customerName: 'Katipunan Bakery & Cafe',
+    customerPhone: '+639174567890',
+    deliveryAddress: '112 Katipunan Ave, Quezon City',
+    presetName: '5-Gallon Round Dispenser Jug (Refill)',
     unitPrice: 25,
-    verifiedCount: 6,
-    emptyContainersToPickup: 6,
+    verifiedCount: 20,
+    emptyContainersToPickup: 16,
     scheduledTimeSlot: '1:00 – 3:00 PM',
-    status: 'DELIVERED',
-    documentStage: 'OFFICIAL_RECEIPT',
+    status: 'INVOICED',
+    documentStage: 'INVOICE_ONLY',
     invoiceNumber: 'INV-1050',
-    receiptNumber: 'OR-1050',
-    paymentState: 'PAID_CASH',
-    subtotalAmount: 150,
-    deliveryFee: 30,
-    totalDue: 180,
-    amountPaid: 180,
-    balanceDue: 0,
-    operationalCostTotal: 48,
-    netProfit: 132,
-    assignedRiderName: 'J. Cruz',
-    invoicedAt: '2:00 PM',
-    deliveredAt: '2:30 PM',
-  },
-  {
-    id: 'order-1051',
-    orderNumber: '1051',
-    customerName: 'Marco Soriano',
-    customerPhone: '+639177654321',
-    deliveryAddress: 'Station Counter Walk-In',
-    presetName: '5-Gallon Slim Container (Refill)',
-    unitPrice: 25,
-    verifiedCount: 3,
-    emptyContainersToPickup: 3,
-    scheduledTimeSlot: '1:00 – 3:00 PM',
-    status: 'DELIVERED',
-    documentStage: 'OFFICIAL_RECEIPT',
-    invoiceNumber: 'INV-1051',
-    receiptNumber: 'OR-1051',
-    paymentState: 'PAID_CASH',
-    subtotalAmount: 75,
-    deliveryFee: 0,
-    totalDue: 75,
-    amountPaid: 75,
-    balanceDue: 0,
-    operationalCostTotal: 24,
-    netProfit: 51,
-    assignedRiderName: 'Counter Walk-In',
-    invoicedAt: '2:15 PM',
-    deliveredAt: '2:16 PM',
-  },
-  {
-    id: 'order-1052',
-    orderNumber: '1052',
-    customerName: 'Pansol Wellness Clinic',
-    customerPhone: '+639176549870',
-    deliveryAddress: '45 Pansol Ave, Quezon City',
-    presetName: '5-Gallon Round Dispenser Jug (Refill)',
-    unitPrice: 25,
-    verifiedCount: 8,
-    emptyContainersToPickup: 8,
-    scheduledTimeSlot: '4:00 – 6:00 PM',
-    status: 'INVOICED',
-    documentStage: 'INVOICE_ONLY',
-    invoiceNumber: 'INV-1052',
     receiptNumber: null,
-    paymentState: 'E_PAYMENT',
-    subtotalAmount: 200,
-    deliveryFee: 30,
-    totalDue: 230,
-    amountPaid: 0,
-    balanceDue: 230,
-    operationalCostTotal: 64,
-    netProfit: 166,
-    assignedRiderName: 'J. Cruz',
-    invoicedAt: '3:45 PM',
-    deliveredAt: null,
-  },
-  {
-    id: 'order-1053',
-    orderNumber: '1053',
-    customerName: 'Angela Reyes',
-    customerPhone: '+639173216549',
-    deliveryAddress: '19 Melchor St, Loyola Heights, QC',
-    presetName: '5-Gallon Slim Container (Refill)',
-    unitPrice: 25,
-    verifiedCount: 7,
-    emptyContainersToPickup: 5,
-    scheduledTimeSlot: '4:00 – 6:00 PM',
-    status: 'DELIVERED',
-    documentStage: 'OFFICIAL_RECEIPT',
-    invoiceNumber: 'INV-1053',
-    receiptNumber: 'OR-1053',
     paymentState: 'PARTIAL',
-    subtotalAmount: 175,
+    subtotalAmount: 500,
     deliveryFee: 30,
-    totalDue: 205,
-    amountPaid: 105,
-    balanceDue: 100,
-    operationalCostTotal: 56,
-    netProfit: 149,
+    totalDue: 530,
+    amountPaid: 250,
+    balanceDue: 280,
+    netProfit: 530,
     assignedRiderName: 'J. Cruz',
-    invoicedAt: '4:05 PM',
-    deliveredAt: '4:42 PM',
-  },
-  {
-    id: 'order-1054',
-    orderNumber: '1054',
-    customerName: 'UP Town Fitness Studio',
-    customerPhone: '+639179871234',
-    deliveryAddress: '140 Katipunan Ave, Quezon City',
-    presetName: '5-Gallon Round Dispenser Jug (Refill)',
-    unitPrice: 25,
-    verifiedCount: 14,
-    emptyContainersToPickup: 14,
-    scheduledTimeSlot: '4:00 – 6:00 PM',
-    status: 'DELIVERED',
-    documentStage: 'OFFICIAL_RECEIPT',
-    invoiceNumber: 'INV-1054',
-    receiptNumber: 'OR-1054',
-    paymentState: 'PAID_CASH',
-    subtotalAmount: 350,
-    deliveryFee: 30,
-    totalDue: 380,
-    amountPaid: 380,
-    balanceDue: 0,
-    operationalCostTotal: 112,
-    netProfit: 268,
-    assignedRiderName: 'J. Cruz',
-    invoicedAt: '4:20 PM',
-    deliveredAt: '5:05 PM',
-  },
-  {
-    id: 'order-1055',
-    orderNumber: '1055',
-    customerName: 'Noel Pascual',
-    customerPhone: '+639175432198',
-    deliveryAddress: '7C La Vista Subdivision, QC',
-    presetName: '5-Gallon Slim Container (Refill)',
-    unitPrice: 25,
-    verifiedCount: 6,
-    emptyContainersToPickup: 6,
-    scheduledTimeSlot: '4:00 – 6:00 PM',
-    status: 'DELIVERED',
-    documentStage: 'OFFICIAL_RECEIPT',
-    invoiceNumber: 'INV-1055',
-    receiptNumber: 'OR-1055',
-    paymentState: 'E_PAYMENT',
-    subtotalAmount: 150,
-    deliveryFee: 30,
-    totalDue: 180,
-    amountPaid: 180,
-    balanceDue: 0,
-    operationalCostTotal: 48,
-    netProfit: 132,
-    assignedRiderName: 'J. Cruz',
-    invoicedAt: '4:50 PM',
-    deliveredAt: '5:25 PM',
-  },
-  {
-    id: 'order-1056',
-    orderNumber: '1056',
-    customerName: 'Loyola Co-Working Loft',
-    customerPhone: '+639176789012',
-    deliveryAddress: '62 Esteban Abada St, Quezon City',
-    presetName: '5-Gallon Round Dispenser Jug (Refill)',
-    unitPrice: 25,
-    verifiedCount: 9,
-    emptyContainersToPickup: 9,
-    scheduledTimeSlot: '4:00 – 6:00 PM',
-    status: 'INVOICED',
-    documentStage: 'INVOICE_ONLY',
-    invoiceNumber: 'INV-1056',
-    receiptNumber: null,
-    paymentState: 'PAID_CASH',
-    subtotalAmount: 225,
-    deliveryFee: 30,
-    totalDue: 255,
-    amountPaid: 0,
-    balanceDue: 255,
-    operationalCostTotal: 72,
-    netProfit: 183,
-    assignedRiderName: 'J. Cruz',
-    invoicedAt: '5:10 PM',
+    invoicedAt: '2:15 PM',
     deliveredAt: null,
-  },
-];
-
-export const INITIAL_CUSTOMER_ACCOUNTABILITY: CustomerAccountabilityRecord[] = [
-  {
-    id: 'cust-1',
-    customerName: 'Maria Santos',
-    phoneNumber: '+639170000003',
-    address: 'Blk 4 Lot 12 Pansol St, Quezon City',
-    emptyContainersHeld: 5,
-    containersDueBackDate: '2026-10-22',
-    isOverdue: false,
-    runningUnpaidBalance: 100,
-    lastOrderNumber: '#OR-1042',
-  },
-  {
-    id: 'cust-2',
-    customerName: 'Carlo Mendoza',
-    phoneNumber: '+639178889900',
-    address: '18 Xavierville Ave, Loyola Heights, QC',
-    emptyContainersHeld: 6,
-    containersDueBackDate: '2026-10-20',
-    isOverdue: false,
-    runningUnpaidBalance: 0,
-    lastOrderNumber: '#INV-1043',
-  },
-  {
-    id: 'cust-3',
-    customerName: 'Katipunan Study Hub (Office)',
-    phoneNumber: '+639173334455',
-    address: '102 Katipunan Ave, Quezon City',
-    emptyContainersHeld: 12,
-    containersDueBackDate: '2026-10-12',
-    isOverdue: true,
-    runningUnpaidBalance: 460,
-    lastOrderNumber: '#OR-1044',
-  },
-  {
-    id: 'cust-4',
-    customerName: 'Elena Bautista',
-    phoneNumber: '+639176667788',
-    address: '24 Rosa Alvero St, Loyola Heights, QC',
-    emptyContainersHeld: 2,
-    containersDueBackDate: '2026-10-24',
-    isOverdue: false,
-    runningUnpaidBalance: 0,
-    lastOrderNumber: '#OR-1045',
-  },
-  {
-    id: 'cust-5',
-    customerName: 'Juan Dela Cruz',
-    phoneNumber: '+639171112233',
-    address: '15 Maayusin St, UP Village, QC',
-    emptyContainersHeld: 0,
-    containersDueBackDate: '—',
-    isOverdue: false,
-    runningUnpaidBalance: 0,
-    lastOrderNumber: '#OR-1039',
   },
 ];
 
 /**
- * Step-by-step function to calculate the station's Daily Revenue,
- * Operational Costs (Water + Electricity + Container Wear), and True Net Profit.
+ * Computes daily summary metrics without refill cost deductions
  */
 export function calculateProfitSummaryMetrics(
   orders: PosOrderItem[],
@@ -507,10 +265,8 @@ export function calculateProfitSummaryMetrics(
   let totalOrdersCount = 0;
   let totalContainersRefilled = 0;
   let totalEmptyContainersPickedUp = 0;
-
   let grossSalesRevenue = 0;
   let cashCollected = 0;
-  let ePaymentCollected = 0;
   let unpaidReceivablesAdded = 0;
 
   for (const order of orders) {
@@ -523,8 +279,6 @@ export function calculateProfitSummaryMetrics(
 
     if (order.paymentState === 'PAID_CASH') {
       cashCollected = cashCollected + order.amountPaid;
-    } else if (order.paymentState === 'E_PAYMENT') {
-      ePaymentCollected = ePaymentCollected + order.amountPaid;
     } else if (order.paymentState === 'PARTIAL') {
       cashCollected = cashCollected + order.amountPaid;
       unpaidReceivablesAdded = unpaidReceivablesAdded + order.balanceDue;
@@ -533,37 +287,17 @@ export function calculateProfitSummaryMetrics(
     }
   }
 
-  const waterCostTotal = totalContainersRefilled * WATER_COST_PER_JUG_PHP;
-  const electricityCostTotal =
-    totalContainersRefilled * ELECTRICITY_COST_PER_JUG_PHP;
-  const containerWearCostTotal =
-    totalContainersRefilled * CONTAINER_WEAR_COST_PER_JUG_PHP;
-
-  const totalCostOfRefill =
-    waterCostTotal + electricityCostTotal + containerWearCostTotal;
-
-  const trueNetProfit = grossSalesRevenue - totalCostOfRefill;
-
   return {
     totalOrdersCount,
     totalContainersRefilled,
     totalEmptyContainersPickedUp,
     grossSalesRevenue,
     cashCollected,
-    ePaymentCollected,
     unpaidReceivablesAdded,
-    waterCostTotal,
-    electricityCostTotal,
-    containerWearCostTotal,
-    totalCostOfRefill,
-    trueNetProfit,
+    trueNetProfit: grossSalesRevenue,
   };
 }
 
-/**
- * Checks whether an order is actively in-progress at the counter or on the road
- * (i.e. not yet delivered and closed with an official receipt).
- */
 export function isOrderActive(order: PosOrderItem): boolean {
   if (order.status === 'DELIVERED' || order.status === 'CANCELLED') {
     return false;
@@ -571,16 +305,10 @@ export function isOrderActive(order: PosOrderItem): boolean {
   return true;
 }
 
-/**
- * Returns only the active orders that require station counter or dispatch action
- */
 export function filterActiveOrders(orders: PosOrderItem[]): PosOrderItem[] {
   return orders.filter(isOrderActive);
 }
 
-/**
- * Parses an order's date and time into a comparable millisecond timestamp
- */
 export function parseOrderTimestamp(order: PosOrderItem): number {
   if (order.createdAtIso) {
     const parsed = new Date(order.createdAtIso).getTime();
@@ -605,10 +333,6 @@ export function parseOrderTimestamp(order: PosOrderItem): number {
   return new Date(`${dateStr}T12:00:00`).getTime();
 }
 
-/**
- * Filters historical transactions based on date range, custom date, search term, and payment status,
- * sorted by timestamp (newest first by default).
- */
 export function filterHistoricalOrders(
   orders: PosOrderItem[],
   filter: TransactionLogsFilter,
@@ -619,7 +343,6 @@ export function filterHistoricalOrders(
   const filtered = orders.filter((order) => {
     const orderDate = order.orderDate ?? todayStr;
 
-    // 1. Date filter
     if (filter.specificDate) {
       if (orderDate !== filter.specificDate) return false;
     } else if (filter.dateRange === 'TODAY') {
@@ -632,12 +355,10 @@ export function filterHistoricalOrders(
       if (orderMs < cutoffMs) return false;
     }
 
-    // 2. Payment State filter
     if (filter.paymentStateFilter !== 'ALL') {
       if (order.paymentState !== filter.paymentStateFilter) return false;
     }
 
-    // 3. Search query filter
     if (filter.searchQuery.trim().length > 0) {
       const q = filter.searchQuery.toLowerCase().trim();
       const matchName = order.customerName.toLowerCase().includes(q);

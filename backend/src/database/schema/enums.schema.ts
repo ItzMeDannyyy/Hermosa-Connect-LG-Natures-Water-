@@ -1,15 +1,8 @@
 import { pgEnum } from 'drizzle-orm/pg-core';
 
 export const userRoleEnum = pgEnum('user_role', [
-  'CUSTOMER',
   'RIDER',
   'OPERATOR',
-]);
-
-export const routeTripStatusEnum = pgEnum('route_trip_status', [
-  'PLANNED',
-  'IN_PROGRESS',
-  'COMPLETED',
 ]);
 
 export const orderTypeEnum = pgEnum('order_type', [
@@ -44,7 +37,6 @@ export const documentStageEnum = pgEnum('document_stage', [
 
 export const paymentStateEnum = pgEnum('payment_state', [
   'PAID_CASH',
-  'E_PAYMENT',
   'PARTIAL',
   'UNPAID_CHARGE_SLIP',
 ]);

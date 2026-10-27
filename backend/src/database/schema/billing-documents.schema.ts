@@ -38,13 +38,6 @@ export const billingDocuments = pgTable('billing_documents', {
   balanceDue: numeric('balance_due', { precision: 10, scale: 2 })
     .default('0.00')
     .notNull(),
-  totalOperationalCost: numeric('total_operational_cost', {
-    precision: 10,
-    scale: 2,
-  }).notNull(),
-  netProfit: numeric('net_profit', { precision: 10, scale: 2 }).notNull(),
-  epaymentProvider: text('epayment_provider'),
-  epaymentRefNo: text('epayment_ref_no'),
   chargeSlipDueDate: date('charge_slip_due_date'),
   invoicedAt: timestamp('invoiced_at').defaultNow().notNull(),
   receiptIssuedAt: timestamp('receipt_issued_at'),

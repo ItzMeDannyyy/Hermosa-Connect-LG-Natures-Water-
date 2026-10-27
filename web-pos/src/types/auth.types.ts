@@ -6,7 +6,7 @@
  * ============================================================================
  */
 
-export type UserRole = 'CUSTOMER' | 'RIDER' | 'OPERATOR';
+export type UserRole = 'RIDER' | 'OPERATOR';
 
 export interface UserAccount {
   id: string;
@@ -32,22 +32,6 @@ export interface ContainerPreset {
   branchId: string;
   name: string;
   refillPrice: string;
-  waterCost: string;
-  electricityCost: string;
-  containerWearCost: string;
-}
-
-export interface CustomerProfile {
-  id: string;
-  userId: string;
-  defaultPresetId: string | null;
-  defaultOrderQty: number;
-  deliveryAddress: string;
-  latitude: number;
-  longitude: number;
-  emptyContainersHeld: number;
-  runningUnpaidBalance: string;
-  containersDueBackDate: string | null;
 }
 
 export interface AuthSuccessResponse {
@@ -57,8 +41,7 @@ export interface AuthSuccessResponse {
   expiresIn: number;
   user: UserAccount;
   branch: StationBranch | null;
-  customerProfile: CustomerProfile | null;
-  defaultPreset: ContainerPreset | null;
+  defaultPreset?: ContainerPreset | null;
 }
 
 export interface LoginCredentials {

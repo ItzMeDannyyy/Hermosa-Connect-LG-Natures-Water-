@@ -135,16 +135,16 @@ export function TransactionLogsPanel(props: TransactionLogsPanelProps) {
 
           <div className="p-3.5">
             <div className="text-[11px] font-medium text-[#64748b]">
-              Net station profit
+              Cash collected
             </div>
             <div className="text-[20px] font-semibold text-[#15803d] num-mono mt-1">
-              ₱{summaryMetrics.trueNetProfit.toLocaleString('en-US', {
+              ₱{summaryMetrics.cashCollected.toLocaleString('en-US', {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2,
               })}
             </div>
             <div className="text-[11px] text-[#64748b] mt-0.5">
-              Less ₱{summaryMetrics.totalCostOfRefill.toFixed(2)} operational utility costs
+              ₱{summaryMetrics.unpaidReceivablesAdded.toFixed(2)} receivables pending
             </div>
           </div>
         </div>
@@ -226,7 +226,6 @@ export function TransactionLogsPanel(props: TransactionLogsPanelProps) {
           >
             <option value="ALL">All Payment Types</option>
             <option value="PAID_CASH">Cash Only</option>
-            <option value="E_PAYMENT">GCash / Maya QR</option>
             <option value="PARTIAL">Partial Deposit</option>
             <option value="UNPAID_CHARGE_SLIP">Unpaid Charge Slip</option>
           </select>
@@ -333,8 +332,6 @@ export function TransactionLogsPanel(props: TransactionLogsPanelProps) {
                         <div className="text-[11px] text-[#64748b]">
                           {order.paymentState === 'PAID_CASH'
                             ? 'Cash'
-                            : order.paymentState === 'E_PAYMENT'
-                            ? 'E-Payment'
                             : order.paymentState === 'PARTIAL'
                             ? 'Partial'
                             : 'Charge Slip'}

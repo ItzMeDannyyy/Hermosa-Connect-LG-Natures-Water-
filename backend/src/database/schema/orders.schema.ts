@@ -3,6 +3,7 @@ import {
   date,
   integer,
   pgTable,
+  text,
   timestamp,
   uuid,
 } from 'drizzle-orm/pg-core';
@@ -12,21 +13,16 @@ import {
   orderTypeEnum,
   scheduledTimeSlotEnum,
 } from './enums.schema.js';
-import { routeTrips } from './route-trips.schema.js';
 import { stationBranches } from './station-branches.schema.js';
-import { users } from './users.schema.js';
 
 export const orders = pgTable('orders', {
   id: uuid('id').defaultRandom().primaryKey(),
-  customerId: uuid('customer_id')
-    .notNull()
-    .references(() => users.id, { onDelete: 'restrict' }),
+  customerName: text('customer_name').notNull(),
+  customerPhone: text('customer_phone'),
+  deliveryAddress: text('delivery_address'),
   branchId: uuid('branch_id')
     .notNull()
     .references(() => stationBranches.id, { onDelete: 'restrict' }),
-  tripId: uuid('trip_id').references(() => routeTrips.id, {
-    onDelete: 'set null',
-  }),
   presetId: uuid('preset_id').references(() => containerPresets.id, {
     onDelete: 'set null',
   }),
@@ -39,8 +35,6 @@ export const orders = pgTable('orders', {
     .notNull(),
   scheduledPickupDate: date('scheduled_pickup_date'),
   scheduledTimeSlot: scheduledTimeSlotEnum('scheduled_time_slot'),
-  stopSequenceNumber: integer('stop_sequence_number'),
-  reminderSent: boolean('reminder_sent').default(false).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 

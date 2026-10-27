@@ -5,8 +5,7 @@ import {
   NotFoundException,
   OnModuleInit,
 } from '@nestjs/common';
-import bcrypt from 'bcryptjs';
-import { desc, eq, sql } from 'drizzle-orm';
+import { desc, eq } from 'drizzle-orm';
 import {
   DATABASE_CONNECTION,
   type Database,
@@ -14,10 +13,8 @@ import {
 import {
   billingDocuments,
   containerPresets,
-  customerProfiles,
   orders,
   stationBranches,
-  users,
 } from '../database/schema/index.js';
 import type {
   ConvertOrderReceiptDto,
@@ -32,24 +29,7 @@ export class PosService implements OnModuleInit {
   constructor(@Inject(DATABASE_CONNECTION) private readonly db: Database) {}
 
   async onModuleInit() {
-    await this.ensureReminderColumnsExist();
-    await this.seedInitialPosOrdersAndCustomersIfEmpty();
-  }
-
-  /**
-   * Ensures `pickup_reminder_sent` and `last_reminded_at` columns exist on `customer_profiles`
-   */
-  private async ensureReminderColumnsExist() {
-    try {
-      await this.db.execute(
-        sql`ALTER TABLE customer_profiles ADD COLUMN IF NOT EXISTS pickup_reminder_sent boolean NOT NULL DEFAULT false;`,
-      );
-      await this.db.execute(
-        sql`ALTER TABLE customer_profiles ADD COLUMN IF NOT EXISTS last_reminded_at timestamp;`,
-      );
-    } catch {
-      // Table may not exist yet before initial migration
-    }
+    await this.seedInitialPosOrdersIfEmpty();
   }
 
   /**
@@ -69,8 +49,7 @@ export class PosService implements OnModuleInit {
 
   /**
    * 1. GET /api/pos/dashboard
-   *    Fetches all live orders + billing documents (#INV and #OR) and customer
-   *    accountability records directly from PostgreSQL.
+   *    Fetches all live orders + billing documents (#INV and #OR) directly from PostgreSQL.
    */
   async getPosDashboardData() {
     const allOrders = await this.db
@@ -79,8 +58,6 @@ export class PosService implements OnModuleInit {
       .orderBy(desc(orders.createdAt));
 
     const allBillingDocs = await this.db.select().from(billingDocuments);
-    const allUsers = await this.db.select().from(users);
-    const allProfiles = await this.db.select().from(customerProfiles);
     const allPresets = await this.db.select().from(containerPresets);
 
     const formattedOrders = [];
@@ -93,12 +70,6 @@ export class PosService implements OnModuleInit {
         continue;
       }
 
-      const customerUser = allUsers.find(
-        (u) => u.id === orderRecord.customerId,
-      );
-      const customerProfile = allProfiles.find(
-        (p) => p.userId === orderRecord.customerId,
-      );
       const preset = allPresets.find((pr) => pr.id === orderRecord.presetId);
 
       const orderNumberStr = billingDoc.invoiceNumber.replace('INV-', '');
@@ -118,10 +89,10 @@ export class PosService implements OnModuleInit {
       formattedOrders.push({
         id: orderRecord.id,
         orderNumber: orderNumberStr,
-        customerName: customerUser?.fullName ?? 'Walk-in Customer',
-        customerPhone: customerUser?.phoneNumber ?? '+639170000000',
+        customerName: orderRecord.customerName,
+        customerPhone: orderRecord.customerPhone ?? '+639170000000',
         deliveryAddress:
-          customerProfile?.deliveryAddress ?? 'Station Counter Walk-In',
+          orderRecord.deliveryAddress ?? 'Station Counter Walk-In',
         presetName: preset?.name ?? '5-Gallon Slim Container (Refill)',
         unitPrice: Number(preset?.refillPrice ?? 25),
         verifiedCount:
@@ -140,70 +111,20 @@ export class PosService implements OnModuleInit {
         totalDue: Number(billingDoc.totalDue),
         amountPaid: Number(billingDoc.amountPaid),
         balanceDue: Number(billingDoc.balanceDue),
-        operationalCostTotal: Number(billingDoc.totalOperationalCost),
-        netProfit: Number(billingDoc.netProfit),
         assignedRiderName: 'J. Cruz',
         invoicedAt: invoicedTimeLabel,
         deliveredAt: deliveredTimeLabel,
       });
     }
 
-    // Build Customer Accountability Records from PostgreSQL customer_profiles
-    const accountabilityRecords = [];
-    const todayIso = new Date().toISOString().slice(0, 10);
-
-    for (const profile of allProfiles) {
-      const customerUser = allUsers.find((u) => u.id === profile.userId);
-      if (!customerUser) {
-        continue;
-      }
-
-      // Find latest order document for this customer
-      const latestCustomerOrder = formattedOrders.find(
-        (o) => o.customerPhone === customerUser.phoneNumber,
-      );
-      const lastDocLabel = latestCustomerOrder
-        ? latestCustomerOrder.receiptNumber
-          ? `#${latestCustomerOrder.receiptNumber}`
-          : `#${latestCustomerOrder.invoiceNumber}`
-        : '#OR-1040';
-
-      const dueDateStr = profile.containersDueBackDate ?? '2026-10-25';
-      const isOverdue =
-        profile.emptyContainersHeld > 0 && dueDateStr < todayIso;
-
-      const lastRemindedTimeLabel = profile.lastRemindedAt
-        ? new Date(profile.lastRemindedAt).toLocaleTimeString([], {
-            hour: '2-digit',
-            minute: '2-digit',
-          })
-        : null;
-
-      accountabilityRecords.push({
-        id: profile.id,
-        customerName: customerUser.fullName,
-        phoneNumber: customerUser.phoneNumber,
-        address: profile.deliveryAddress,
-        emptyContainersHeld: profile.emptyContainersHeld,
-        containersDueBackDate: dueDateStr,
-        isOverdue: isOverdue,
-        runningUnpaidBalance: Number(profile.runningUnpaidBalance),
-        lastOrderNumber: lastDocLabel,
-        pickupReminderSent: profile.pickupReminderSent ?? false,
-        lastRemindedAt: lastRemindedTimeLabel,
-      });
-    }
-
     return {
       orders: formattedOrders,
-      customerRecords: accountabilityRecords,
     };
   }
 
   /**
    * 2. POST /api/pos/orders
-   *    Creates a new Order + BillingDocument (#INV or #OR) inside PostgreSQL
-   *    with server-side POS price & True Net Profit calculation.
+   *    Creates a new Order + BillingDocument (#INV or #OR) inside PostgreSQL.
    */
   async createPosOrder(dto: CreatePosOrderDto) {
     const [branch] = await this.db.select().from(stationBranches).limit(1);
@@ -217,55 +138,12 @@ export class PosService implements OnModuleInit {
       .where(eq(containerPresets.branchId, branch.id))
       .limit(1);
 
-    // Find or create customer user & profile
-    let [customerUser] = await this.db
-      .select()
-      .from(users)
-      .where(eq(users.fullName, dto.customerName))
-      .limit(1);
-
-    if (!customerUser) {
-      const uniquePhone = `+63917${Math.floor(1000000 + Math.random() * 8999999)}`;
-      const defaultPass = await bcrypt.hash('password123', 10);
-
-      const [createdCustomer] = await this.db
-        .insert(users)
-        .values({
-          fullName: dto.customerName.trim(),
-          phoneNumber: uniquePhone,
-          passwordHash: defaultPass,
-          role: 'CUSTOMER',
-          branchId: branch.id,
-        })
-        .returning();
-
-      customerUser = createdCustomer!;
-
-      await this.db.insert(customerProfiles).values({
-        userId: customerUser.id,
-        defaultPresetId: preset?.id ?? null,
-        defaultOrderQty: dto.containerCount,
-        deliveryAddress: dto.deliveryAddress.trim(),
-        latitude: 14.6415,
-        longitude: 121.0748,
-        emptyContainersHeld: Math.max(
-          0,
-          dto.containerCount - dto.emptyContainersToPickup,
-        ),
-        runningUnpaidBalance: '0.00',
-        containersDueBackDate: '2026-10-25',
-      });
-    }
-
-    // Server-side POS & True Profit Math
-    const unitPrice = 25;
-    const subtotalAmount = dto.containerCount * unitPrice;
+    const subtotalAmount =
+      dto.subtotalAmount !== undefined && dto.subtotalAmount > 0
+        ? dto.subtotalAmount
+        : dto.containerCount * 25;
     const deliveryFee = dto.includeDeliveryFee ? 30 : 0;
     const totalDue = subtotalAmount + deliveryFee;
-
-    const operationalCostPerJug = 8; // PHP 3 water + PHP 3 elec + PHP 2 wear
-    const totalOperationalCost = dto.containerCount * operationalCostPerJug;
-    const netProfit = totalDue - totalOperationalCost;
 
     let amountPaid = totalDue;
     let balanceDue = 0;
@@ -275,9 +153,6 @@ export class PosService implements OnModuleInit {
       amountPaid = totalDue;
       balanceDue = 0;
       changeGiven = Math.max(0, (dto.cashTendered ?? totalDue) - totalDue);
-    } else if (dto.paymentState === 'E_PAYMENT') {
-      amountPaid = totalDue;
-      balanceDue = 0;
     } else if (dto.paymentState === 'PARTIAL') {
       amountPaid = Math.min(dto.partialAmountPaid ?? 0, totalDue);
       balanceDue = Math.max(0, totalDue - amountPaid);
@@ -286,17 +161,17 @@ export class PosService implements OnModuleInit {
       balanceDue = totalDue;
     }
 
-    // Generate next sequential order number (#1046, #1047...)
     const existingDocs = await this.db.select().from(billingDocuments);
     const nextOrderNum = 1042 + existingDocs.length;
-
     const isDeliveryOrder = dto.includeDeliveryFee;
 
     await this.db.transaction(async (tx) => {
       const [createdOrder] = await tx
         .insert(orders)
         .values({
-          customerId: customerUser.id,
+          customerName: dto.customerName.trim(),
+          customerPhone: dto.customerPhone?.trim() ?? '+639170000000',
+          deliveryAddress: dto.deliveryAddress?.trim() || 'Station Counter Walk-In',
           branchId: branch.id,
           presetId: preset?.id ?? null,
           orderType:
@@ -306,7 +181,7 @@ export class PosService implements OnModuleInit {
           verifiedCount: dto.containerCount,
           emptyContainersToPickup: dto.emptyContainersToPickup,
           scheduledPickupDate: new Date().toISOString().slice(0, 10),
-          scheduledTimeSlot: dto.scheduledTimeSlot,
+          scheduledTimeSlot: dto.scheduledTimeSlot ?? 'SLOT_1_3_PM',
         })
         .returning();
 
@@ -322,28 +197,8 @@ export class PosService implements OnModuleInit {
         amountPaid: amountPaid.toFixed(2),
         changeGiven: changeGiven.toFixed(2),
         balanceDue: balanceDue.toFixed(2),
-        totalOperationalCost: totalOperationalCost.toFixed(2),
-        netProfit: netProfit.toFixed(2),
         receiptIssuedAt: isDeliveryOrder ? null : new Date(),
       });
-
-      // If there is a balance due, update customer's runningUnpaidBalance
-      if (balanceDue > 0) {
-        const [profile] = await tx
-          .select()
-          .from(customerProfiles)
-          .where(eq(customerProfiles.userId, customerUser.id))
-          .limit(1);
-
-        if (profile) {
-          const updatedBalance =
-            Number(profile.runningUnpaidBalance) + balanceDue;
-          await tx
-            .update(customerProfiles)
-            .set({ runningUnpaidBalance: updatedBalance.toFixed(2) })
-            .where(eq(customerProfiles.id, profile.id));
-        }
-      }
     });
 
     return this.getPosDashboardData();
@@ -381,8 +236,6 @@ export class PosService implements OnModuleInit {
     const subtotalAmount = dto.verifiedCount * unitPrice;
     const deliveryFee = Number(billingDoc.deliveryFee);
     const totalDue = subtotalAmount + deliveryFee;
-    const totalOperationalCost = dto.verifiedCount * 8;
-    const netProfit = totalDue - totalOperationalCost;
 
     await this.db.transaction(async (tx) => {
       await tx
@@ -398,8 +251,6 @@ export class PosService implements OnModuleInit {
         .set({
           subtotalAmount: subtotalAmount.toFixed(2),
           totalDue: totalDue.toFixed(2),
-          totalOperationalCost: totalOperationalCost.toFixed(2),
-          netProfit: netProfit.toFixed(2),
         })
         .where(eq(billingDocuments.id, billingDoc.id));
     });
@@ -409,8 +260,7 @@ export class PosService implements OnModuleInit {
 
   /**
    * 3B. PATCH /api/pos/orders/:orderId/convert-to-receipt
-   *     Converts a pre-dispatch Invoice (#INV) into a doorstep Official Receipt (#OR)
-   *     in PostgreSQL ("One Count, Two Documents" — Feature 06).
+   *     Converts a pre-dispatch Invoice (#INV) into a doorstep Official Receipt (#OR).
    */
   async convertInvoiceToOfficialReceipt(
     orderId: string,
@@ -476,62 +326,15 @@ export class PosService implements OnModuleInit {
           receiptIssuedAt: new Date(),
         })
         .where(eq(billingDocuments.id, billingDoc.id));
-
-      if (balanceDueNum > 0) {
-        const [profile] = await tx
-          .select()
-          .from(customerProfiles)
-          .where(eq(customerProfiles.userId, orderRecord.customerId))
-          .limit(1);
-
-        if (profile) {
-          const newRunningBalance =
-            Number(profile.runningUnpaidBalance) + balanceDueNum;
-          await tx
-            .update(customerProfiles)
-            .set({ runningUnpaidBalance: newRunningBalance.toFixed(2) })
-            .where(eq(customerProfiles.id, profile.id));
-        }
-      }
     });
 
     return this.getPosDashboardData();
   }
 
   /**
-   * 4. PATCH /api/pos/customers/:profileId/settle-balance
-   *    Settles a customer's unpaid balance in PostgreSQL.
+   * Auto-seeds realistic initial POS Orders (#1042-#1045) into PostgreSQL on startup if empty.
    */
-  async settleCustomerUnpaidBalance(profileId: string) {
-    await this.db
-      .update(customerProfiles)
-      .set({ runningUnpaidBalance: '0.00' })
-      .where(eq(customerProfiles.id, profileId));
-
-    return this.getPosDashboardData();
-  }
-
-  /**
-   * 5. PATCH /api/pos/customers/:profileId/send-reminder
-   *    Marks a customer's container pickup reminder as sent (or re-sent) in PostgreSQL.
-   */
-  async sendCustomerPickupReminder(profileId: string) {
-    await this.db
-      .update(customerProfiles)
-      .set({
-        pickupReminderSent: true,
-        lastRemindedAt: new Date(),
-      })
-      .where(eq(customerProfiles.id, profileId));
-
-    return this.getPosDashboardData();
-  }
-
-  /**
-   * Auto-seeds realistic POS Orders (#OR-1042, #INV-1043, #OR-1044, #OR-1045)
-   * into PostgreSQL on startup if the orders table is empty.
-   */
-  private async seedInitialPosOrdersAndCustomersIfEmpty() {
+  private async seedInitialPosOrdersIfEmpty() {
     try {
       const existingOrders = await this.db.select().from(orders);
       if (existingOrders.length > 0) {
@@ -549,19 +352,11 @@ export class PosService implements OnModuleInit {
         .where(eq(containerPresets.branchId, branch.id))
         .limit(1);
 
-      const defaultPass = await bcrypt.hash('password123', 10);
-
-      // Ensure Maria Santos, Carlo Mendoza, Katipunan Study Hub, and Elena Bautista exist
-      const seedCustomers = [
+      const seedOrders = [
         {
-          fullName: 'Maria Santos',
+          customerName: 'Maria Santos',
           phoneNumber: '+639170000003',
           address: 'Blk 4 Lot 12 Pansol St, Quezon City',
-          lat: 14.6455,
-          lng: 121.0762,
-          emptyJugs: 5,
-          unpaidBal: '100.00',
-          dueDate: '2026-10-22',
           orderNum: 1042,
           qty: 8,
           pickupQty: 3,
@@ -573,33 +368,23 @@ export class PosService implements OnModuleInit {
           bal: 100,
         },
         {
-          fullName: 'Carlo Mendoza',
+          customerName: 'Carlo Mendoza',
           phoneNumber: '+639178889900',
           address: '18 Xavierville Ave, Loyola Heights, QC',
-          lat: 14.6401,
-          lng: 121.0729,
-          emptyJugs: 6,
-          unpaidBal: '0.00',
-          dueDate: '2026-10-24',
           orderNum: 1043,
           qty: 6,
           pickupQty: 6,
           slot: 'SLOT_1_3_PM' as const,
           status: 'INVOICED' as const,
           docStage: 'INVOICE_ONLY' as const,
-          payState: 'E_PAYMENT' as const,
+          payState: 'UNPAID_CHARGE_SLIP' as const,
           paid: 0,
           bal: 180,
         },
         {
-          fullName: 'Katipunan Study Hub (Office)',
+          customerName: 'Katipunan Study Hub (Office)',
           phoneNumber: '+639173334455',
           address: '102 Katipunan Ave, Quezon City',
-          lat: 14.638,
-          lng: 121.074,
-          emptyJugs: 12,
-          unpaidBal: '460.00',
-          dueDate: '2026-10-12', // Overdue
           orderNum: 1044,
           qty: 12,
           pickupQty: 10,
@@ -611,69 +396,32 @@ export class PosService implements OnModuleInit {
           bal: 0,
         },
         {
-          fullName: 'Elena Bautista',
+          customerName: 'Elena Bautista',
           phoneNumber: '+639176667788',
           address: '24 Rosa Alvero St, Loyola Heights, QC',
-          lat: 14.642,
-          lng: 121.075,
-          emptyJugs: 2,
-          unpaidBal: '0.00',
-          dueDate: '2026-10-26',
           orderNum: 1045,
           qty: 10,
           pickupQty: 8,
           slot: 'SLOT_4_6_PM' as const,
           status: 'DELIVERED' as const,
           docStage: 'OFFICIAL_RECEIPT' as const,
-          payState: 'E_PAYMENT' as const,
+          payState: 'PAID_CASH' as const,
           paid: 280,
           bal: 0,
         },
       ];
 
-      for (const item of seedCustomers) {
-        let [custUser] = await this.db
-          .select()
-          .from(users)
-          .where(eq(users.phoneNumber, item.phoneNumber))
-          .limit(1);
-
-        if (!custUser) {
-          const [inserted] = await this.db
-            .insert(users)
-            .values({
-              fullName: item.fullName,
-              phoneNumber: item.phoneNumber,
-              passwordHash: defaultPass,
-              role: 'CUSTOMER',
-              branchId: branch.id,
-            })
-            .returning();
-          custUser = inserted!;
-
-          await this.db.insert(customerProfiles).values({
-            userId: custUser.id,
-            defaultPresetId: preset?.id ?? null,
-            defaultOrderQty: item.qty,
-            deliveryAddress: item.address,
-            latitude: item.lat,
-            longitude: item.lng,
-            emptyContainersHeld: item.emptyJugs,
-            runningUnpaidBalance: item.unpaidBal,
-            containersDueBackDate: item.dueDate,
-          });
-        }
-
+      for (const item of seedOrders) {
         const subtotal = item.qty * 25;
         const deliveryFee = 30;
         const totalDue = subtotal + deliveryFee;
-        const opCost = item.qty * 8;
-        const netProfit = totalDue - opCost;
 
         const [createdOrder] = await this.db
           .insert(orders)
           .values({
-            customerId: custUser.id,
+            customerName: item.customerName,
+            customerPhone: item.phoneNumber,
+            deliveryAddress: item.address,
             branchId: branch.id,
             presetId: preset?.id ?? null,
             orderType: 'BOTH',
@@ -701,15 +449,13 @@ export class PosService implements OnModuleInit {
           amountPaid: item.paid.toFixed(2),
           changeGiven: '0.00',
           balanceDue: item.bal.toFixed(2),
-          totalOperationalCost: opCost.toFixed(2),
-          netProfit: netProfit.toFixed(2),
           receiptIssuedAt:
             item.docStage === 'OFFICIAL_RECEIPT' ? new Date() : null,
         });
       }
 
       this.logger.log(
-        'Seeded initial POS Orders (#1042-#1045) and Customer Accountability records into PostgreSQL!',
+        'Seeded initial POS Orders (#1042-#1045) into PostgreSQL!',
       );
     } catch (error) {
       this.logger.warn(

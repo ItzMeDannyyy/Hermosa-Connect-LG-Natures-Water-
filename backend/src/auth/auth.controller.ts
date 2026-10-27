@@ -22,7 +22,6 @@ import {
   DemoSwitchDto,
   LoginDto,
   RefreshTokenDto,
-  RegisterCustomerDto,
   RegisterStaffDto,
 } from './dto/auth.dto.js';
 import { JwtAuthGuard } from './guards/jwt-auth.guard.js';
@@ -32,22 +31,6 @@ import { RolesGuard } from './guards/roles.guard.js';
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
-
-  /**
-   * POST /api/auth/register/customer
-   * Public 2-in-1 Customer Registration + 1-Click Delivery Profile & Nearest Branch Auto-Assignment
-   */
-  @Public()
-  @Throttle({ default: { limit: 10, ttl: 60000 } })
-  @Post('register/customer')
-  async registerCustomer(
-    @Body() dto: RegisterCustomerDto,
-    @Res({ passthrough: true }) res: Response,
-  ) {
-    const result = await this.authService.registerCustomer(dto);
-    this.setAuthCookies(res, result.accessToken, result.refreshToken);
-    return result;
-  }
 
   /**
    * POST /api/auth/register/staff
@@ -64,7 +47,7 @@ export class AuthController {
 
   /**
    * POST /api/auth/login
-   * Public login endpoint for Customers, Riders, and Station Operators
+   * Public login endpoint for Riders and Station Operators
    */
   @Public()
   @Throttle({ default: { limit: 10, ttl: 60000 } })
@@ -81,7 +64,7 @@ export class AuthController {
 
   /**
    * POST /api/auth/refresh
-   * Exchanges a valid refreshToken (from JSON body or HttpOnly cookie) for a new token pair
+   * Exchanges a valid refreshToken for a new token pair
    */
   @Public()
   @HttpCode(HttpStatus.OK)
@@ -117,7 +100,7 @@ export class AuthController {
 
   /**
    * GET /api/auth/me
-   * Returns current authenticated user profile, assigned branch, and customer 1-click preset
+   * Returns current authenticated user profile and assigned branch
    */
   @Get('me')
   async getMe(@CurrentUser() user: ActiveUserPayload) {
@@ -126,7 +109,7 @@ export class AuthController {
 
   /**
    * POST /api/auth/demo-switch
-   * Ideathon Pitch Helper: Instantly switches into Demo CUSTOMER, RIDER, or OPERATOR
+   * Instantly switches between Demo OPERATOR and RIDER accounts
    */
   @Public()
   @HttpCode(HttpStatus.OK)
@@ -141,7 +124,7 @@ export class AuthController {
   }
 
   /**
-   * Role-Restricted Test Endpoints to verify RBAC Middleware/Guards
+   * Role-Restricted Test Endpoints to verify RBAC Guards
    */
   @Roles('OPERATOR')
   @Get('verify/operator-only')
@@ -149,7 +132,7 @@ export class AuthController {
     return {
       access: 'GRANTED',
       role: user.role,
-      message: `Welcome Station Operator ${user.fullName}! You have full access to POS, Cost Deductions, and End-of-Day Profit Reports.`,
+      message: `Welcome Station Operator ${user.fullName}! You have full access to POS and End-of-Day Sales Reports.`,
       user,
     };
   }
@@ -160,7 +143,7 @@ export class AuthController {
     return {
       access: 'GRANTED',
       role: user.role,
-      message: `Welcome ${user.fullName}! You have access to Sequenced Routes, Roboflow AI Container Counting, and Doorstep Smart Receipts.`,
+      message: `Welcome ${user.fullName}! You have access to Roboflow AI Container Counting and Doorstep Smart Receipts.`,
       user,
     };
   }

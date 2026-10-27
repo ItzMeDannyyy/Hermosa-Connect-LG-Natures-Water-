@@ -15,6 +15,10 @@ export class CreatePosOrderDto {
   @IsNotEmpty()
   customerName!: string;
 
+  @IsOptional()
+  @IsString()
+  customerPhone?: string;
+
   @IsString()
   @IsNotEmpty()
   deliveryAddress!: string;
@@ -36,11 +40,17 @@ export class CreatePosOrderDto {
   @IsBoolean()
   includeDeliveryFee!: boolean;
 
+  @IsOptional()
   @IsIn(['SLOT_8_10_AM', 'SLOT_1_3_PM', 'SLOT_4_6_PM'])
-  scheduledTimeSlot!: 'SLOT_8_10_AM' | 'SLOT_1_3_PM' | 'SLOT_4_6_PM';
+  scheduledTimeSlot?: 'SLOT_8_10_AM' | 'SLOT_1_3_PM' | 'SLOT_4_6_PM';
 
-  @IsIn(['PAID_CASH', 'E_PAYMENT', 'PARTIAL', 'UNPAID_CHARGE_SLIP'])
-  paymentState!: 'PAID_CASH' | 'E_PAYMENT' | 'PARTIAL' | 'UNPAID_CHARGE_SLIP';
+  @IsIn(['PAID_CASH', 'PARTIAL', 'UNPAID_CHARGE_SLIP'])
+  paymentState!: 'PAID_CASH' | 'PARTIAL' | 'UNPAID_CHARGE_SLIP';
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  subtotalAmount?: number;
 
   @IsOptional()
   @IsNumber()
@@ -54,8 +64,8 @@ export class CreatePosOrderDto {
 }
 
 export class ConvertOrderReceiptDto {
-  @IsIn(['PAID_CASH', 'E_PAYMENT', 'PARTIAL', 'UNPAID_CHARGE_SLIP'])
-  paymentState!: 'PAID_CASH' | 'E_PAYMENT' | 'PARTIAL' | 'UNPAID_CHARGE_SLIP';
+  @IsIn(['PAID_CASH', 'PARTIAL', 'UNPAID_CHARGE_SLIP'])
+  paymentState!: 'PAID_CASH' | 'PARTIAL' | 'UNPAID_CHARGE_SLIP';
 
   @IsOptional()
   @IsNumber()

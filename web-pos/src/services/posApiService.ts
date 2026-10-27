@@ -8,7 +8,6 @@
  */
 
 import type {
-  CustomerAccountabilityRecord,
   PaymentState,
   PosOrderItem,
   TimeSlotLabel,
@@ -21,18 +20,19 @@ const BACKEND_POS_BASE_URL = `${BASE_API_URL}/pos`;
 
 export interface PosDashboardBackendResponse {
   orders: PosOrderItem[];
-  customerRecords: CustomerAccountabilityRecord[];
 }
 
 export interface CreateOrderBackendInput {
   customerName: string;
+  customerPhone?: string;
   deliveryAddress: string;
   presetName: string;
   containerCount: number;
   emptyContainersToPickup: number;
   includeDeliveryFee: boolean;
-  scheduledTimeSlot: TimeSlotLabel;
+  scheduledTimeSlot?: TimeSlotLabel;
   paymentState: PaymentState;
+  subtotalAmount?: number;
   cashTendered?: number;
   partialAmountPaid?: number;
 }
@@ -53,7 +53,7 @@ function convertUiSlotToDatabaseEnum(
 }
 
 /**
- * 1. Fetch Live Orders (#INV & #OR) and Customer Accountability Ledger from PostgreSQL
+ * 1. Fetch Live Orders (#INV & #OR) from PostgreSQL
  *    Calls GET http://localhost:3000/api/pos/dashboard
  */
 export async function fetchPosDashboardFromBackend(): Promise<PosDashboardBackendResponse> {
@@ -90,13 +90,17 @@ export async function createPosOrderOnBackend(
 
   const payload = {
     customerName: input.customerName,
+    customerPhone: input.customerPhone,
     deliveryAddress: input.deliveryAddress,
     presetName: input.presetName,
     containerCount: input.containerCount,
     emptyContainersToPickup: input.emptyContainersToPickup,
     includeDeliveryFee: input.includeDeliveryFee,
-    scheduledTimeSlot: convertUiSlotToDatabaseEnum(input.scheduledTimeSlot),
+    scheduledTimeSlot: input.scheduledTimeSlot
+      ? convertUiSlotToDatabaseEnum(input.scheduledTimeSlot)
+      : 'SLOT_1_3_PM',
     paymentState: input.paymentState,
+    subtotalAmount: input.subtotalAmount,
     cashTendered: input.cashTendered,
     partialAmountPaid: input.partialAmountPaid,
   };
@@ -153,70 +157,6 @@ export async function convertInvoiceToReceiptOnBackend(
   if (!response.ok) {
     throw new Error(
       responseData.message || 'Failed to convert Invoice to Official Receipt.',
-    );
-  }
-
-  return responseData as PosDashboardBackendResponse;
-}
-
-/**
- * 4. Settle a Customer's Unpaid Balance in PostgreSQL
- *    Calls PATCH http://localhost:3000/api/pos/customers/:profileId/settle-balance
- */
-export async function settleCustomerBalanceOnBackend(
-  profileId: string,
-): Promise<PosDashboardBackendResponse> {
-  const accessToken = getSavedAccessToken();
-
-  const response = await fetch(
-    `${BACKEND_POS_BASE_URL}/customers/${profileId}/settle-balance`,
-    {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${accessToken ?? ''}`,
-      },
-      credentials: 'include',
-    },
-  );
-
-  const responseData = await response.json();
-
-  if (!response.ok) {
-    throw new Error(
-      responseData.message || 'Failed to settle customer balance.',
-    );
-  }
-
-  return responseData as PosDashboardBackendResponse;
-}
-
-/**
- * 5. Mark a Customer's Container Pickup Reminder as Sent (or Re-Sent) in PostgreSQL
- *    Calls PATCH http://localhost:3000/api/pos/customers/:profileId/send-reminder
- */
-export async function sendCustomerPickupReminderOnBackend(
-  profileId: string,
-): Promise<PosDashboardBackendResponse> {
-  const accessToken = getSavedAccessToken();
-
-  const response = await fetch(
-    `${BACKEND_POS_BASE_URL}/customers/${profileId}/send-reminder`,
-    {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${accessToken ?? ''}`,
-      },
-      credentials: 'include',
-    },
-  );
-
-  const responseData = await response.json();
-
-  if (!response.ok) {
-    throw new Error(
-      responseData.message || 'Failed to send container pickup reminder.',
     );
   }
 

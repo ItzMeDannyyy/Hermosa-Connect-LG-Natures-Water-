@@ -4,7 +4,7 @@
  * PURPOSE: Station Top Navigation Bar adhering to tasteskill framed-sheet design.
  *          - Quiet 56px height with clean, functional spacing.
  *          - Clear product mark: LG Nature's Water · Station #01 (Loyola Heights).
- *          - Tabbed navigation (Orders & Queue, Transaction Logs, Container Ledger)
+ *          - Tabbed navigation (Orders & Queue, Transaction Logs)
  *            with quiet active underlines.
  *          - Quick station utility actions: New Order, End-of-Day Z-Reading.
  *          - Strictly Lucide vector icons, zero Unicode emojis.
@@ -19,7 +19,6 @@ import {
   Monitor,
   Plus,
   ReceiptText,
-  RefreshCw,
   ShieldCheck,
   UserPlus,
 } from 'lucide-react';
@@ -47,8 +46,7 @@ export function TopNavigationBar(props: TopNavigationBarProps) {
   const location = useLocation();
 
   const isLogs = location.pathname.startsWith('/pos/logs');
-  const isAccountability = location.pathname.startsWith('/pos/accountability');
-  const isDashboard = !isLogs && !isAccountability;
+  const isDashboard = !isLogs;
 
   const rawBranchName =
     props.currentBranch !== null ? props.currentBranch.name : 'Station 1';
@@ -69,10 +67,7 @@ export function TopNavigationBar(props: TopNavigationBarProps) {
     if (role === 'OPERATOR') {
       return 'Station Operator';
     }
-    if (role === 'RIDER') {
-      return 'Delivery Rider';
-    }
-    return 'Customer';
+    return 'Delivery Rider';
   }
 
   function handleToggleProfileMenu() {
@@ -143,18 +138,6 @@ export function TopNavigationBar(props: TopNavigationBarProps) {
             <ReceiptText size={15} />
             <span>Transaction Logs</span>
           </Link>
-
-          <Link
-            to="/pos/accountability"
-            className={`h-full px-3.5 inline-flex items-center gap-2 text-[13px] font-medium border-b-2 transition-colors ${
-              isAccountability
-                ? 'border-[#0284c7] text-[#0f172a] font-semibold'
-                : 'border-transparent text-[#64748b] hover:text-[#0f172a]'
-            }`}
-          >
-            <RefreshCw size={15} />
-            <span>Container Ledger</span>
-          </Link>
         </nav>
 
         {/* ====================================================================
@@ -172,7 +155,7 @@ export function TopNavigationBar(props: TopNavigationBarProps) {
             <span>EOD Report</span>
           </button>
 
-          {/* Quick Register Order Button (Main Job is 1-click away!) */}
+          {/* Quick Register Order Button */}
           {props.onOpenRegisterCustomer && (
             <button
               type="button"
@@ -202,125 +185,89 @@ export function TopNavigationBar(props: TopNavigationBarProps) {
             </button>
 
             {isProfileMenuOpen && (
-              <>
-                {/* Backdrop Scrim */}
-                <div
-                  className="fixed inset-0 z-40"
-                  onClick={() => setIsProfileMenuOpen(false)}
-                />
+              <div
+                className="absolute right-0 mt-1.5 w-60 bg-white border border-[#cbd5e1] rounded-[8px] shadow-sm py-1.5 z-50 text-[12px]"
+                role="menu"
+              >
+                <div className="px-3 py-2 border-b border-[#f1f5f9]">
+                  <p className="font-semibold text-[#0f172a] truncate">
+                    {props.currentUser.fullName}
+                  </p>
+                  <p className="text-[11px] text-[#64748b]">
+                    {getReadableRoleLabel(props.currentUser.role)} ·{' '}
+                    {props.currentUser.phoneNumber}
+                  </p>
+                </div>
 
-                {/* Dropdown Menu */}
-                <div className="absolute right-0 top-[calc(100%+6px)] w-76 bg-white text-[#0f172a] border border-[#cbd5e1] rounded-[8px] p-2 z-50">
-                  {/* Account Info Box */}
-                  <div className="p-2.5 bg-[#f8fafc] border border-[#e2e8f0] rounded-[6px] mb-2">
-                    <div className="text-[12px] font-semibold text-[#0f172a] truncate">
-                      {props.currentUser.fullName}
-                    </div>
-                    <div className="text-[11px] text-[#64748b] num-mono">
-                      {props.currentUser.phoneNumber}
-                    </div>
-                    <div className="flex items-center gap-1.5 mt-1 text-[11px] text-[#0284c7]">
-                      <ShieldCheck size={12} />
-                      <span className="font-medium">
-                        {getReadableRoleLabel(props.currentUser.role)}
-                      </span>
-                    </div>
+                <div className="py-1">
+                  <div className="px-3 py-1 text-[10px] font-semibold uppercase text-[#94a3b8] tracking-wider">
+                    Staff Management
                   </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleMenuActionAndClose(props.onOpenStaffModal)
+                    }
+                    className="w-full px-3 py-1.5 text-left text-[#334155] hover:bg-[#f8fafc] flex items-center gap-2 cursor-pointer"
+                  >
+                    <UserPlus size={14} className="text-[#64748b]" />
+                    <span>Provision Staff Account</span>
+                  </button>
+                </div>
 
-                  {/* Operational Utilities */}
-                  <div className="flex flex-col gap-0.5">
-                    <button
-                      type="button"
-                      onClick={() =>
-                        handleMenuActionAndClose(props.onOpenStaffModal)
-                      }
-                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-[5px] text-left hover:bg-[#f1f5f9] text-[12px] text-[#334155] cursor-pointer"
-                    >
-                      <UserPlus size={14} className="text-[#64748b]" />
-                      <span>Provision Staff Credentials</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() =>
-                        handleMenuActionAndClose(props.onOpenEndOfDayModal)
-                      }
-                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-[5px] text-left hover:bg-[#f1f5f9] text-[12px] text-[#334155] cursor-pointer"
-                    >
-                      <FileBarChart size={14} className="text-[#64748b]" />
-                      <span>End-of-Day Report (Z-Reading)</span>
-                    </button>
+                <div className="border-t border-[#f1f5f9] py-1">
+                  <div className="px-3 py-1 text-[10px] font-semibold uppercase text-[#94a3b8] tracking-wider">
+                    Quick Role Switch
                   </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleMenuActionAndClose(() =>
+                        props.onSwitchRole('OPERATOR'),
+                      )
+                    }
+                    className={`w-full px-3 py-1.5 text-left flex items-center justify-between cursor-pointer ${
+                      props.currentUser.role === 'OPERATOR'
+                        ? 'bg-[#f0f9ff] text-[#0284c7] font-semibold'
+                        : 'text-[#334155] hover:bg-[#f8fafc]'
+                    }`}
+                  >
+                    <span>Station Operator</span>
+                    {props.currentUser.role === 'OPERATOR' && (
+                      <ShieldCheck size={13} />
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleMenuActionAndClose(() =>
+                        props.onSwitchRole('RIDER'),
+                      )
+                    }
+                    className={`w-full px-3 py-1.5 text-left flex items-center justify-between cursor-pointer ${
+                      props.currentUser.role === 'RIDER'
+                        ? 'bg-[#f0f9ff] text-[#0284c7] font-semibold'
+                        : 'text-[#334155] hover:bg-[#f8fafc]'
+                    }`}
+                  >
+                    <span>Delivery Rider</span>
+                    {props.currentUser.role === 'RIDER' && (
+                      <ShieldCheck size={13} />
+                    )}
+                  </button>
+                </div>
 
-                  <div className="h-px bg-[#e2e8f0] my-1.5" />
-
-                  {/* Sandbox Role Switcher */}
-                  <div className="px-1 py-1">
-                    <span className="block text-[10px] font-semibold uppercase tracking-wider text-[#94a3b8] mb-1">
-                      Demo Role Switcher
-                    </span>
-                    <div className="grid grid-cols-3 gap-1 bg-[#f1f5f9] p-1 rounded-[6px]">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          handleMenuActionAndClose(() =>
-                            props.onSwitchRole('OPERATOR'),
-                          )
-                        }
-                        className={`py-1 text-[11px] font-medium rounded-[4px] cursor-pointer transition-colors ${
-                          props.currentUser.role === 'OPERATOR'
-                            ? 'bg-white text-[#0f172a] shadow-xs font-semibold'
-                            : 'text-[#64748b] hover:text-[#0f172a]'
-                        }`}
-                      >
-                        Operator
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          handleMenuActionAndClose(() =>
-                            props.onSwitchRole('RIDER'),
-                          )
-                        }
-                        className={`py-1 text-[11px] font-medium rounded-[4px] cursor-pointer transition-colors ${
-                          props.currentUser.role === 'RIDER'
-                            ? 'bg-white text-[#0f172a] shadow-xs font-semibold'
-                            : 'text-[#64748b] hover:text-[#0f172a]'
-                        }`}
-                      >
-                        Rider
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          handleMenuActionAndClose(() =>
-                            props.onSwitchRole('CUSTOMER'),
-                          )
-                        }
-                        className={`py-1 text-[11px] font-medium rounded-[4px] cursor-pointer transition-colors ${
-                          props.currentUser.role === 'CUSTOMER'
-                            ? 'bg-white text-[#0f172a] shadow-xs font-semibold'
-                            : 'text-[#64748b] hover:text-[#0f172a]'
-                        }`}
-                      >
-                        Customer
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="h-px bg-[#e2e8f0] my-1.5" />
-
-                  {/* Sign Out */}
+                <div className="border-t border-[#f1f5f9] pt-1">
                   <button
                     type="button"
                     onClick={() => handleMenuActionAndClose(props.onLogout)}
-                    className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-[5px] text-left hover:bg-[#fef2f2] text-[12px] font-medium text-[#b91c1c] cursor-pointer"
+                    className="w-full px-3 py-1.5 text-left text-[#b91c1c] hover:bg-[#fef2f2] flex items-center gap-2 cursor-pointer font-medium"
                   >
                     <LogOut size={14} />
                     <span>Sign Out</span>
                   </button>
                 </div>
-              </>
+              </div>
             )}
           </div>
         </div>

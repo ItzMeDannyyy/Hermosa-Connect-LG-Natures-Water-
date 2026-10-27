@@ -18,7 +18,6 @@ import {
 } from '../database/database.module.js';
 import {
   containerPresets,
-  customerProfiles,
   stationBranches,
   users,
   type StationBranch,
@@ -28,7 +27,6 @@ import type { ActiveUserPayload } from './decorators/current-user.decorator.js';
 import type {
   DemoSwitchDto,
   LoginDto,
-  RegisterCustomerDto,
   RegisterStaffDto,
 } from './dto/auth.dto.js';
 
@@ -49,7 +47,6 @@ export class AuthService implements OnModuleInit {
 
   /**
    * Haversine distance formula in kilometers between two GPS coordinates
-   * Used for Feature 01: Nearest-station logic during Customer registration & ordering
    */
   calculateDistanceKm(
     lat1: number,
@@ -105,133 +102,58 @@ export class AuthService implements OnModuleInit {
   }
 
   /**
-   * 1. Customer Registration + 1-Click Delivery Profile Setup
-   */
-  async registerCustomer(dto: RegisterCustomerDto) {
-    const [existing] = await this.db
-      .select({ id: users.id })
-      .from(users)
-      .where(eq(users.phoneNumber, dto.phoneNumber))
-      .limit(1);
-
-    if (existing) {
-      throw new ConflictException(
-        `Phone number ${dto.phoneNumber} is already registered`,
-      );
-    }
-
-    const { branch: nearestBranch, distanceKm } = await this.findNearestBranch(
-      dto.latitude,
-      dto.longitude,
-    );
-
-    // Find default container preset for the nearest branch if not explicitly provided
-    let presetId = dto.defaultPresetId ?? null;
-    if (!presetId) {
-      const [branchPreset] = await this.db
-        .select()
-        .from(containerPresets)
-        .where(eq(containerPresets.branchId, nearestBranch.id))
-        .limit(1);
-      presetId = branchPreset?.id ?? null;
-    }
-
-    const passwordHash = await bcrypt.hash(dto.password, this.saltRounds);
-
-    const createdUser = await this.db.transaction(async (tx) => {
-      const [newUser] = await tx
-        .insert(users)
-        .values({
-          fullName: dto.fullName.trim(),
-          phoneNumber: dto.phoneNumber,
-          passwordHash,
-          role: 'CUSTOMER',
-          branchId: nearestBranch.id,
-        })
-        .returning();
-
-      if (!newUser) {
-        throw new Error('Failed to create user');
-      }
-
-      const [profile] = await tx
-        .insert(customerProfiles)
-        .values({
-          userId: newUser.id,
-          defaultPresetId: presetId,
-          defaultOrderQty: dto.defaultOrderQty ?? 8,
-          deliveryAddress: dto.deliveryAddress.trim(),
-          latitude: dto.latitude,
-          longitude: dto.longitude,
-          emptyContainersHeld: 0,
-          runningUnpaidBalance: '0.00',
-        })
-        .returning();
-
-      return { user: newUser, customerProfile: profile };
-    });
-
-    const tokens = await this.issueTokensAndSaveRefreshHash(createdUser.user);
-
-    return {
-      message: 'Customer registered and 1-Click Ordering profile configured',
-      ...tokens,
-      user: this.sanitizeUser(createdUser.user),
-      customerProfile: createdUser.customerProfile,
-      nearestBranch: {
-        id: nearestBranch.id,
-        name: nearestBranch.name,
-        address: nearestBranch.address,
-        distanceKm,
-      },
-    };
-  }
-
-  /**
-   * 2. Staff Registration (Provisioned by Station Operator)
+   * 1. Register Staff (OPERATOR provisions RIDER or OPERATOR)
    */
   async registerStaff(
-    operatorUser: ActiveUserPayload,
+    operator: ActiveUserPayload,
     dto: RegisterStaffDto,
   ) {
+    if (operator.role !== 'OPERATOR') {
+      throw new ForbiddenException(
+        'Only Station Operators are permitted to provision staff accounts.',
+      );
+    }
+
     const [existing] = await this.db
-      .select({ id: users.id })
+      .select()
       .from(users)
       .where(eq(users.phoneNumber, dto.phoneNumber))
       .limit(1);
 
     if (existing) {
       throw new ConflictException(
-        `Phone number ${dto.phoneNumber} is already registered`,
+        'A user with this phone number already exists.',
       );
     }
 
-    const targetBranchId = dto.branchId ?? operatorUser.branchId;
+    const branchId = dto.branchId ?? operator.branchId;
+    if (!branchId) {
+      throw new ConflictException(
+        'Staff must be assigned to an active Station Branch.',
+      );
+    }
+
     const passwordHash = await bcrypt.hash(dto.password, this.saltRounds);
 
-    const [staffUser] = await this.db
+    const [newUser] = await this.db
       .insert(users)
       .values({
-        fullName: dto.fullName.trim(),
+        fullName: dto.fullName,
         phoneNumber: dto.phoneNumber,
         passwordHash,
         role: dto.role,
-        branchId: targetBranchId,
+        branchId,
       })
       .returning();
 
-    if (!staffUser) {
-      throw new Error('Failed to create staff account');
-    }
-
     return {
-      message: `${dto.role} account created successfully`,
-      user: this.sanitizeUser(staffUser),
+      message: `Staff member ${dto.fullName} successfully registered as ${dto.role}.`,
+      user: this.sanitizeUser(newUser!),
     };
   }
 
   /**
-   * 3. Unified Login (Customer, Rider, Operator)
+   * 2. Login (Phone + Password for RIDER and OPERATOR)
    */
   async login(dto: LoginDto) {
     const [user] = await this.db
@@ -241,16 +163,19 @@ export class AuthService implements OnModuleInit {
       .limit(1);
 
     if (!user) {
-      throw new UnauthorizedException('Invalid phone number or password');
+      throw new UnauthorizedException(
+        'Invalid phone number or password credentials.',
+      );
     }
 
     const isPasswordValid = await bcrypt.compare(
       dto.password,
       user.passwordHash,
     );
-
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid phone number or password');
+      throw new UnauthorizedException(
+        'Invalid phone number or password credentials.',
+      );
     }
 
     const tokens = await this.issueTokensAndSaveRefreshHash(user);
@@ -264,21 +189,23 @@ export class AuthService implements OnModuleInit {
   }
 
   /**
-   * 4. Token Refresh Rotation
+   * 3. Refresh Access Token
    */
-  async refreshTokens(rawRefreshToken?: string) {
-    if (!rawRefreshToken) {
+  async refreshTokens(refreshToken: string | undefined) {
+    if (!refreshToken) {
       throw new UnauthorizedException('Refresh token is required');
     }
+
+    const refreshSecret =
+      this.configService.get<string>('JWT_REFRESH_SECRET') ??
+      'lg-natures-water-super-secret-refresh-key-2026';
 
     let payload: ActiveUserPayload;
     try {
       payload = await this.jwtService.verifyAsync<ActiveUserPayload>(
-        rawRefreshToken,
+        refreshToken,
         {
-          secret:
-            this.configService.get<string>('JWT_REFRESH_SECRET') ??
-            'lg-natures-water-super-secret-refresh-key-2026',
+          secret: refreshSecret,
         },
       );
     } catch {
@@ -292,11 +219,11 @@ export class AuthService implements OnModuleInit {
       .limit(1);
 
     if (!user || !user.refreshTokenHash) {
-      throw new ForbiddenException('Session expired or logged out. Please log in again.');
+      throw new ForbiddenException('Access revoked or user not found');
     }
 
     const isRefreshMatching = await bcrypt.compare(
-      rawRefreshToken,
+      refreshToken,
       user.refreshTokenHash,
     );
 
@@ -314,7 +241,7 @@ export class AuthService implements OnModuleInit {
   }
 
   /**
-   * 5. Logout (Revokes Refresh Token in PostgreSQL)
+   * 4. Logout (Revokes Refresh Token in PostgreSQL)
    */
   async logout(userId: string) {
     await this.db
@@ -328,7 +255,7 @@ export class AuthService implements OnModuleInit {
   }
 
   /**
-   * 6. Get Current Authenticated User Profile (/auth/me)
+   * 5. Get Current Authenticated User Profile (/auth/me)
    */
   async getMe(userId: string) {
     const [user] = await this.db
@@ -351,43 +278,19 @@ export class AuthService implements OnModuleInit {
       branch = foundBranch ?? null;
     }
 
-    let customerProfile = null;
-    let defaultPreset = null;
-
-    if (user.role === 'CUSTOMER') {
-      const [foundProfile] = await this.db
-        .select()
-        .from(customerProfiles)
-        .where(eq(customerProfiles.userId, user.id))
-        .limit(1);
-      customerProfile = foundProfile ?? null;
-
-      if (customerProfile?.defaultPresetId) {
-        const [foundPreset] = await this.db
-          .select()
-          .from(containerPresets)
-          .where(eq(containerPresets.id, customerProfile.defaultPresetId))
-          .limit(1);
-        defaultPreset = foundPreset ?? null;
-      }
-    }
-
     return {
       user: this.sanitizeUser(user),
       branch,
-      customerProfile,
-      defaultPreset,
     };
   }
 
   /**
-   * 7. Ideathon 1-Click Demo Role Switcher (Customer / Rider / Operator)
+   * 6. Demo Role Switcher (Rider / Operator)
    */
   async demoSwitch(dto: DemoSwitchDto) {
-    const demoPhoneByRole: Record<'OPERATOR' | 'RIDER' | 'CUSTOMER', string> = {
+    const demoPhoneByRole: Record<'OPERATOR' | 'RIDER', string> = {
       OPERATOR: '+639170000001',
       RIDER: '+639170000002',
-      CUSTOMER: '+639170000003',
     };
 
     const preferredPhone = demoPhoneByRole[dto.role];
@@ -426,7 +329,7 @@ export class AuthService implements OnModuleInit {
       sub: user.id,
       phoneNumber: user.phoneNumber,
       fullName: user.fullName,
-      role: user.role,
+      role: user.role as 'RIDER' | 'OPERATOR',
       branchId: user.branchId,
     };
 
@@ -448,55 +351,44 @@ export class AuthService implements OnModuleInit {
       }),
     ]);
 
-    const refreshTokenHash = await bcrypt.hash(refreshToken, 10);
+    const refreshTokenHash = await bcrypt.hash(refreshToken, this.saltRounds);
     await this.db
       .update(users)
       .set({ refreshTokenHash, updatedAt: new Date() })
       .where(eq(users.id, user.id));
 
-    return {
-      accessToken,
-      refreshToken,
-      expiresIn: 900, // 15 minutes in seconds
-    };
+    return { accessToken, refreshToken };
   }
 
   private sanitizeUser(user: User) {
     return {
       id: user.id,
-      fullName: user.fullName,
       phoneNumber: user.phoneNumber,
+      fullName: user.fullName,
       role: user.role,
       branchId: user.branchId,
       createdAt: user.createdAt,
     };
   }
 
-  /**
-   * Auto-seeds 3 LG Nature's Water Station Branches, Presets, and Demo Accounts
-   * (Operator, Rider J. Cruz, and Customer Maria Santos) if DB is empty.
-   */
   private async ensureDefaultBranchesAndDemoUsers() {
     try {
       const existingBranches = await this.db.select().from(stationBranches);
       let branch1: StationBranch;
 
       if (existingBranches.length === 0) {
-        this.logger.log(
-          "Seeding default LG Nature's Water branches, container presets, and demo accounts...",
-        );
         const insertedBranches = await this.db
           .insert(stationBranches)
           .values([
             {
               name: "LG Nature's Water - Station 1 (Main Hub)",
-              address: '124 Katipunan Ave, Quezon City',
+              address: '124 Katipunan Ave, Loyola Heights, QC',
               latitude: 14.6415,
               longitude: 121.0748,
               deliveryFee: '30.00',
             },
             {
-              name: "LG Nature's Water - Station 2 (Downtown)",
+              name: "LG Nature's Water - Station 2 (North Branch)",
               address: '88 Timog Ave, Quezon City',
               latitude: 14.6345,
               longitude: 121.0345,
@@ -520,17 +412,11 @@ export class AuthService implements OnModuleInit {
               branchId: b.id,
               name: '5-Gallon Slim Container (Refill)',
               refillPrice: '25.00',
-              waterCost: '3.00',
-              electricityCost: '3.00',
-              containerWearCost: '2.00',
             },
             {
               branchId: b.id,
               name: '5-Gallon Round Dispenser Jug (Refill)',
               refillPrice: '25.00',
-              waterCost: '3.00',
-              electricityCost: '3.00',
-              containerWearCost: '2.00',
             },
           ]);
         }
@@ -541,11 +427,6 @@ export class AuthService implements OnModuleInit {
       const existingUsers = await this.db.select().from(users);
       if (existingUsers.length === 0) {
         const defaultPasswordHash = await bcrypt.hash('password123', 12);
-        const [defaultPreset] = await this.db
-          .select()
-          .from(containerPresets)
-          .where(eq(containerPresets.branchId, branch1.id))
-          .limit(1);
 
         // 1. Demo Operator
         await this.db.insert(users).values({
@@ -556,7 +437,7 @@ export class AuthService implements OnModuleInit {
           branchId: branch1.id,
         });
 
-        // 2. Demo Rider (J. Cruz from Slide 11)
+        // 2. Demo Rider
         await this.db.insert(users).values({
           fullName: 'J. Cruz (Delivery Rider)',
           phoneNumber: '+639170000002',
@@ -565,34 +446,8 @@ export class AuthService implements OnModuleInit {
           branchId: branch1.id,
         });
 
-        // 3. Demo Customer
-        const [demoCustomer] = await this.db
-          .insert(users)
-          .values({
-            fullName: 'Maria Santos (Household Customer)',
-            phoneNumber: '+639170000003',
-            passwordHash: defaultPasswordHash,
-            role: 'CUSTOMER',
-            branchId: branch1.id,
-          })
-          .returning();
-
-        if (demoCustomer) {
-          await this.db.insert(customerProfiles).values({
-            userId: demoCustomer.id,
-            defaultPresetId: defaultPreset?.id ?? null,
-            defaultOrderQty: 8,
-            deliveryAddress: 'Blk 4 Lot 12 Pansol St, Quezon City',
-            latitude: 14.6455,
-            longitude: 121.0762,
-            emptyContainersHeld: 3,
-            runningUnpaidBalance: '100.00',
-            containersDueBackDate: '2026-10-22',
-          });
-        }
-
         this.logger.log(
-          'Demo accounts ready! Login password for all: "password123" | Phones: +639170000001 (OPERATOR), +639170000002 (RIDER), +639170000003 (CUSTOMER)',
+          'Staff accounts ready! Password: "password123" | Phones: +639170000001 (OPERATOR), +639170000002 (RIDER)',
         );
       }
     } catch (error) {

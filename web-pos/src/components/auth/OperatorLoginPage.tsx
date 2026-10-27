@@ -16,7 +16,6 @@ import {
   ArrowRight,
   CheckCircle2,
   ChevronRight,
-  ClipboardList,
   Droplets,
   Eye,
   EyeOff,
@@ -29,7 +28,6 @@ import {
   ShieldCheck,
   Store,
   Truck,
-  User,
   X,
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
@@ -258,7 +256,7 @@ export function OperatorLoginPage(props: OperatorLoginPageProps) {
             </div>
 
             <p data-load style={{ '--d': '320ms' } as React.CSSProperties} className="taste-lead text-[var(--ink)] mb-6">
-              LG Nature&apos;s Water replaces wet paper notebooks with AI gallon counting, street route dispatch, and live net profit tracking.
+              LG Nature&apos;s Water replaces wet paper notebooks with AI gallon counting, rider delivery dispatch, and live sales tracking.
             </p>
 
             <div data-load style={{ '--d': '440ms' } as React.CSSProperties} className="flex flex-wrap items-center gap-4 mb-8">
@@ -331,10 +329,10 @@ export function OperatorLoginPage(props: OperatorLoginPageProps) {
               {/* Accent Block */}
               <div className="mt-4 relative z-10 p-5 bg-[var(--accent)] text-[var(--accent-ink)] max-w-sm anim-pulse-3">
                 <span className="taste-nums block text-3xl sm:text-4xl font-sans font-bold leading-tight">
-                  PHP 17.00
+                  PHP 25.00
                 </span>
                 <span className="taste-small block text-sm font-semibold opacity-95 mt-1">
-                  True net profit kept per 5-gallon jug after PHP 8.00 water, electricity, and wear costs.
+                  Standard 5-gallon refill price · Cash-only doorstep &amp; counter collections.
                 </span>
               </div>
             </div>
@@ -395,15 +393,15 @@ export function OperatorLoginPage(props: OperatorLoginPageProps) {
             {/* Exchange 2 */}
             <div data-reveal className="space-y-4 anim-drift-6">
               <h3 className="text-2xl font-bold font-sans text-[var(--ink)]">
-                Next, sequence deliveries and pickups into one route.
+                Next, dispatch deliveries to riders for their street runs.
               </h3>
               <div className="p-4 bg-[var(--bg)] text-[var(--ink)] text-base">
-                <strong>Rider Route Optimizer:</strong> Groups 15 stops along Katipunan Ave and Pansol St into three turn-by-turn dispatch windows.
+                <strong>Rider Delivery Manifest:</strong> Orders are grouped into dispatch windows; riders manage their own delivery patterns and street sequences.
               </div>
               <div className="p-5 bg-white" data-ui>
                 <div className="flex items-center justify-between mb-3 pb-2 bg-slate-50 px-3 py-1.5">
                   <span className="font-bold text-sm text-slate-800">
-                    Active Rider Trip · Afternoon Window
+                    Active Rider Manifest · Afternoon Window
                   </span>
                   <span className="text-sm font-semibold text-emerald-700">
                     Rider J. Cruz
@@ -411,15 +409,15 @@ export function OperatorLoginPage(props: OperatorLoginPageProps) {
                 </div>
                 <div className="text-sm text-slate-700 space-y-2 pt-1">
                   <div className="flex items-center gap-2">
-                    <span className="px-2 py-0.5 bg-slate-100 font-bold">Stop 1</span>
+                    <span className="px-2 py-0.5 bg-slate-100 font-bold">Delivery 1</span>
                     <span>18 Xavierville Ave · Carlo Mendoza · 6 jugs</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="px-2 py-0.5 bg-slate-100 font-bold">Stop 2</span>
+                    <span className="px-2 py-0.5 bg-slate-100 font-bold">Delivery 2</span>
                     <span>Blk 4 Lot 12 Pansol St · Maria Santos · 8 jugs + 3 empties</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="px-2 py-0.5 bg-slate-100 font-bold">Stop 3</span>
+                    <span className="px-2 py-0.5 bg-slate-100 font-bold">Delivery 3</span>
                     <span>102 Katipunan Ave · Study Hub · 12 jugs + 10 empties</span>
                   </div>
                 </div>
@@ -429,10 +427,10 @@ export function OperatorLoginPage(props: OperatorLoginPageProps) {
             {/* Exchange 3 */}
             <div data-reveal className="space-y-4">
               <h3 className="text-2xl font-bold font-sans text-[var(--ink)]">
-                Finally, confirm payment to issue the official receipt.
+                Finally, confirm cash payment to issue the official receipt.
               </h3>
               <div className="p-4 bg-[var(--bg)] text-[var(--ink)] text-base">
-                <strong>Doorstep Collection:</strong> Customer pays partial cash at the gate. Official receipt prints or sends via SMS automatically.
+                <strong>Doorstep Collection:</strong> Customer pays cash at the gate. Official receipt prints or generates immediately.
               </div>
               <div className="p-5 bg-white" data-ui>
                 <div className="flex items-center justify-between mb-3 pb-2 bg-slate-50 px-3 py-1.5">
@@ -446,15 +444,15 @@ export function OperatorLoginPage(props: OperatorLoginPageProps) {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-slate-700">
                   <div className="space-y-1.5">
                     <p>Amount Paid at Door: <strong className="taste-nums">PHP 130.00</strong></p>
-                    <p>Remaining Account Balance: <strong className="taste-nums text-red-600">PHP 100.00</strong></p>
-                    <p>Customer Jugs Held: <strong className="taste-nums">5 jugs</strong> (Due Oct 22)</p>
+                    <p>Remaining Charge Slip: <strong className="taste-nums text-red-600">PHP 100.00</strong></p>
+                    <p>Payment Mode: <strong className="taste-nums">Cash Only</strong></p>
                   </div>
                   <div className="bg-slate-50 p-3">
-                    <span className="font-bold block text-slate-900 mb-1">Station Net Profit Breakdown:</span>
-                    <p>Gross Collected: <span className="taste-nums">PHP 230.00</span></p>
-                    <p>Station Cost (Water + Power + Wear): <span className="taste-nums">PHP 64.00</span></p>
+                    <span className="font-bold block text-slate-900 mb-1">Order Settlement Summary:</span>
+                    <p>Total Due: <span className="taste-nums">PHP 230.00</span></p>
+                    <p>Cash Collected: <span className="taste-nums">PHP 130.00</span></p>
                     <p className="font-bold text-emerald-700 pt-1 mt-1 bg-white px-1">
-                      True Net Profit: <span className="taste-nums">PHP 166.00</span>
+                      Cash Received: <span className="taste-nums">PHP 130.00</span>
                     </p>
                   </div>
                 </div>
@@ -472,10 +470,10 @@ export function OperatorLoginPage(props: OperatorLoginPageProps) {
       <section id="documents" className="py-20">
         <div className="taste-wrap max-w-6xl px-6 mx-auto">
           <h2 data-reveal className="taste-head text-[var(--ink)] mb-4">
-            Four station documents
+            Three station documents
           </h2>
           <p data-reveal className="taste-lead text-[var(--ink)] mb-12">
-            Every counter ticket, delivery slip, and daily ledger uses one synchronized dataset so numbers never change between bay and door.
+            Every counter ticket, delivery slip, and daily report uses one synchronized dataset so numbers never change between bay and door.
           </p>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
@@ -495,15 +493,9 @@ export function OperatorLoginPage(props: OperatorLoginPageProps) {
                   icon: Receipt,
                 },
                 {
-                  id: 'ledger',
-                  title: 'Borrowed jug ledger',
-                  subtitle: 'Pansol St & Katipunan overdue tracking',
-                  icon: ClipboardList,
-                },
-                {
                   id: 'eod',
                   title: 'Daily closing report',
-                  subtitle: '1-tap sales, costs & net profit summary',
+                  subtitle: '1-tap cash sales & reconciliation summary',
                   icon: FileBarChart,
                 },
               ].map((doc, index) => {
@@ -672,64 +664,14 @@ export function OperatorLoginPage(props: OperatorLoginPageProps) {
                     <div className="flex justify-between items-baseline pb-3 bg-slate-50 p-3">
                       <div>
                         <h4 className="font-sans text-xl font-bold">
-                          CONTAINER ACCOUNTABILITY LEDGER
-                        </h4>
-                        <span className="text-sm text-slate-600">
-                          Loyola Heights &amp; Pansol Street Hub
-                        </span>
-                      </div>
-                      <span className="text-sm font-bold text-slate-700">
-                        Active Balances
-                      </span>
-                    </div>
-
-                    <div className="text-sm space-y-2">
-                      <div className="p-3 bg-slate-50 flex justify-between items-center">
-                        <div>
-                          <strong>Maria Santos</strong> (Blk 4 Lot 12 Pansol St)
-                          <div className="text-slate-600 text-sm">5 jugs held · Due Oct 22</div>
-                        </div>
-                        <span className="taste-nums font-bold text-red-600">
-                          PHP 100.00 unpaid
-                        </span>
-                      </div>
-
-                      <div className="p-3 bg-red-50 flex justify-between items-center">
-                        <div>
-                          <strong>Katipunan Study Hub</strong> (102 Katipunan Ave)
-                          <div className="text-red-700 text-sm">12 jugs held · Overdue since Oct 12</div>
-                        </div>
-                        <span className="taste-nums font-bold text-red-700">
-                          PHP 460.00 unpaid
-                        </span>
-                      </div>
-
-                      <div className="p-3 bg-slate-50 flex justify-between items-center">
-                        <div>
-                          <strong>Carlo Mendoza</strong> (18 Xavierville Ave)
-                          <div className="text-slate-600 text-sm">6 jugs held · Due Oct 20</div>
-                        </div>
-                        <span className="taste-nums font-bold text-emerald-700">
-                          Settled (PHP 0.00)
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {activeDocIndex === 3 && (
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-baseline pb-3 bg-slate-50 p-3">
-                      <div>
-                        <h4 className="font-sans text-xl font-bold">
-                          END-OF-DAY SHIFT CLOSING
+                          END-OF-DAY CASH RECONCILIATION
                         </h4>
                         <span className="text-sm text-slate-600">
                           Shift Closing Summary · Oct 20, 2026
                         </span>
                       </div>
                       <span className="text-sm font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5">
-                        Shift #01 Reconciled
+                        Cash Drawer Reconciled
                       </span>
                     </div>
 
@@ -750,17 +692,17 @@ export function OperatorLoginPage(props: OperatorLoginPageProps) {
                           <td className="py-1">Gross Sales Revenue:</td>
                           <td className="text-right taste-nums">PHP 3,360.00</td>
                         </tr>
-                        <tr className="text-slate-600">
-                          <td className="py-1">Total Refill Deductions (Water, Power, Wear):</td>
-                          <td className="text-right taste-nums">PHP 984.00</td>
+                        <tr className="text-emerald-700 font-semibold">
+                          <td className="py-1">Cash Collected in Drawer:</td>
+                          <td className="text-right taste-nums">PHP 2,420.00</td>
                         </tr>
                         <tr className="text-slate-600">
-                          <td className="py-1">Unpaid Receivables Logged:</td>
+                          <td className="py-1">Unpaid Charge Slips Logged:</td>
                           <td className="text-right taste-nums text-red-600">PHP 940.00</td>
                         </tr>
                         <tr className="font-bold text-base text-emerald-700 bg-slate-50">
-                          <td className="py-2 px-1">True Net Profit for Shift:</td>
-                          <td className="text-right px-1 taste-nums text-xl">PHP 2,376.00</td>
+                          <td className="py-2 px-1">Actual Cash in Drawer:</td>
+                          <td className="text-right px-1 taste-nums text-xl">PHP 2,420.00</td>
                         </tr>
                       </tbody>
                     </table>
@@ -821,11 +763,11 @@ export function OperatorLoginPage(props: OperatorLoginPageProps) {
               </div>
             </div>
 
-            {/* Right Plan: Doorstep Route Delivery (Cols 6-12) */}
+            {/* Right Plan: Doorstep Delivery (Cols 6-12) */}
             <div data-reveal className="lg:col-span-7 p-8 sm:p-10 bg-[#0369a1] text-white flex flex-col justify-between min-h-[460px]">
               <div>
                 <h3 className="font-sans text-2xl font-bold mb-2 text-white">
-                  Doorstep route delivery
+                  Doorstep rider delivery
                 </h3>
                 <p className="taste-body text-base text-white/95 mb-6 max-w-[36ch]">
                   Five-gallon slim or round dispenser jugs delivered along Katipunan, Xavierville, and Pansol.
@@ -909,13 +851,6 @@ export function OperatorLoginPage(props: OperatorLoginPageProps) {
                 className="hover:text-white cursor-pointer"
               >
                 Rider Guard Test
-              </button>
-              <button
-                type="button"
-                onClick={() => handleSelectDemoRole('CUSTOMER')}
-                className="hover:text-white cursor-pointer"
-              >
-                Customer Guard Test
               </button>
             </div>
 
@@ -1103,7 +1038,7 @@ export function OperatorLoginPage(props: OperatorLoginPageProps) {
                     role: 'OPERATOR' as UserRole,
                     title: 'Operator account',
                     phone: '+639170000001',
-                    desc: 'Full counter POS & profit ledger access',
+                    desc: 'Full counter POS & sales register access',
                     icon: Store,
                   },
                   {
@@ -1112,13 +1047,6 @@ export function OperatorLoginPage(props: OperatorLoginPageProps) {
                     phone: '+639170000002',
                     desc: 'Tests 403 Forbidden on Web POS',
                     icon: Truck,
-                  },
-                  {
-                    role: 'CUSTOMER' as UserRole,
-                    title: 'Customer account',
-                    phone: '+639170000003',
-                    desc: 'Tests 403 Forbidden on Web POS',
-                    icon: User,
                   },
                 ].map((item) => {
                   const ItemIcon = item.icon;

@@ -10,15 +10,6 @@ export const containerPresets = pgTable('container_presets', {
   refillPrice: numeric('refill_price', { precision: 10, scale: 2 })
     .default('25.00')
     .notNull(),
-  waterCost: numeric('water_cost', { precision: 10, scale: 2 })
-    .default('3.00')
-    .notNull(),
-  electricityCost: numeric('electricity_cost', { precision: 10, scale: 2 })
-    .default('3.00')
-    .notNull(),
-  containerWearCost: numeric('container_wear_cost', { precision: 10, scale: 2 })
-    .default('2.00')
-    .notNull(),
 });
 
 export type ContainerPreset = typeof containerPresets.$inferSelect;

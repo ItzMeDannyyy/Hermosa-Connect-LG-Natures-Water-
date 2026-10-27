@@ -13,7 +13,6 @@ import {
   Banknote,
   FileBarChart,
   Printer,
-  Smartphone,
   X,
 } from 'lucide-react';
 import type { ProfitSummaryMetrics } from '../../types/pos.types';
@@ -104,48 +103,15 @@ export function EndOfDayReportModal(props: EndOfDayReportModalProps) {
               </span>
             </div>
             <div className="flex justify-between py-0.5 text-[#334155]">
-              <span className="flex items-center gap-1">
-                <Smartphone size={12} className="text-[#64748b]" />
-                <span>GCash / Maya Digital:</span>
-              </span>
-              <span className="font-semibold text-[#0f172a]">
-                ₱{props.metrics.ePaymentCollected.toFixed(2)}
-              </span>
-            </div>
-            <div className="flex justify-between py-0.5 text-[#334155]">
               <span>Unpaid Charge Slips:</span>
               <span className="font-semibold text-[#b91c1c]">
                 ₱{props.metrics.unpaidReceivablesAdded.toFixed(2)}
               </span>
             </div>
             <div className="h-px bg-[#e2e8f0] my-1.5" />
-            <div className="flex justify-between font-bold text-[#0f172a] text-[12px]">
-              <span>Gross Sales Total:</span>
-              <span>₱{props.metrics.grossSalesRevenue.toFixed(2)}</span>
-            </div>
-          </div>
-
-          {/* Utility Deductions & True Net Profit */}
-          <div className="bg-[#f8fafc] border border-[#e2e8f0] rounded-[6px] p-3">
-            <div className="text-[10px] font-semibold uppercase text-[#64748b] tracking-wider mb-2 font-sans">
-              3. Operational Cost Deductions
-            </div>
-            <div className="flex justify-between py-0.5 text-[#334155]">
-              <span>Raw Deepwell Water:</span>
-              <span>−₱{props.metrics.waterCostTotal.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between py-0.5 text-[#334155]">
-              <span>RO/UV Purification Power:</span>
-              <span>−₱{props.metrics.electricityCostTotal.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between py-0.5 text-[#334155]">
-              <span>Sanitization &amp; Wear:</span>
-              <span>−₱{props.metrics.containerWearCostTotal.toFixed(2)}</span>
-            </div>
-            <div className="h-px bg-[#e2e8f0] my-1.5" />
             <div className="flex justify-between font-bold text-[#15803d] text-[12px]">
-              <span>True Net Profit:</span>
-              <span>₱{props.metrics.trueNetProfit.toFixed(2)}</span>
+              <span>Total Sales Revenue:</span>
+              <span>₱{props.metrics.grossSalesRevenue.toFixed(2)}</span>
             </div>
           </div>
         </div>
