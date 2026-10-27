@@ -1,17 +1,15 @@
 /**
  * ============================================================================
  * FILE: src/components/pos/ProfitTrackerCards.tsx
- * PURPOSE: Renders the 4 top KPI cards from Wireframe W1.
- *          Styled entirely with Tailwind CSS and Lucide SVG icons.
+ * PURPOSE: Typography-first station operational ledger bar following tasteskill v2.
+ *          - One unified container split by 1px hairlines.
+ *          - No icons in colored circles, no sparklines.
+ *          - High-contrast tabular numbers (IBM Plex Mono) with muted unit suffixes.
+ *          - Sentence-case labels and explicit baselines.
+ *          - Strictly Lucide vector icons, zero Unicode emojis.
  * ============================================================================
  */
 
-import {
-  Banknote,
-  PackageCheck,
-  SlidersHorizontal,
-  TrendingUp,
-} from 'lucide-react';
 import type {
   CustomerAccountabilityRecord,
   ProfitSummaryMetrics,
@@ -27,13 +25,12 @@ export function ProfitTrackerCards(props: ProfitTrackerCardsProps) {
   let overdueCustomersCount = 0;
 
   for (const record of props.customerRecords) {
-    totalEmptyJugsOut = totalEmptyJugsOut + record.emptyContainersHeld;
+    totalEmptyJugsOut += record.emptyContainersHeld;
     if (record.isOverdue) {
-      overdueCustomersCount = overdueCustomersCount + 1;
+      overdueCustomersCount += 1;
     }
   }
 
-  // Calculate operational profit margin percentage and per-container net profit
   const profitMarginPercent =
     props.metrics.grossSalesRevenue > 0
       ? Math.round(
@@ -47,89 +44,92 @@ export function ProfitTrackerCards(props: ProfitTrackerCardsProps) {
       : 0;
 
   return (
-    <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
-      {/* Card 1: Gross Sales Revenue */}
-      <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-2xs flex flex-col justify-between">
-        <div className="flex items-center justify-between gap-2 mb-2">
-          <span className="text-xs font-bold tracking-wider text-slate-500 uppercase">
-            GROSS SALES REVENUE
-          </span>
-          <span className="w-8.5 h-8.5 rounded-lg bg-sky-100 text-sky-600 inline-flex items-center justify-center shrink-0">
-            <Banknote size={17} />
-          </span>
+    <section className="bg-white border border-[#e2e8f0] rounded-[10px] overflow-hidden">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-[#e2e8f0]">
+        {/* Metric 1: Gross Sales Revenue */}
+        <div className="p-4 flex flex-col justify-between">
+          <div className="text-[12px] font-medium text-[#64748b]">
+            Gross sales today
+          </div>
+          <div className="my-2">
+            <span className="text-[24px] font-semibold text-[#0f172a] tracking-tight num-mono">
+              ₱{props.metrics.grossSalesRevenue.toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
+            </span>
+          </div>
+          <div className="text-[12px] text-[#64748b]">
+            <span className="num-mono font-medium text-[#334155]">
+              {props.metrics.totalOrdersCount}
+            </span>{' '}
+            orders ({props.metrics.totalContainersRefilled} refills logged)
+          </div>
         </div>
-        <div className="text-2xl font-extrabold text-slate-900 tracking-tight mb-1.5">
-          PHP {props.metrics.grossSalesRevenue.toFixed(2)}
-        </div>
-        <div className="text-xs text-slate-500">
-          {props.metrics.totalOrdersCount} orders •{' '}
-          {props.metrics.totalContainersRefilled} containers refilled
-        </div>
-      </div>
 
-      {/* Card 2: Cost of Refill Deducted */}
-      <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-2xs flex flex-col justify-between">
-        <div className="flex items-center justify-between gap-2 mb-2">
-          <span className="text-xs font-bold tracking-wider text-slate-500 uppercase">
-            COST OF REFILL
-          </span>
-          <span className="w-8.5 h-8.5 rounded-lg bg-amber-100 text-amber-600 inline-flex items-center justify-center shrink-0">
-            <SlidersHorizontal size={17} />
-          </span>
+        {/* Metric 2: Operational Cost Deductions */}
+        <div className="p-4 flex flex-col justify-between">
+          <div className="text-[12px] font-medium text-[#64748b]">
+            Refill cost deductions
+          </div>
+          <div className="my-2">
+            <span className="text-[24px] font-semibold text-[#475569] tracking-tight num-mono">
+              −₱{props.metrics.totalCostOfRefill.toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
+            </span>
+          </div>
+          <div className="text-[12px] text-[#64748b] truncate">
+            Water ₱{props.metrics.waterCostTotal} · Power ₱{props.metrics.electricityCostTotal} · Wear ₱{props.metrics.containerWearCostTotal}
+          </div>
         </div>
-        <div className="text-2xl font-extrabold text-amber-700 tracking-tight mb-1.5">
-          - PHP {props.metrics.totalCostOfRefill.toFixed(2)}
-        </div>
-        <div className="text-xs text-slate-500">
-          Water PHP {props.metrics.waterCostTotal} • Elec PHP{' '}
-          {props.metrics.electricityCostTotal} • Wear PHP{' '}
-          {props.metrics.containerWearCostTotal}
-        </div>
-      </div>
 
-      {/* Card 3: True Net Profit */}
-      <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-2xs flex flex-col justify-between">
-        <div className="flex items-center justify-between gap-2 mb-2">
-          <span className="text-xs font-bold tracking-wider text-slate-500 uppercase">
-            NET PROFIT
-          </span>
-          <span className="w-8.5 h-8.5 rounded-lg bg-emerald-100 text-emerald-600 inline-flex items-center justify-center shrink-0">
-            <TrendingUp size={17} />
-          </span>
+        {/* Metric 3: True Net Station Profit */}
+        <div className="p-4 flex flex-col justify-between bg-[#fcfdfd]">
+          <div className="flex items-center justify-between text-[12px] font-medium text-[#64748b]">
+            <span className="text-[#0f172a] font-semibold">True net profit</span>
+            <span className="text-[11px] font-medium text-[#15803d] num-mono">
+              +{profitMarginPercent}% margin
+            </span>
+          </div>
+          <div className="my-2">
+            <span className="text-[24px] font-semibold text-[#15803d] tracking-tight num-mono">
+              ₱{props.metrics.trueNetProfit.toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
+            </span>
+          </div>
+          <div className="text-[12px] text-[#64748b]">
+            Average +₱{avgProfitPerContainer.toFixed(2)} / container
+          </div>
         </div>
-        <div className="text-2xl font-extrabold text-emerald-600 tracking-tight mb-1.5">
-          PHP {props.metrics.trueNetProfit.toFixed(2)}
-        </div>
-        <div className="text-xs text-slate-500">
-          <span className="text-emerald-600 font-bold">
-            {profitMarginPercent}% margin
-          </span>{' '}
-          • PHP {avgProfitPerContainer.toFixed(2)} net / container
-        </div>
-      </div>
 
-      {/* Card 4: Empty Containers Out */}
-      <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-2xs flex flex-col justify-between">
-        <div className="flex items-center justify-between gap-2 mb-2">
-          <span className="text-xs font-bold tracking-wider text-slate-500 uppercase">
-            EMPTY CONTAINERS OUT
-          </span>
-          <span className="w-8.5 h-8.5 rounded-lg bg-indigo-100 text-indigo-600 inline-flex items-center justify-center shrink-0">
-            <PackageCheck size={17} />
-          </span>
-        </div>
-        <div className="text-2xl font-extrabold text-slate-900 tracking-tight mb-1.5">
-          {totalEmptyJugsOut} Gallons
-        </div>
-        <div className="text-xs text-slate-500">
-          {props.metrics.totalEmptyContainersPickedUp} collected today •{' '}
-          <span
-            className={
-              overdueCustomersCount > 0 ? 'text-red-600 font-bold' : ''
-            }
-          >
-            {overdueCustomersCount} overdue
-          </span>
+        {/* Metric 4: Container Fleet Accountability */}
+        <div className="p-4 flex flex-col justify-between">
+          <div className="flex items-center justify-between text-[12px] font-medium text-[#64748b]">
+            <span>Container accountability</span>
+            {overdueCustomersCount > 0 && (
+              <span className="text-[11px] font-semibold text-[#b91c1c] num-mono">
+                {overdueCustomersCount} overdue
+              </span>
+            )}
+          </div>
+          <div className="my-2">
+            <span className="text-[24px] font-semibold text-[#0f172a] tracking-tight num-mono">
+              {totalEmptyJugsOut}{' '}
+              <span className="text-[14px] font-normal text-[#64748b]">
+                gallons out
+              </span>
+            </span>
+          </div>
+          <div className="text-[12px] text-[#64748b]">
+            <span className="num-mono font-medium text-[#334155]">
+              {props.metrics.totalEmptyContainersPickedUp}
+            </span>{' '}
+            empty jugs collected today
+          </div>
         </div>
       </div>
     </section>

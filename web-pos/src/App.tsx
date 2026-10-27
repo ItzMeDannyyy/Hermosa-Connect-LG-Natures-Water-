@@ -2,7 +2,10 @@
  * ============================================================================
  * FILE: src/App.tsx
  * PURPOSE: Root Component for the LG Nature's Water Station Counter Web POS.
- *          Styled with Tailwind CSS and Lucide icons (lucide-react) strictly.
+ *          Redesigned according to tasteskill v2 framed-sheet principles:
+ *          - Clean, engineered tinted ground (#f1f5f9) and inset work surface.
+ *          - High touch-accuracy and zero AI-slop ornaments.
+ *          - Strict Lucide vector icons (lucide-react), zero Unicode emojis.
  * ============================================================================
  */
 
@@ -11,6 +14,7 @@ import {
   LogOut,
   ShieldAlert,
   Store,
+  UserPlus,
 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import {
@@ -18,6 +22,7 @@ import {
   Navigate,
   Route,
   Routes,
+  useLocation,
   useNavigate,
 } from 'react-router-dom';
 import { OperatorLoginPage } from './components/auth/OperatorLoginPage';
@@ -32,12 +37,14 @@ import {
 } from './components/pos/FloatingToastNotification';
 import { LiveOrderQueuePanel } from './components/pos/LiveOrderQueuePanel';
 import { ProfitTrackerCards } from './components/pos/ProfitTrackerCards';
-import { QuickCounterRegisterPanel } from './components/pos/QuickCounterRegisterPanel';
+import { RegisterCustomerModalDrawer } from './components/pos/RegisterCustomerModalDrawer';
 import { TopNavigationBar } from './components/pos/TopNavigationBar';
+import { TransactionLogsPanel } from './components/pos/TransactionLogsPanel';
 import {
   INITIAL_CUSTOMER_ACCOUNTABILITY,
   INITIAL_POS_ORDERS,
   calculateProfitSummaryMetrics,
+  filterActiveOrders,
 } from './data/initialPosData';
 import {
   fetchCurrentUserProfile,
@@ -68,6 +75,7 @@ import type {
 
 function PosApplicationRouterContent() {
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Authentication & Role State
   const [currentUser, setCurrentUser] = useState<UserAccount | null>(null);
@@ -82,6 +90,8 @@ function PosApplicationRouterContent() {
   // Modal & Toast State
   const [isStaffModalOpen, setIsStaffModalOpen] = useState<boolean>(false);
   const [isEndOfDayModalOpen, setIsEndOfDayModalOpen] =
+    useState<boolean>(false);
+  const [isRegisterDrawerOpen, setIsRegisterDrawerOpen] =
     useState<boolean>(false);
   const [notificationToast, setNotificationToast] =
     useState<ToastNotificationData | null>(null);
@@ -102,7 +112,7 @@ function PosApplicationRouterContent() {
       setOrders(dashboardData.orders);
       setCustomerRecords(dashboardData.customerRecords);
     } catch {
-      // Fallback to initial data if user is not an OPERATOR
+      // Fallback to initial data if backend is offline or unauthorized
     }
   }
 
@@ -137,13 +147,10 @@ function PosApplicationRouterContent() {
     void restoreExistingSession();
   }, []);
 
-  /**
-   * Helper to trigger a floating toast notification with a countdown progress bar
-   */
   function showToastNotification(
     message: string,
     variant: ToastVariant = 'success',
-    durationMs: number = 4500,
+    durationMs: number = 4000,
   ) {
     setNotificationToast({
       id: Date.now(),
@@ -153,21 +160,14 @@ function PosApplicationRouterContent() {
     });
   }
 
-  /**
-   * Dismisses the active floating toast notification
-   */
   const handleDismissToast = useCallback(() => {
     setNotificationToast(null);
   }, []);
 
-  /**
-   * Called when OperatorLoginPage finishes logging in or switching roles
-   */
   async function handleLoginSuccess(authData: AuthSuccessResponse) {
     setCurrentUser(authData.user);
     setCurrentBranch(authData.branch);
 
-    // Verify Operator RBAC Guard on the backend
     try {
       const verifyResponse = await verifyOperatorAccessOnBackend();
       setRbacBackendStatus(verifyResponse.message);
@@ -183,15 +183,12 @@ function PosApplicationRouterContent() {
     }
   }
 
-  /**
-   * Switches between OPERATOR, RIDER, and CUSTOMER using NestJS POST /api/auth/demo-switch
-   */
   async function handleQuickRoleSwitch(targetRole: UserRole) {
     try {
       const authData = await switchDemoRoleOnBackend(targetRole);
       await handleLoginSuccess(authData);
       showToastNotification(
-        `Switched active session to ${authData.user.fullName} (${authData.user.role})`,
+        `Switched session to ${authData.user.fullName} (${authData.user.role})`,
         'info',
       );
     } catch (error) {
@@ -201,9 +198,6 @@ function PosApplicationRouterContent() {
     }
   }
 
-  /**
-   * Logs out from NestJS and navigates to /login
-   */
   async function handleLogout() {
     await logoutFromBackend();
     setCurrentUser(null);
@@ -212,10 +206,6 @@ function PosApplicationRouterContent() {
     navigate('/login');
   }
 
-  /**
-   * Converts a pre-dispatch Invoice (#INV) into an Official Receipt (#OR)
-   * Calls PATCH /api/pos/orders/:orderId/convert-to-receipt
-   */
   async function handleConvertInvoiceToReceipt(
     orderId: string,
     selectedPaymentState: PaymentState,
@@ -228,7 +218,7 @@ function PosApplicationRouterContent() {
       setOrders(updatedDashboard.orders);
       setCustomerRecords(updatedDashboard.customerRecords);
       showToastNotification(
-        `Official Receipt issued (${selectedPaymentState})`,
+        `Official Receipt issued (${selectedPaymentState})! Order completed and archived.`,
         'success',
       );
     } catch (error) {
@@ -238,10 +228,6 @@ function PosApplicationRouterContent() {
     }
   }
 
-  /**
-   * Creates a new POS order
-   * Calls POST /api/pos/orders
-   */
   async function handleAddNewPosOrder(newOrderInput: CreateOrderBackendInput) {
     try {
       const updatedDashboard = await createPosOrderOnBackend(newOrderInput);
@@ -258,10 +244,6 @@ function PosApplicationRouterContent() {
     }
   }
 
-  /**
-   * Settles a customer's unpaid balance
-   * Calls PATCH /api/pos/customers/:profileId/settle-balance
-   */
   async function handleSettleCustomerBalance(profileId: string) {
     try {
       const updatedDashboard = await settleCustomerBalanceOnBackend(profileId);
@@ -278,20 +260,13 @@ function PosApplicationRouterContent() {
     }
   }
 
-  /**
-   * Simulates Google Maps / PostGIS Waypoint Sequencing for active delivery stops
-   */
   function handleSimulateRiderRouteOptimization() {
     showToastNotification(
-      'Smart Routing: Grouped & sequenced all deliveries + container pickups along Katipunan & Pansol St for Rider J. Cruz!',
+      'Smart Routing: Sequenced delivery stops along Katipunan & Pansol St for Rider J. Cruz.',
       'info',
     );
   }
 
-  /**
-   * Sends a day-before or overdue container pickup notification, marks the
-   * customer as Reminded (green check), and persists to PostgreSQL if connected.
-   */
   async function handleTriggerPickupReminder(
     profileId: string,
     customerName: string,
@@ -302,28 +277,18 @@ function PosApplicationRouterContent() {
       minute: '2-digit',
     });
 
-    // Update local state immediately so the row switches to "Reminded" with green check
-    setCustomerRecords((previousRecords) => {
-      const updatedList: CustomerAccountabilityRecord[] = [];
-      for (let i = 0; i < previousRecords.length; i++) {
-        const currentRec = previousRecords[i];
-        if (currentRec.id === profileId) {
-          updatedList.push({
-            ...currentRec,
-            pickupReminderSent: true,
-            lastRemindedAt: timeLabel,
-          });
-        } else {
-          updatedList.push(currentRec);
-        }
-      }
-      return updatedList;
-    });
+    setCustomerRecords((prevRecords) =>
+      prevRecords.map((rec) =>
+        rec.id === profileId
+          ? { ...rec, pickupReminderSent: true, lastRemindedAt: timeLabel }
+          : rec,
+      ),
+    );
 
     showToastNotification(
       isRemindAgain
-        ? `Sent follow-up pickup reminder again via Push & SMS to ${customerName}!`
-        : `Sent container pickup reminder via Push & SMS to ${customerName}!`,
+        ? `Sent follow-up container pickup reminder to ${customerName}!`
+        : `Sent container pickup reminder via SMS to ${customerName}!`,
       'success',
     );
 
@@ -333,40 +298,39 @@ function PosApplicationRouterContent() {
       setOrders(updatedDashboard.orders);
       setCustomerRecords(updatedDashboard.customerRecords);
     } catch {
-      // Keep optimistic local "Reminded" state when running offline
+      // Keep optimistic local state offline
     }
   }
 
-  // Show loading indicator while checking existing token on boot
   if (isCheckingSession) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-950 text-white">
-        <h2 className="flex items-center gap-2.5 text-lg font-bold">
-          <Droplets size={24} className="text-sky-400" />
-          <span>Loading LG Nature&apos;s Water Station POS...</span>
-        </h2>
+      <div className="min-h-screen flex items-center justify-center bg-[#f1f5f9] text-[#0f172a]">
+        <div className="flex items-center gap-2.5 text-[14px] font-semibold">
+          <Droplets size={20} className="text-[#0284c7]" />
+          <span>Connecting to LG Nature&apos;s Water POS...</span>
+        </div>
       </div>
     );
   }
 
   const profitMetrics = calculateProfitSummaryMetrics(orders);
+  const activeOrdersCount = filterActiveOrders(orders).length;
   const nextOrderNumber = 1042 + orders.length;
 
-  /**
-   * Shared POS Layout wrapper for /pos/dashboard and /pos/accountability
-   */
   function renderPosShell(pageContent: React.ReactNode) {
     if (currentUser === null) {
       return null;
     }
 
     return (
-      <div className="min-h-screen flex flex-col bg-slate-100 text-slate-900">
+      <div className="app-frame">
         <TopNavigationBar
           currentUser={currentUser}
           currentBranch={currentBranch}
+          activeOrdersCount={activeOrdersCount}
           onOpenStaffModal={() => setIsStaffModalOpen(true)}
           onOpenEndOfDayModal={() => setIsEndOfDayModalOpen(true)}
+          onOpenRegisterCustomer={() => setIsRegisterDrawerOpen(true)}
           onSwitchRole={handleQuickRoleSwitch}
           onLogout={handleLogout}
         />
@@ -376,12 +340,18 @@ function PosApplicationRouterContent() {
           onDismiss={handleDismissToast}
         />
 
-        <main className="p-4 lg:p-6 max-w-[1600px] w-full mx-auto flex flex-col gap-5">
+        {/* Framed Inset Work Surface */}
+        <main className="p-4 sm:p-6 max-w-[1560px] w-full mx-auto flex flex-col gap-5 flex-1">
+          {/* Top Ledger Strip */}
           <ProfitTrackerCards
             metrics={profitMetrics}
             customerRecords={customerRecords}
           />
-          {pageContent}
+
+          {/* Page Work Surface */}
+          <div key={location.pathname} className="pos-page-transition w-full">
+            {pageContent}
+          </div>
         </main>
 
         <StaffRegistrationModal
@@ -401,13 +371,49 @@ function PosApplicationRouterContent() {
           metrics={profitMetrics}
           onClose={() => setIsEndOfDayModalOpen(false)}
         />
+
+        {/* Pinned Right Tab for Quick POS Entry */}
+        <button
+          type="button"
+          onClick={() => setIsRegisterDrawerOpen(true)}
+          className="edge-pos-trigger"
+          title="Open Counter POS Register"
+          aria-label="Register Customer & Counter POS"
+        >
+          <div className="edge-pos-trigger__pip" />
+          <UserPlus size={15} className="text-[#38bdf8]" />
+          <span className="edge-pos-trigger__label">
+            Counter POS
+          </span>
+        </button>
+
+        {/* Register Customer Drawer */}
+        <RegisterCustomerModalDrawer
+          isOpen={isRegisterDrawerOpen}
+          onClose={() => setIsRegisterDrawerOpen(false)}
+          nextOrderNumber={nextOrderNumber}
+          onAddNewPosOrder={handleAddNewPosOrder}
+        />
       </div>
     );
   }
 
   return (
     <Routes>
-      {/* Route 1: Public Login Route (/login) */}
+      <Route
+        path="/"
+        element={
+          currentUser !== null ? (
+            currentUser.role === 'OPERATOR' ? (
+              <Navigate to="/pos/dashboard" replace />
+            ) : (
+              <Navigate to="/unauthorized" replace />
+            )
+          ) : (
+            <OperatorLoginPage onLoginSuccess={handleLoginSuccess} />
+          )
+        }
+      />
       <Route
         path="/login"
         element={
@@ -423,31 +429,38 @@ function PosApplicationRouterContent() {
         }
       />
 
-      {/* Route 2: Protected Operator POS Dashboard (/pos/dashboard — Wireframe W1) */}
       <Route
         path="/pos/dashboard"
         element={
           <ProtectedOperatorRoute currentUser={currentUser}>
             {renderPosShell(
-              <div className="grid grid-cols-1 xl:grid-cols-[1.45fr_1fr] gap-5 items-start">
-                <LiveOrderQueuePanel
-                  orders={orders}
-                  onConvertInvoiceToReceipt={handleConvertInvoiceToReceipt}
-                  onSimulateRiderRouteOptimization={
-                    handleSimulateRiderRouteOptimization
-                  }
-                />
-                <QuickCounterRegisterPanel
-                  nextOrderNumber={nextOrderNumber}
-                  onAddNewPosOrder={handleAddNewPosOrder}
-                />
-              </div>,
+              <LiveOrderQueuePanel
+                orders={orders}
+                onConvertInvoiceToReceipt={handleConvertInvoiceToReceipt}
+                onSimulateRiderRouteOptimization={
+                  handleSimulateRiderRouteOptimization
+                }
+                onOpenRegisterCustomer={() => setIsRegisterDrawerOpen(true)}
+              />,
             )}
           </ProtectedOperatorRoute>
         }
       />
 
-      {/* Route 3: Protected Customer Container & Balance Ledger (/pos/accountability — Wireframe W2) */}
+      <Route
+        path="/pos/logs"
+        element={
+          <ProtectedOperatorRoute currentUser={currentUser}>
+            {renderPosShell(
+              <TransactionLogsPanel
+                orders={orders}
+                onOpenRegisterCustomer={() => setIsRegisterDrawerOpen(true)}
+              />,
+            )}
+          </ProtectedOperatorRoute>
+        }
+      />
+
       <Route
         path="/pos/accountability"
         element={
@@ -463,67 +476,45 @@ function PosApplicationRouterContent() {
         }
       />
 
-      {/* Route 4: RBAC Forbidden Route (/unauthorized) when RIDER or CUSTOMER tries to access Web POS */}
+      {/* Unauthorized Access Page */}
       <Route
         path="/unauthorized"
         element={
           currentUser === null ? (
             <Navigate to="/login" replace />
           ) : (
-            <div className="min-h-screen flex items-center justify-center bg-slate-950 p-6">
-              <div className="bg-white rounded-2xl p-8 max-w-xl w-full shadow-2xl border-t-4 border-red-600">
-                <div className="inline-flex items-center gap-1.5 bg-red-50 text-red-700 border border-red-200 px-3 py-1 rounded-full text-xs font-extrabold mb-3">
-                  <ShieldAlert size={14} />
-                  <span>
-                    NESTJS RBAC MIDDLEWARE &amp; ROLES GUARD ACTIVE (
-                    <code className="font-mono">/unauthorized</code>)
-                  </span>
+            <div className="min-h-screen flex items-center justify-center bg-[#f1f5f9] p-4 text-[13px]">
+              <div className="bg-white rounded-[10px] p-6 max-w-lg w-full border border-[#cbd5e1]">
+                <div className="inline-flex items-center gap-1.5 bg-[#fef2f2] text-[#b91c1c] border border-[#fecaca] px-2.5 py-0.5 rounded-[4px] text-[11px] font-semibold mb-3">
+                  <ShieldAlert size={13} />
+                  <span>RBAC Guard: Operator Role Required</span>
                 </div>
-                <h2 className="text-xl font-extrabold text-slate-900 mb-2">
-                  Station Counter Web POS is Restricted to Operators
+                <h2 className="text-[18px] font-semibold text-[#0f172a] mb-1">
+                  Counter POS Restricted to Station Operators
                 </h2>
-                <p className="text-sm text-slate-600 mb-4">
-                  You are currently authenticated as{' '}
-                  <strong className="text-slate-900">
-                    {currentUser.fullName}
-                  </strong>{' '}
-                  with role{' '}
-                  <code className="px-1.5 py-0.5 bg-slate-100 rounded text-xs font-mono font-bold text-slate-800">
-                    {currentUser.role}
-                  </code>
-                  .
+                <p className="text-[12px] text-[#64748b] mb-4">
+                  Authenticated as <strong>{currentUser.fullName}</strong> ({currentUser.role}). Station operational margins, utilities, and EOD reconciliations require operator credentials.
+                  {rbacBackendStatus && (
+                    <span className="block mt-1 font-mono text-[11px] text-[#b91c1c]">
+                      {rbacBackendStatus}
+                    </span>
+                  )}
                 </p>
-                <div className="px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-medium mb-4">
-                  <strong>
-                    Backend Response (/api/auth/verify/operator-only &amp;
-                    /api/pos/dashboard):
-                  </strong>{' '}
-                  {rbacBackendStatus ??
-                    '403 Forbidden: Access denied. Required role(s): OPERATOR'}
-                </div>
-                <p className="text-xs text-slate-500 leading-relaxed mb-6">
-                  In <strong>LG Nature&apos;s Water</strong>, Operational Costs
-                  (Water, Electricity, Container Wear) and True Net Profit are
-                  strictly restricted to <code className="font-mono">OPERATOR</code>{' '}
-                  accounts. <code className="font-mono">RIDER</code> and{' '}
-                  <code className="font-mono">CUSTOMER</code> accounts use the
-                  React Native Mobile App.
-                </p>
-                <div className="flex flex-wrap gap-3">
+                <div className="flex gap-2">
                   <button
                     type="button"
-                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-600/20 transition-colors cursor-pointer"
+                    className="btn-primary text-[12px] py-1.5"
                     onClick={() => handleQuickRoleSwitch('OPERATOR')}
                   >
-                    <Store size={16} />
-                    <span>Switch Back to Station Operator</span>
+                    <Store size={14} />
+                    <span>Switch to Station Operator</span>
                   </button>
                   <button
                     type="button"
-                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors cursor-pointer"
+                    className="btn-secondary text-[12px] py-1.5"
                     onClick={handleLogout}
                   >
-                    <LogOut size={16} />
+                    <LogOut size={14} />
                     <span>Sign Out</span>
                   </button>
                 </div>
@@ -533,7 +524,6 @@ function PosApplicationRouterContent() {
         }
       />
 
-      {/* Default Fallback Route -> Redirects to /pos/dashboard */}
       <Route path="*" element={<Navigate to="/pos/dashboard" replace />} />
     </Routes>
   );

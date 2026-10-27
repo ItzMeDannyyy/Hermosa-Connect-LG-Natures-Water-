@@ -1,12 +1,13 @@
 /**
  * ============================================================================
  * FILE: src/components/pos/TopNavigationBar.tsx
- * PURPOSE: Clean, balanced single-row Top Navigation Bar for the Station POS.
- *          - Left: Proportioned Logo Placeholder + Colored slight-cursive
- *            "LG Nature's Water" title + compact branch location badge.
- *          - Center: Perfectly aligned horizontal navigation tab bar.
- *          - Right: Uniformly sized action buttons + User Profile dropdown.
- *          - Styled with Tailwind CSS and Lucide SVG icons strictly.
+ * PURPOSE: Station Top Navigation Bar adhering to tasteskill framed-sheet design.
+ *          - Quiet 56px height with clean, functional spacing.
+ *          - Clear product mark: LG Nature's Water · Station #01 (Loyola Heights).
+ *          - Tabbed navigation (Orders & Queue, Transaction Logs, Container Ledger)
+ *            with quiet active underlines.
+ *          - Quick station utility actions: New Order, End-of-Day Z-Reading.
+ *          - Strictly Lucide vector icons, zero Unicode emojis.
  * ============================================================================
  */
 
@@ -15,14 +16,15 @@ import {
   Droplets,
   FileBarChart,
   LogOut,
-  MapPin,
   Monitor,
+  Plus,
+  ReceiptText,
   RefreshCw,
+  ShieldCheck,
   UserPlus,
-  Zap,
 } from 'lucide-react';
 import { useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import type {
   StationBranch,
   UserAccount,
@@ -32,25 +34,28 @@ import type {
 interface TopNavigationBarProps {
   currentUser: UserAccount;
   currentBranch: StationBranch | null;
+  activeOrdersCount?: number;
   onOpenStaffModal: () => void;
   onOpenEndOfDayModal: () => void;
+  onOpenRegisterCustomer?: () => void;
   onSwitchRole: (role: UserRole) => void;
   onLogout: () => void;
 }
 
 export function TopNavigationBar(props: TopNavigationBarProps) {
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState<boolean>(false);
+  const location = useLocation();
 
-  // Extract a clean, short station label (e.g., "Station 1 • Main Hub")
+  const isLogs = location.pathname.startsWith('/pos/logs');
+  const isAccountability = location.pathname.startsWith('/pos/accountability');
+  const isDashboard = !isLogs && !isAccountability;
+
   const rawBranchName =
     props.currentBranch !== null ? props.currentBranch.name : 'Station 1';
   const shortStationLabel = rawBranchName.includes('—')
     ? rawBranchName.split('—')[1]!.trim()
     : rawBranchName;
 
-  /**
-   * Builds a 2-letter avatar initial from the user's full name (e.g., "Danny" -> "DA")
-   */
   function getUserInitials(fullName: string): string {
     const cleanName = fullName.replace(/\(.*\)/g, '').trim();
     const parts = cleanName.split(' ').filter(Boolean);
@@ -60,9 +65,6 @@ export function TopNavigationBar(props: TopNavigationBarProps) {
     return cleanName.slice(0, 2).toUpperCase();
   }
 
-  /**
-   * Formats the user's role into a clean, human-readable label
-   */
   function getReadableRoleLabel(role: UserRole): string {
     if (role === 'OPERATOR') {
       return 'Station Operator';
@@ -83,173 +85,181 @@ export function TopNavigationBar(props: TopNavigationBarProps) {
   }
 
   return (
-    <header className="sticky top-0 z-40 bg-[#07192d]/95 backdrop-blur-md text-white border-b border-white/10 shadow-md">
-      <div className="max-w-[1600px] mx-auto px-4 lg:px-6 h-16 flex items-center justify-between gap-4">
+    <header className="sticky top-0 z-40 bg-[#ffffff] border-b border-[#e2e8f0]">
+      <div className="max-w-[1560px] mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-4">
         {/* ====================================================================
-            1. LEFT ZONE: COMPACT LOGO PLACEHOLDER + BRAND TITLE + BRANCH PILL
+            1. BRAND IDENTITY & STATION SCOPE
             ==================================================================== */}
-        <div className="flex items-center gap-3 min-w-0 shrink-0">
-          {/* Proportioned 40x40px Logo Placeholder */}
-          <div
-            title="Logo Placeholder — Replace with LG Nature's Water Official Logo"
-            className="w-10 h-10 shrink-0 rounded-xl border border-dashed border-sky-400/50 bg-sky-500/10 flex flex-col items-center justify-center text-sky-300"
-          >
-            <Droplets size={15} className="text-sky-300" />
-            <span className="text-[7px] font-extrabold tracking-widest uppercase text-sky-200/80 leading-none mt-0.5">
-              LOGO
-            </span>
+        <div className="flex items-center gap-3 shrink-0">
+          <div className="w-8 h-8 rounded-[6px] bg-[#0284c7] text-white flex items-center justify-center shrink-0">
+            <Droplets size={17} strokeWidth={2.2} />
           </div>
 
-          {/* Colored Slight-Cursive Brand Name + Subtle Branch Pill */}
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="flex flex-col justify-center">
-              <h1
-                style={{
-                  fontFamily: "'Cormorant Garamond', Georgia, serif",
-                }}
-                className="text-2xl sm:text-[1.65rem] font-bold italic tracking-tight leading-none whitespace-nowrap"
-              >
-                <span className="bg-gradient-to-br from-sky-300 via-cyan-300 to-blue-400 bg-clip-text text-transparent">
-                  LG{' '}
-                </span>
-                <span className="bg-gradient-to-r from-emerald-300 via-teal-300 to-cyan-300 bg-clip-text text-transparent">
-                  Nature&apos;s{' '}
-                </span>
-                <span className="bg-gradient-to-r from-cyan-300 via-sky-400 to-blue-500 bg-clip-text text-transparent">
-                  Water
-                </span>
-              </h1>
-            </div>
-
-            {/* Subtle Vertical Divider + Branch Location Pill (Hidden on very small screens) */}
-            <div className="hidden md:flex items-center gap-2 pl-3 border-l border-white/15">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/[0.06] border border-white/10 text-[11px] font-semibold text-slate-300 whitespace-nowrap">
-                <MapPin size={12} className="text-sky-400 shrink-0" />
-                <span>{shortStationLabel}</span>
+          <div className="flex flex-col">
+            <span className="text-[14px] font-semibold tracking-tight text-[#0f172a] leading-none">
+              LG Nature&apos;s Water
+            </span>
+            <span className="text-[11px] text-[#64748b] flex items-center gap-1.5 mt-0.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#15803d]" />
+              <span className="truncate max-w-[200px] sm:max-w-[300px]">
+                {shortStationLabel}
               </span>
-            </div>
+            </span>
           </div>
         </div>
 
         {/* ====================================================================
-            2. CENTER ZONE: CLEAN SEGMENTED NAVIGATION TABS
+            2. CENTER NAVIGATION TABS (Framed-sheet underline tabs)
             ==================================================================== */}
         <nav
-          className="inline-flex items-center bg-slate-950/60 border border-white/10 p-1 rounded-xl gap-1"
-          aria-label="Main Navigation"
+          className="hidden md:flex items-center h-full gap-1 select-none"
+          aria-label="POS Operational Navigation"
         >
-          <NavLink
+          <Link
             to="/pos/dashboard"
-            className={({ isActive }) =>
-              `inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all ${
-                isActive
-                  ? 'bg-blue-600 text-white shadow-xs'
-                  : 'text-slate-300 hover:text-white hover:bg-white/[0.06]'
-              }`
-            }
+            className={`h-full px-3.5 inline-flex items-center gap-2 text-[13px] font-medium border-b-2 transition-colors ${
+              isDashboard
+                ? 'border-[#0284c7] text-[#0f172a] font-semibold'
+                : 'border-transparent text-[#64748b] hover:text-[#0f172a]'
+            }`}
           >
-            <Monitor size={14} />
-            <span>Orders &amp; Counter POS</span>
-          </NavLink>
+            <Monitor size={15} />
+            <span>Orders &amp; Queue</span>
+            {typeof props.activeOrdersCount === 'number' && props.activeOrdersCount > 0 && (
+              <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-[#fef3c7] text-[#92400e] num-mono">
+                {props.activeOrdersCount}
+              </span>
+            )}
+          </Link>
 
-          <NavLink
-            to="/pos/accountability"
-            className={({ isActive }) =>
-              `inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all ${
-                isActive
-                  ? 'bg-blue-600 text-white shadow-xs'
-                  : 'text-slate-300 hover:text-white hover:bg-white/[0.06]'
-              }`
-            }
+          <Link
+            to="/pos/logs"
+            className={`h-full px-3.5 inline-flex items-center gap-2 text-[13px] font-medium border-b-2 transition-colors ${
+              isLogs
+                ? 'border-[#0284c7] text-[#0f172a] font-semibold'
+                : 'border-transparent text-[#64748b] hover:text-[#0f172a]'
+            }`}
           >
-            <RefreshCw size={14} />
-            <span>Container &amp; Balance Ledger</span>
-          </NavLink>
+            <ReceiptText size={15} />
+            <span>Transaction Logs</span>
+          </Link>
+
+          <Link
+            to="/pos/accountability"
+            className={`h-full px-3.5 inline-flex items-center gap-2 text-[13px] font-medium border-b-2 transition-colors ${
+              isAccountability
+                ? 'border-[#0284c7] text-[#0f172a] font-semibold'
+                : 'border-transparent text-[#64748b] hover:text-[#0f172a]'
+            }`}
+          >
+            <RefreshCw size={15} />
+            <span>Container Ledger</span>
+          </Link>
         </nav>
 
         {/* ====================================================================
-            3. RIGHT ZONE: UNIFORM H-9 ACTION BUTTONS + USER PROFILE MENU
+            3. ACTION UTILITIES & OPERATOR PROFILE
             ==================================================================== */}
-        <div className="flex items-center gap-2 shrink-0">
-          <button
-            type="button"
-            onClick={props.onOpenStaffModal}
-            className="h-9 px-3 rounded-lg bg-white/[0.07] hover:bg-white/[0.14] border border-white/15 text-slate-200 text-xs font-semibold inline-flex items-center gap-1.5 whitespace-nowrap transition-colors cursor-pointer"
-          >
-            <UserPlus size={14} className="text-sky-300" />
-            <span className="hidden sm:inline">Add Staff</span>
-          </button>
-
+        <div className="flex items-center gap-2.5 shrink-0">
+          {/* Quick End of Day Report Button */}
           <button
             type="button"
             onClick={props.onOpenEndOfDayModal}
-            className="h-9 px-3.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold inline-flex items-center gap-1.5 whitespace-nowrap shadow-xs transition-colors cursor-pointer"
+            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[6px] border border-[#e2e8f0] bg-[#ffffff] hover:bg-[#f8fafc] text-[#334155] text-[12px] font-medium cursor-pointer transition-colors"
+            title="Open End-of-Day Z-Reading Report"
           >
-            <FileBarChart size={14} />
-            <span className="hidden sm:inline">End-of-Day Report</span>
+            <FileBarChart size={14} className="text-[#0284c7]" />
+            <span>EOD Report</span>
           </button>
 
-          <div className="w-px h-5 bg-white/15 mx-1" />
+          {/* Quick Register Order Button (Main Job is 1-click away!) */}
+          {props.onOpenRegisterCustomer && (
+            <button
+              type="button"
+              onClick={props.onOpenRegisterCustomer}
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-[6px] bg-[#0f172a] hover:bg-[#1e293b] text-[#ffffff] text-[12px] font-semibold cursor-pointer transition-colors"
+            >
+              <Plus size={14} />
+              <span>New Order</span>
+            </button>
+          )}
 
-          {/* User Avatar Profile Dropdown */}
+          {/* Operator Profile Dropdown */}
           <div className="relative">
             <button
               type="button"
               onClick={handleToggleProfileMenu}
               aria-expanded={isProfileMenuOpen}
-              className="h-9 pl-1.5 pr-2.5 rounded-full bg-white/[0.08] hover:bg-white/[0.15] border border-white/15 text-white flex items-center gap-2 transition-colors cursor-pointer"
+              className="h-8.5 pl-2 pr-2.5 rounded-[6px] border border-[#e2e8f0] bg-[#ffffff] hover:bg-[#f8fafc] text-[#0f172a] flex items-center gap-2 cursor-pointer transition-colors"
             >
-              <span className="w-6 h-6 rounded-full bg-gradient-to-br from-sky-400 to-blue-600 text-white font-extrabold text-[10px] flex items-center justify-center shrink-0">
+              <span className="w-6 h-6 rounded-[4px] bg-[#f1f5f9] text-[#334155] font-semibold text-[11px] flex items-center justify-center shrink-0 num-mono">
                 {getUserInitials(props.currentUser.fullName)}
               </span>
-              <span className="hidden lg:inline text-xs font-bold text-slate-100 max-w-[110px] truncate">
+              <span className="hidden sm:inline-block text-[12px] font-medium text-[#0f172a] max-w-[120px] truncate">
                 {props.currentUser.fullName.replace(/\(.*\)/g, '').trim()}
               </span>
-              <ChevronDown size={13} className="text-slate-400" />
+              <ChevronDown size={13} className="text-[#64748b]" />
             </button>
 
             {isProfileMenuOpen && (
               <>
+                {/* Backdrop Scrim */}
                 <div
                   className="fixed inset-0 z-40"
                   onClick={() => setIsProfileMenuOpen(false)}
                 />
 
-                <div className="absolute right-0 top-[calc(100%+10px)] w-64 bg-white text-slate-900 border border-slate-200 rounded-xl shadow-xl p-2 z-50">
-                  <div className="px-3 py-2.5 flex flex-col gap-0.5">
-                    <strong className="text-sm font-bold text-slate-900">
+                {/* Dropdown Menu */}
+                <div className="absolute right-0 top-[calc(100%+6px)] w-76 bg-white text-[#0f172a] border border-[#cbd5e1] rounded-[8px] p-2 z-50">
+                  {/* Account Info Box */}
+                  <div className="p-2.5 bg-[#f8fafc] border border-[#e2e8f0] rounded-[6px] mb-2">
+                    <div className="text-[12px] font-semibold text-[#0f172a] truncate">
                       {props.currentUser.fullName}
-                    </strong>
-                    <span className="text-xs text-slate-500">
+                    </div>
+                    <div className="text-[11px] text-[#64748b] num-mono">
                       {props.currentUser.phoneNumber}
-                    </span>
-                    <span className="mt-1 self-start bg-sky-100 text-sky-800 px-2 py-0.5 rounded-full text-[11px] font-bold">
-                      {getReadableRoleLabel(props.currentUser.role)}
-                    </span>
+                    </div>
+                    <div className="flex items-center gap-1.5 mt-1 text-[11px] text-[#0284c7]">
+                      <ShieldCheck size={12} />
+                      <span className="font-medium">
+                        {getReadableRoleLabel(props.currentUser.role)}
+                      </span>
+                    </div>
                   </div>
 
-                  <div className="h-px bg-slate-200 my-1.5" />
+                  {/* Operational Utilities */}
+                  <div className="flex flex-col gap-0.5">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        handleMenuActionAndClose(props.onOpenStaffModal)
+                      }
+                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-[5px] text-left hover:bg-[#f1f5f9] text-[12px] text-[#334155] cursor-pointer"
+                    >
+                      <UserPlus size={14} className="text-[#64748b]" />
+                      <span>Provision Staff Credentials</span>
+                    </button>
 
-                  <button
-                    type="button"
-                    onClick={() =>
-                      handleMenuActionAndClose(props.onOpenStaffModal)
-                    }
-                    className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
-                  >
-                    <UserPlus size={15} />
-                    <span>Provision Station Staff</span>
-                  </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        handleMenuActionAndClose(props.onOpenEndOfDayModal)
+                      }
+                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-[5px] text-left hover:bg-[#f1f5f9] text-[12px] text-[#334155] cursor-pointer"
+                    >
+                      <FileBarChart size={14} className="text-[#64748b]" />
+                      <span>End-of-Day Report (Z-Reading)</span>
+                    </button>
+                  </div>
 
-                  <div className="h-px bg-slate-200 my-1.5" />
+                  <div className="h-px bg-[#e2e8f0] my-1.5" />
 
-                  {/* Tucked-away Demo Role Switcher */}
-                  <div className="px-3 py-1.5">
-                    <span className="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">
-                      <Zap size={12} />
-                      <span>Demo Preview Mode</span>
+                  {/* Sandbox Role Switcher */}
+                  <div className="px-1 py-1">
+                    <span className="block text-[10px] font-semibold uppercase tracking-wider text-[#94a3b8] mb-1">
+                      Demo Role Switcher
                     </span>
-                    <div className="grid grid-cols-3 gap-1.5">
+                    <div className="grid grid-cols-3 gap-1 bg-[#f1f5f9] p-1 rounded-[6px]">
                       <button
                         type="button"
                         onClick={() =>
@@ -257,10 +267,10 @@ export function TopNavigationBar(props: TopNavigationBarProps) {
                             props.onSwitchRole('OPERATOR'),
                           )
                         }
-                        className={`py-1.5 px-2 rounded-md text-xs font-semibold border transition-colors cursor-pointer ${
+                        className={`py-1 text-[11px] font-medium rounded-[4px] cursor-pointer transition-colors ${
                           props.currentUser.role === 'OPERATOR'
-                            ? 'bg-blue-600 border-blue-600 text-white'
-                            : 'bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200'
+                            ? 'bg-white text-[#0f172a] shadow-xs font-semibold'
+                            : 'text-[#64748b] hover:text-[#0f172a]'
                         }`}
                       >
                         Operator
@@ -272,10 +282,10 @@ export function TopNavigationBar(props: TopNavigationBarProps) {
                             props.onSwitchRole('RIDER'),
                           )
                         }
-                        className={`py-1.5 px-2 rounded-md text-xs font-semibold border transition-colors cursor-pointer ${
+                        className={`py-1 text-[11px] font-medium rounded-[4px] cursor-pointer transition-colors ${
                           props.currentUser.role === 'RIDER'
-                            ? 'bg-blue-600 border-blue-600 text-white'
-                            : 'bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200'
+                            ? 'bg-white text-[#0f172a] shadow-xs font-semibold'
+                            : 'text-[#64748b] hover:text-[#0f172a]'
                         }`}
                       >
                         Rider
@@ -287,10 +297,10 @@ export function TopNavigationBar(props: TopNavigationBarProps) {
                             props.onSwitchRole('CUSTOMER'),
                           )
                         }
-                        className={`py-1.5 px-2 rounded-md text-xs font-semibold border transition-colors cursor-pointer ${
+                        className={`py-1 text-[11px] font-medium rounded-[4px] cursor-pointer transition-colors ${
                           props.currentUser.role === 'CUSTOMER'
-                            ? 'bg-blue-600 border-blue-600 text-white'
-                            : 'bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200'
+                            ? 'bg-white text-[#0f172a] shadow-xs font-semibold'
+                            : 'text-[#64748b] hover:text-[#0f172a]'
                         }`}
                       >
                         Customer
@@ -298,14 +308,15 @@ export function TopNavigationBar(props: TopNavigationBarProps) {
                     </div>
                   </div>
 
-                  <div className="h-px bg-slate-200 my-1.5" />
+                  <div className="h-px bg-[#e2e8f0] my-1.5" />
 
+                  {/* Sign Out */}
                   <button
                     type="button"
                     onClick={() => handleMenuActionAndClose(props.onLogout)}
-                    className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
+                    className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-[5px] text-left hover:bg-[#fef2f2] text-[12px] font-medium text-[#b91c1c] cursor-pointer"
                   >
-                    <LogOut size={15} />
+                    <LogOut size={14} />
                     <span>Sign Out</span>
                   </button>
                 </div>

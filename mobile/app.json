@@ -33,6 +33,13 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 76
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow LG Nature's Water to access your photos to upload gallon container images for AI counting.",
+          "cameraPermission": "Allow LG Nature's Water to use your camera to photograph water gallon containers for AI counting."
+        }
       ]
     ],
     "experiments": {

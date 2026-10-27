@@ -1,35 +1,48 @@
 /**
  * ============================================================================
  * FILE: src/styles/theme.styles.ts
- * PURPOSE: Shared color tokens and layout CSS/StyleSheet rules for the
+ * PURPOSE: Refined color tokens and shared layout StyleSheet rules for the
  *          LG Nature's Water Mobile Application.
+ *          Adheres to tasteskill v2 / design-taste-frontend anti-slop rules:
+ *          - Honest contrast without muddy gradients
+ *          - Color reserved for data state (crimson for unpaid, emerald for receipt)
+ *          - 1px hairline structural boundaries
  * ============================================================================
  */
 
 import { StyleSheet } from 'react-native';
 
 export const COLORS = {
-  navyDark: '#061527',
-  navyPrimary: '#0a2540',
-  navyCard: '#0f3156',
-  bluePrimary: '#2563eb',
-  skyAccent: '#0284c7',
-  skyLight: '#e0f2fe',
+  // Brand Mineral Waters
+  navyDark: '#081424',
+  navyPrimary: '#0f2238',
+  navyCard: '#132c4a',
+  bluePrimary: '#0284c7', // Pure Glacial Cyan / Blue
+  skyAccent: '#0ea5e9',
+  skyLight: '#f0f9ff',
   skyBorder: '#bae6fd',
+
+  // Semantics: Data State Only
   emeraldPrimary: '#059669',
-  emeraldLight: '#d1fae5',
+  emeraldLight: '#ecfdf5',
   emeraldBorder: '#a7f3d0',
   amberPrimary: '#d97706',
-  amberLight: '#fef3c7',
+  amberLight: '#fffbeb',
   amberBorder: '#fde68a',
   redPrimary: '#dc2626',
-  redLight: '#fee2e2',
+  redLight: '#fef2f2',
   redBorder: '#fecaca',
-  slateBg: '#f1f5f9',
+
+  // Surfaces & Hairlines
+  slateBg: '#f8fafc',
   white: '#ffffff',
+  cardSubtle: '#f1f5f9',
   borderLight: '#e2e8f0',
+  borderDark: '#1e3a5f',
+
+  // Typography
   textPrimary: '#0f172a',
-  textSecondary: '#475569',
+  textSecondary: '#334155',
   textMuted: '#64748b',
 };
 
@@ -40,58 +53,72 @@ export const sharedStyles = StyleSheet.create({
   },
   demoSwitcherTopBar: {
     backgroundColor: COLORS.navyDark,
-    paddingHorizontal: 14,
+    paddingHorizontal: 16,
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#1e3a5f',
+    borderBottomColor: '#172e48',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    flexWrap: 'wrap',
-    gap: 8,
+    gap: 12,
   },
   demoBarLeftLabelRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 7,
   },
   demoBarTitleText: {
-    color: '#93c5fd',
-    fontSize: 11,
+    color: '#e2e8f0',
+    fontSize: 12,
     fontWeight: '800',
-    letterSpacing: 0.6,
-    textTransform: 'uppercase',
+    letterSpacing: 0.8,
   },
   demoRolePillsRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 8,
   },
-  demoRolePillButton: {
+  segmentedControlTrack: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#0f243d',
+    borderRadius: 10,
+    padding: 3,
+    borderWidth: 1,
+    borderColor: '#1e3e64',
+  },
+  segmentedPillButton: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 5,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 999,
-    backgroundColor: '#112a46',
-    borderWidth: 1,
-    borderColor: '#1e3a5f',
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: 7,
   },
-  demoRolePillButtonActive: {
+  segmentedPillButtonActive: {
     backgroundColor: COLORS.bluePrimary,
-    borderColor: '#60a5fa',
   },
-  demoRolePillText: {
-    color: '#cbd5e1',
+  segmentedPillText: {
+    color: '#94a3b8',
     fontSize: 11,
     fontWeight: '700',
   },
-  demoRolePillTextActive: {
+  segmentedPillTextActive: {
     color: COLORS.white,
+    fontWeight: '800',
+  },
+  signOutIconButton: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+    backgroundColor: 'rgba(239, 68, 68, 0.12)',
+    borderWidth: 1,
+    borderColor: 'rgba(239, 68, 68, 0.25)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   toastNotificationBanner: {
-    backgroundColor: COLORS.emeraldPrimary,
+    backgroundColor: '#047857',
     paddingHorizontal: 16,
     paddingVertical: 10,
     flexDirection: 'row',
@@ -108,8 +135,8 @@ export const sharedStyles = StyleSheet.create({
     backgroundColor: COLORS.white,
     borderTopWidth: 1,
     borderTopColor: COLORS.borderLight,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
+    paddingVertical: 6,
+    paddingHorizontal: 16,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-around',
@@ -119,11 +146,11 @@ export const sharedStyles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 6,
-    borderRadius: 12,
-    gap: 3,
+    borderRadius: 10,
+    gap: 2,
   },
   bottomTabItemActive: {
-    backgroundColor: '#eff6ff',
+    backgroundColor: '#f0f9ff',
   },
   bottomTabLabel: {
     fontSize: 11,
@@ -132,5 +159,6 @@ export const sharedStyles = StyleSheet.create({
   },
   bottomTabLabelActive: {
     color: COLORS.bluePrimary,
+    fontWeight: '800',
   },
 });

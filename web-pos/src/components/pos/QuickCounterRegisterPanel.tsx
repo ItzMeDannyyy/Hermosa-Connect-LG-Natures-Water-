@@ -1,35 +1,21 @@
 /**
  * ============================================================================
  * FILE: src/components/pos/QuickCounterRegisterPanel.tsx
- * PURPOSE: Fast, tap-friendly Station Counter POS Register.
- *          - Organized into 3 clear Fieldsets:
- *              1. Customer & Fulfillment
- *              2. Container Count & Pickup Slot (with tap-friendly Radio Cards,
- *                 +/- steppers, and a subtle "AI Photo Tally" popover)
- *              3. Payment Method (4 interactive Radio Cards for Cash, E-Pay,
- *                 Partial, and Unpaid Slip)
- *          - Sticky Checkout Footer at the bottom showing the calculated total,
- *            exact change / balance due, and primary submit button.
- *          - Styled with Tailwind CSS and Lucide icons (lucide-react) strictly.
+ * PURPOSE: Quick Counter POS Register & Customer Order Form.
+ *          Adheres strictly to tasteskill v2 framed-sheet principles:
+ *          - High touch-accuracy and engineered layout.
+ *          - Clean segmented controls, clear price and profit math.
+ *          - Tabular numbers (IBM Plex Mono).
+ *          - Strictly Lucide vector icons, zero Unicode emojis.
  * ============================================================================
  */
 
 import {
-  Banknote,
-  Calculator,
-  Camera,
-  CheckCircle2,
-  ClipboardList,
   Clock,
-  Droplets,
   Minus,
-  PieChart,
   Plus,
-  Smartphone,
-  Store,
   Truck,
   User,
-  Zap,
 } from 'lucide-react';
 import React, { useState } from 'react';
 import {
@@ -45,20 +31,8 @@ interface QuickCounterRegisterPanelProps {
   onAddNewPosOrder: (newOrderInput: CreateOrderBackendInput) => Promise<void>;
 }
 
-const AVAILABLE_PRESETS = [
-  {
-    id: 'slim',
-    label: '5-Gal Slim',
-    fullName: '5-Gallon Slim Container (Refill)',
-    priceLabel: 'PHP 25',
-  },
-  {
-    id: 'round',
-    label: '5-Gal Round',
-    fullName: '5-Gallon Round Dispenser Jug (Refill)',
-    priceLabel: 'PHP 25',
-  },
-];
+const SLIM_PRESET_NAME = '5-Gallon Slim Container (Refill)';
+const ROUND_PRESET_NAME = '5-Gallon Round Dispenser Jug (Refill)';
 
 const AVAILABLE_TIME_SLOTS: TimeSlotLabel[] = [
   '8:00 – 10:00 AM',
@@ -69,34 +43,25 @@ const AVAILABLE_TIME_SLOTS: TimeSlotLabel[] = [
 export function QuickCounterRegisterPanel(
   props: QuickCounterRegisterPanelProps,
 ) {
-  // Fieldset 1: Customer & Fulfillment State
+  const [includeDeliveryFee, setIncludeDeliveryFee] = useState<boolean>(false);
   const [customerName, setCustomerName] = useState<string>('Walk-in Customer');
   const [deliveryAddress, setDeliveryAddress] = useState<string>(
     '52 Esteban Abada St, Loyola Heights, QC',
   );
-  const [includeDeliveryFee, setIncludeDeliveryFee] = useState<boolean>(true);
 
-  // Fieldset 2: Container Preset, Count & Schedule State
-  const [presetName, setPresetName] = useState<string>(
-    '5-Gallon Slim Container (Refill)',
-  );
-  const [containerCount, setContainerCount] = useState<number>(8);
+  const [presetName, setPresetName] = useState<string>(SLIM_PRESET_NAME);
+  const [containerCount, setContainerCount] = useState<number>(5);
   const [emptyContainersToPickup, setEmptyContainersToPickup] =
     useState<number>(3);
   const [scheduledTimeSlot, setScheduledTimeSlot] =
     useState<TimeSlotLabel>('1:00 – 3:00 PM');
-  const [isAiCameraMenuOpen, setIsAiCameraMenuOpen] = useState<boolean>(false);
-  const [aiVerifiedBadgeText, setAiVerifiedBadgeText] = useState<string | null>(
-    null,
-  );
 
-  // Fieldset 3: Payment Method State
   const [paymentState, setPaymentState] = useState<PaymentState>('PAID_CASH');
-  const [cashTendered, setCashTendered] = useState<number>(250);
-  const [partialAmountPaid, setPartialAmountPaid] = useState<number>(130);
+  const [cashTendered, setCashTendered] = useState<number>(200);
+  const [partialAmountPaid, setPartialAmountPaid] = useState<number>(100);
   const [isSavingOrder, setIsSavingOrder] = useState<boolean>(false);
 
-  // Step-by-step POS Pricing & Profit Math
+  // Financial calculations
   const subtotalAmount = containerCount * DEFAULT_REFILL_PRICE_PHP;
   const deliveryFee = includeDeliveryFee ? DEFAULT_DELIVERY_FEE_PHP : 0;
   const totalDue = subtotalAmount + deliveryFee;
@@ -106,49 +71,21 @@ export function QuickCounterRegisterPanel(
   const trueNetProfit = totalDue - operationalCostTotal;
 
   let exactChange = 0;
-  let balanceDue = 0;
 
   if (paymentState === 'PAID_CASH') {
     exactChange = Math.max(0, cashTendered - totalDue);
-  } else if (paymentState === 'PARTIAL') {
-    const validPaid = Math.min(partialAmountPaid, totalDue);
-    balanceDue = Math.max(0, totalDue - validPaid);
-  } else if (paymentState === 'UNPAID_CHARGE_SLIP') {
-    balanceDue = totalDue;
   }
 
-  /**
-   * Adjusts container count via tap-friendly +/- stepper buttons
-   */
   function adjustRefillCount(delta: number) {
-    const nextValue = Math.max(1, Math.min(100, containerCount + delta));
-    setContainerCount(nextValue);
-    setAiVerifiedBadgeText(null);
+    setContainerCount((prev) => Math.max(1, Math.min(100, prev + delta)));
   }
 
-  /**
-   * Adjusts empty container pickup count via +/- stepper buttons
-   */
   function adjustPickupCount(delta: number) {
-    const nextValue = Math.max(
-      0,
-      Math.min(100, emptyContainersToPickup + delta),
+    setEmptyContainersToPickup((prev) =>
+      Math.max(0, Math.min(100, prev + delta)),
     );
-    setEmptyContainersToPickup(nextValue);
   }
 
-  /**
-   * Applies AI Camera Container Count from the subtle camera popover
-   */
-  function handleApplyAiCameraCount(detectedJugs: number) {
-    setContainerCount(detectedJugs);
-    setAiVerifiedBadgeText(`${detectedJugs} jugs counted by camera`);
-    setIsAiCameraMenuOpen(false);
-  }
-
-  /**
-   * Submits the new order to NestJS (POST /api/pos/orders)
-   */
   async function handleCreateOrderSubmit(
     event: React.FormEvent<HTMLFormElement>,
   ) {
@@ -176,426 +113,319 @@ export function QuickCounterRegisterPanel(
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-5 flex flex-col">
-      {/* Compact Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pb-3.5 mb-3.5 border-b border-slate-100">
+    <form
+      onSubmit={handleCreateOrderSubmit}
+      className="flex flex-col justify-between h-full text-[13px]"
+    >
+      <div className="flex flex-col gap-4 overflow-y-auto pr-1">
+        {/* Fulfillment Type Toggle */}
         <div>
-          <h2 className="flex items-center gap-2 text-base font-extrabold text-slate-900">
-            <Calculator size={18} className="text-blue-600" />
-            <span>Counter POS Register</span>
-          </h2>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Tap-to-select presets and instant checkout calculation
-          </p>
+          <label className="block text-[11px] font-semibold text-[#64748b] uppercase tracking-wider mb-1.5">
+            Fulfillment Mode
+          </label>
+          <div className="grid grid-cols-2 gap-2 bg-[#f1f5f9] p-1 rounded-[6px]">
+            <button
+              type="button"
+              onClick={() => setIncludeDeliveryFee(false)}
+              className={`py-2 px-3 rounded-[5px] text-[12px] font-medium flex items-center justify-center gap-1.5 cursor-pointer transition-colors ${
+                !includeDeliveryFee
+                  ? 'bg-white text-[#0f172a] shadow-xs font-semibold'
+                  : 'text-[#64748b] hover:text-[#0f172a]'
+              }`}
+            >
+              <User size={14} />
+              <span>Counter Walk-In</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setIncludeDeliveryFee(true)}
+              className={`py-2 px-3 rounded-[5px] text-[12px] font-medium flex items-center justify-center gap-1.5 cursor-pointer transition-colors ${
+                includeDeliveryFee
+                  ? 'bg-white text-[#0f172a] shadow-xs font-semibold'
+                  : 'text-[#64748b] hover:text-[#0f172a]'
+              }`}
+            >
+              <Truck size={14} />
+              <span>Rider Delivery (+₱25)</span>
+            </button>
+          </div>
         </div>
 
-        {/* Subtle Camera Scan Trigger (Tucks away testing buttons) */}
-        <div className="relative">
-          <button
-            type="button"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-200 transition-colors cursor-pointer"
-            onClick={() => setIsAiCameraMenuOpen(!isAiCameraMenuOpen)}
-          >
-            <Camera size={14} className="text-blue-600" />
-            <span>AI Photo Tally</span>
-          </button>
+        {/* Customer Details */}
+        <div className="flex flex-col gap-2">
+          <div>
+            <label className="block text-[11px] font-semibold text-[#64748b] uppercase tracking-wider mb-1">
+              Customer Name / Account
+            </label>
+            <input
+              type="text"
+              required
+              value={customerName}
+              onChange={(e) => setCustomerName(e.target.value)}
+              className="field-input"
+              placeholder="e.g. Danny O., Ateneo Loyola Dorm"
+            />
+          </div>
 
-          {isAiCameraMenuOpen && (
-            <div className="absolute right-0 top-full mt-1.5 bg-white border border-slate-200 rounded-xl p-3 shadow-xl z-40 min-w-[220px]">
-              <span className="block text-[11px] font-bold text-slate-500 mb-2">
-                Simulate Camera Detection Load:
+          {includeDeliveryFee && (
+            <>
+              <div>
+                <label className="block text-[11px] font-semibold text-[#64748b] uppercase tracking-wider mb-1">
+                  Delivery Address
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={deliveryAddress}
+                  onChange={(e) => setDeliveryAddress(e.target.value)}
+                  className="field-input"
+                  placeholder="Street address in Quezon City"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-semibold text-[#64748b] uppercase tracking-wider mb-1">
+                  Scheduled Delivery Window
+                </label>
+                <div className="grid grid-cols-3 gap-1.5">
+                  {AVAILABLE_TIME_SLOTS.map((slot) => (
+                    <button
+                      key={slot}
+                      type="button"
+                      onClick={() => setScheduledTimeSlot(slot)}
+                      className={`py-1.5 px-2 rounded-[5px] border text-center text-[11px] font-medium cursor-pointer transition-colors ${
+                        scheduledTimeSlot === slot
+                          ? 'border-[#0284c7] bg-[#f0f9ff] text-[#0284c7] font-semibold'
+                          : 'border-[#e2e8f0] bg-white text-[#475569] hover:bg-[#f8fafc]'
+                      }`}
+                    >
+                      <Clock size={11} className="inline mr-1" />
+                      <span>{slot}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Container Preset */}
+        <div>
+          <label className="block text-[11px] font-semibold text-[#64748b] uppercase tracking-wider mb-1.5">
+            Water Refill Type
+          </label>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => setPresetName(SLIM_PRESET_NAME)}
+              className={`p-2.5 rounded-[6px] border text-left cursor-pointer transition-colors ${
+                presetName === SLIM_PRESET_NAME
+                  ? 'border-[#0284c7] bg-[#f0f9ff]'
+                  : 'border-[#e2e8f0] bg-white hover:bg-[#f8fafc]'
+              }`}
+            >
+              <div className="font-semibold text-[#0f172a] text-[12px]">
+                Slim 5-Gal Refill
+              </div>
+              <div className="text-[11px] text-[#64748b] num-mono">
+                ₱{DEFAULT_REFILL_PRICE_PHP}.00 / jug
+              </div>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setPresetName(ROUND_PRESET_NAME)}
+              className={`p-2.5 rounded-[6px] border text-left cursor-pointer transition-colors ${
+                presetName === ROUND_PRESET_NAME
+                  ? 'border-[#0284c7] bg-[#f0f9ff]'
+                  : 'border-[#e2e8f0] bg-white hover:bg-[#f8fafc]'
+              }`}
+            >
+              <div className="font-semibold text-[#0f172a] text-[12px]">
+                Round Dispenser Jug
+              </div>
+              <div className="text-[11px] text-[#64748b] num-mono">
+                ₱{DEFAULT_REFILL_PRICE_PHP}.00 / jug
+              </div>
+            </button>
+          </div>
+        </div>
+
+        {/* Quantities & Pickups */}
+        <div className="grid grid-cols-2 gap-3 bg-[#f8fafc] border border-[#e2e8f0] rounded-[6px] p-3">
+          <div>
+            <label className="block text-[11px] font-semibold text-[#64748b] uppercase tracking-wider mb-1">
+              Refill Jugs
+            </label>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => adjustRefillCount(-1)}
+                className="w-8 h-8 rounded-[4px] border border-[#cbd5e1] bg-white flex items-center justify-center hover:bg-[#f1f5f9] cursor-pointer"
+              >
+                <Minus size={13} />
+              </button>
+              <span className="w-10 text-center font-bold text-[16px] text-[#0f172a] num-mono">
+                {containerCount}
               </span>
-              <div className="grid grid-cols-3 gap-1.5">
-                {[6, 8, 12].map((count) => (
-                  <button
-                    key={count}
-                    type="button"
-                    className="py-1.5 px-2 rounded-lg text-xs font-bold bg-sky-50 text-sky-700 border border-sky-200 hover:bg-sky-100 transition-colors cursor-pointer"
-                    onClick={() => handleApplyAiCameraCount(count)}
-                  >
-                    {count} Jugs
-                  </button>
-                ))}
+              <button
+                type="button"
+                onClick={() => adjustRefillCount(1)}
+                className="w-8 h-8 rounded-[4px] border border-[#cbd5e1] bg-white flex items-center justify-center hover:bg-[#f1f5f9] cursor-pointer"
+              >
+                <Plus size={13} />
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-[11px] font-semibold text-[#64748b] uppercase tracking-wider mb-1">
+              Empty Return
+            </label>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => adjustPickupCount(-1)}
+                className="w-8 h-8 rounded-[4px] border border-[#cbd5e1] bg-white flex items-center justify-center hover:bg-[#f1f5f9] cursor-pointer"
+              >
+                <Minus size={13} />
+              </button>
+              <span className="w-10 text-center font-bold text-[16px] text-[#0f172a] num-mono">
+                {emptyContainersToPickup}
+              </span>
+              <button
+                type="button"
+                onClick={() => adjustPickupCount(1)}
+                className="w-8 h-8 rounded-[4px] border border-[#cbd5e1] bg-white flex items-center justify-center hover:bg-[#f1f5f9] cursor-pointer"
+              >
+                <Plus size={13} />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Payment Mode */}
+        <div>
+          <label className="block text-[11px] font-semibold text-[#64748b] uppercase tracking-wider mb-1.5">
+            Payment Method
+          </label>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+            <button
+              type="button"
+              onClick={() => setPaymentState('PAID_CASH')}
+              className={`py-2 px-2 rounded-[5px] border text-center text-[11px] font-medium cursor-pointer transition-colors ${
+                paymentState === 'PAID_CASH'
+                  ? 'border-[#0284c7] bg-[#f0f9ff] text-[#0284c7] font-semibold'
+                  : 'border-[#e2e8f0] bg-white text-[#475569] hover:bg-[#f8fafc]'
+              }`}
+            >
+              Cash (Tendered)
+            </button>
+            <button
+              type="button"
+              onClick={() => setPaymentState('E_PAYMENT')}
+              className={`py-2 px-2 rounded-[5px] border text-center text-[11px] font-medium cursor-pointer transition-colors ${
+                paymentState === 'E_PAYMENT'
+                  ? 'border-[#0284c7] bg-[#f0f9ff] text-[#0284c7] font-semibold'
+                  : 'border-[#e2e8f0] bg-white text-[#475569] hover:bg-[#f8fafc]'
+              }`}
+            >
+              GCash / Maya QR
+            </button>
+            <button
+              type="button"
+              onClick={() => setPaymentState('PARTIAL')}
+              className={`py-2 px-2 rounded-[5px] border text-center text-[11px] font-medium cursor-pointer transition-colors ${
+                paymentState === 'PARTIAL'
+                  ? 'border-[#0284c7] bg-[#f0f9ff] text-[#0284c7] font-semibold'
+                  : 'border-[#e2e8f0] bg-white text-[#475569] hover:bg-[#f8fafc]'
+              }`}
+            >
+              Partial Deposit
+            </button>
+            <button
+              type="button"
+              onClick={() => setPaymentState('UNPAID_CHARGE_SLIP')}
+              className={`py-2 px-2 rounded-[5px] border text-center text-[11px] font-medium cursor-pointer transition-colors ${
+                paymentState === 'UNPAID_CHARGE_SLIP'
+                  ? 'border-[#b91c1c] bg-[#fef2f2] text-[#b91c1c] font-semibold'
+                  : 'border-[#e2e8f0] bg-white text-[#475569] hover:bg-[#f8fafc]'
+              }`}
+            >
+              Charge Slip
+            </button>
+          </div>
+
+          {paymentState === 'PAID_CASH' && (
+            <div className="mt-2 flex items-center justify-between bg-[#f8fafc] border border-[#e2e8f0] rounded-[6px] p-2.5">
+              <span className="text-[12px] text-[#64748b]">Cash Tendered:</span>
+              <div className="flex items-center gap-2">
+                <span className="num-mono text-[12px]">₱</span>
+                <input
+                  type="number"
+                  min={totalDue}
+                  step={5}
+                  value={cashTendered}
+                  onChange={(e) => setCashTendered(Number(e.target.value))}
+                  className="w-24 bg-white border border-[#cbd5e1] rounded-[4px] px-2 py-1 text-right num-mono text-[12px] font-semibold outline-none"
+                />
+                <span className="text-[11px] text-[#15803d] num-mono">
+                  Change: ₱{exactChange.toFixed(2)}
+                </span>
+              </div>
+            </div>
+          )}
+
+          {paymentState === 'PARTIAL' && (
+            <div className="mt-2 flex items-center justify-between bg-[#f8fafc] border border-[#e2e8f0] rounded-[6px] p-2.5">
+              <span className="text-[12px] text-[#64748b]">Deposit Received:</span>
+              <div className="flex items-center gap-2">
+                <span className="num-mono text-[12px]">₱</span>
+                <input
+                  type="number"
+                  min={0}
+                  max={totalDue}
+                  step={5}
+                  value={partialAmountPaid}
+                  onChange={(e) => setPartialAmountPaid(Number(e.target.value))}
+                  className="w-24 bg-white border border-[#cbd5e1] rounded-[4px] px-2 py-1 text-right num-mono text-[12px] font-semibold outline-none"
+                />
+                <span className="text-[11px] text-[#b91c1c] num-mono">
+                  Remaining: ₱{Math.max(0, totalDue - partialAmountPaid).toFixed(2)}
+                </span>
               </div>
             </div>
           )}
         </div>
       </div>
 
-      <form onSubmit={handleCreateOrderSubmit} className="flex flex-col gap-3">
-        {/* ================================================================
-            FIELDSET 1: CUSTOMER & FULFILLMENT TYPE
-            ================================================================ */}
-        <fieldset className="border border-slate-200 rounded-xl p-3 bg-slate-50/60 flex flex-col gap-2.5">
-          <legend className="inline-flex items-center gap-1.5 px-2 text-xs font-extrabold text-slate-800">
-            <User size={13} className="text-blue-600" />
-            <span>1. Customer &amp; Fulfillment</span>
-          </legend>
-
-          {/* Fulfillment Radio Cards: Rider Delivery vs Counter Walk-In */}
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              className={`flex items-center gap-2.5 p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
-                includeDeliveryFee
-                  ? 'border-blue-600 bg-blue-50/70 text-blue-900 ring-2 ring-blue-600/15'
-                  : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
-              }`}
-              onClick={() => setIncludeDeliveryFee(true)}
-            >
-              <Truck
-                size={16}
-                className={
-                  includeDeliveryFee ? 'text-blue-600' : 'text-slate-400'
-                }
-              />
-              <div className="flex flex-col">
-                <strong className="text-xs font-bold">Rider Delivery</strong>
-                <small className="text-[11px] text-slate-500">
-                  +PHP 30 fee • Issues #INV
-                </small>
-              </div>
-            </button>
-
-            <button
-              type="button"
-              className={`flex items-center gap-2.5 p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
-                !includeDeliveryFee
-                  ? 'border-blue-600 bg-blue-50/70 text-blue-900 ring-2 ring-blue-600/15'
-                  : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
-              }`}
-              onClick={() => setIncludeDeliveryFee(false)}
-            >
-              <Store
-                size={16}
-                className={
-                  !includeDeliveryFee ? 'text-blue-600' : 'text-slate-400'
-                }
-              />
-              <div className="flex flex-col">
-                <strong className="text-xs font-bold">Counter Walk-In</strong>
-                <small className="text-[11px] text-slate-500">
-                  No delivery fee • Issues #OR
-                </small>
-              </div>
-            </button>
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <div>
-              <label className="block text-[11px] font-bold text-slate-600 mb-1">
-                Customer Name
-              </label>
-              <input
-                type="text"
-                value={customerName}
-                onChange={(event) => setCustomerName(event.target.value)}
-                placeholder="Customer or Office Name"
-                required
-                className="w-full px-3 py-2 text-xs font-medium text-slate-900 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
-              />
-            </div>
-
-            {includeDeliveryFee && (
-              <div>
-                <label className="block text-[11px] font-bold text-slate-600 mb-1">
-                  Delivery Street Address
-                </label>
-                <input
-                  type="text"
-                  value={deliveryAddress}
-                  onChange={(event) => setDeliveryAddress(event.target.value)}
-                  placeholder="Street, Barangay, City"
-                  required
-                  className="w-full px-3 py-2 text-xs font-medium text-slate-900 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
-                />
-              </div>
-            )}
-          </div>
-        </fieldset>
-
-        {/* ================================================================
-            FIELDSET 2: ORDER COUNT, CONTAINER TYPE & PICKUP SLOT
-            ================================================================ */}
-        <fieldset className="border border-slate-200 rounded-xl p-3 bg-slate-50/60 flex flex-col gap-2.5">
-          <legend className="inline-flex items-center gap-1.5 px-2 text-xs font-extrabold text-slate-800">
-            <Droplets size={13} className="text-blue-600" />
-            <span>2. Order Count &amp; Container Preset</span>
-            {aiVerifiedBadgeText !== null && (
-              <span className="inline-flex items-center gap-1 ml-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                <CheckCircle2 size={11} />
-                <span>{aiVerifiedBadgeText}</span>
-              </span>
-            )}
-          </legend>
-
-          {/* Container Type Radio Cards */}
-          <div className="grid grid-cols-2 gap-2">
-            {AVAILABLE_PRESETS.map((preset) => {
-              const isSelected = presetName === preset.fullName;
-              return (
-                <button
-                  key={preset.id}
-                  type="button"
-                  className={`flex items-center gap-2.5 p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
-                    isSelected
-                      ? 'border-blue-600 bg-blue-50/70 text-blue-900 ring-2 ring-blue-600/15'
-                      : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
-                  }`}
-                  onClick={() => setPresetName(preset.fullName)}
-                >
-                  <Droplets
-                    size={16}
-                    className={isSelected ? 'text-blue-600' : 'text-slate-400'}
-                  />
-                  <div className="flex flex-col">
-                    <strong className="text-xs font-bold">
-                      {preset.label}
-                    </strong>
-                    <small className="text-[11px] text-slate-500">
-                      {preset.priceLabel} / refill
-                    </small>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Fast POS +/- Steppers for Refill Qty & Empty Pickup Qty */}
-          <div className="grid grid-cols-2 gap-2.5">
-            <div className="bg-white border border-slate-200 rounded-xl p-2.5 flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-700">
-                Refill Qty
-              </span>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  className="w-7 h-7 rounded-lg border border-slate-200 bg-slate-50 text-slate-700 flex items-center justify-center hover:bg-slate-100 transition-colors cursor-pointer"
-                  onClick={() => adjustRefillCount(-1)}
-                >
-                  <Minus size={14} />
-                </button>
-                <span className="min-w-[24px] text-center text-sm font-extrabold text-slate-900">
-                  {containerCount}
-                </span>
-                <button
-                  type="button"
-                  className="w-7 h-7 rounded-lg border border-slate-200 bg-slate-50 text-slate-700 flex items-center justify-center hover:bg-slate-100 transition-colors cursor-pointer"
-                  onClick={() => adjustRefillCount(1)}
-                >
-                  <Plus size={14} />
-                </button>
-              </div>
-            </div>
-
-            <div className="bg-white border border-slate-200 rounded-xl p-2.5 flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-700">
-                Empty Pickup
-              </span>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  className="w-7 h-7 rounded-lg border border-slate-200 bg-slate-50 text-slate-700 flex items-center justify-center hover:bg-slate-100 transition-colors cursor-pointer"
-                  onClick={() => adjustPickupCount(-1)}
-                >
-                  <Minus size={14} />
-                </button>
-                <span className="min-w-[24px] text-center text-sm font-extrabold text-slate-900">
-                  {emptyContainersToPickup}
-                </span>
-                <button
-                  type="button"
-                  className="w-7 h-7 rounded-lg border border-slate-200 bg-slate-50 text-slate-700 flex items-center justify-center hover:bg-slate-100 transition-colors cursor-pointer"
-                  onClick={() => adjustPickupCount(1)}
-                >
-                  <Plus size={14} />
-                </button>
-              </div>
+      {/* Bottom Summary & Order Creation Action */}
+      <div className="pt-3 border-t border-[#e2e8f0] mt-3">
+        <div className="flex items-center justify-between mb-2.5">
+          <div>
+            <div className="text-[11px] text-[#64748b]">Total Collectible Due</div>
+            <div className="text-[18px] font-bold text-[#0f172a] num-mono">
+              ₱{totalDue.toFixed(2)}
             </div>
           </div>
-
-          {/* Time Slot Segmented Pills (Only needed for Delivery / Pickup) */}
-          {includeDeliveryFee && (
-            <div className="flex flex-col gap-1.5">
-              <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-slate-600">
-                <Clock size={12} />
-                <span>Scheduled Time Window</span>
-              </span>
-              <div className="grid grid-cols-3 gap-1.5">
-                {AVAILABLE_TIME_SLOTS.map((slot) => {
-                  const isActiveSlot = scheduledTimeSlot === slot;
-                  return (
-                    <button
-                      key={slot}
-                      type="button"
-                      className={`py-1.5 px-2 rounded-lg text-[11px] font-bold border transition-colors cursor-pointer ${
-                        isActiveSlot
-                          ? 'bg-slate-900 text-white border-slate-900'
-                          : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
-                      }`}
-                      onClick={() => setScheduledTimeSlot(slot)}
-                    >
-                      {slot}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-        </fieldset>
-
-        {/* ================================================================
-            FIELDSET 3: PAYMENT METHOD & TENDERED AMOUNT
-            ================================================================ */}
-        <fieldset className="border border-slate-200 rounded-xl p-3 bg-slate-50/60 flex flex-col gap-2.5">
-          <legend className="inline-flex items-center gap-1.5 px-2 text-xs font-extrabold text-slate-800">
-            <Banknote size={13} className="text-blue-600" />
-            <span>3. Payment Method</span>
-          </legend>
-
-          {/* 4 Payment State Radio Cards */}
-          <div className="grid grid-cols-4 gap-1.5">
-            <button
-              type="button"
-              className={`flex flex-col items-center justify-center gap-1 py-2 px-1.5 rounded-xl border text-center transition-all cursor-pointer ${
-                paymentState === 'PAID_CASH'
-                  ? 'border-blue-600 bg-blue-50/70 text-blue-900 ring-2 ring-blue-600/15'
-                  : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
-              }`}
-              onClick={() => setPaymentState('PAID_CASH')}
-            >
-              <Banknote size={15} />
-              <strong className="text-[11px] font-bold">Cash</strong>
-            </button>
-
-            <button
-              type="button"
-              className={`flex flex-col items-center justify-center gap-1 py-2 px-1.5 rounded-xl border text-center transition-all cursor-pointer ${
-                paymentState === 'E_PAYMENT'
-                  ? 'border-blue-600 bg-blue-50/70 text-blue-900 ring-2 ring-blue-600/15'
-                  : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
-              }`}
-              onClick={() => setPaymentState('E_PAYMENT')}
-            >
-              <Smartphone size={15} />
-              <strong className="text-[11px] font-bold">GCash / Maya</strong>
-            </button>
-
-            <button
-              type="button"
-              className={`flex flex-col items-center justify-center gap-1 py-2 px-1.5 rounded-xl border text-center transition-all cursor-pointer ${
-                paymentState === 'PARTIAL'
-                  ? 'border-blue-600 bg-blue-50/70 text-blue-900 ring-2 ring-blue-600/15'
-                  : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
-              }`}
-              onClick={() => setPaymentState('PARTIAL')}
-            >
-              <PieChart size={15} />
-              <strong className="text-[11px] font-bold">Partial</strong>
-            </button>
-
-            <button
-              type="button"
-              className={`flex flex-col items-center justify-center gap-1 py-2 px-1.5 rounded-xl border text-center transition-all cursor-pointer ${
-                paymentState === 'UNPAID_CHARGE_SLIP'
-                  ? 'border-blue-600 bg-blue-50/70 text-blue-900 ring-2 ring-blue-600/15'
-                  : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
-              }`}
-              onClick={() => setPaymentState('UNPAID_CHARGE_SLIP')}
-            >
-              <ClipboardList size={15} />
-              <strong className="text-[11px] font-bold">Charge Slip</strong>
-            </button>
-          </div>
-
-          {paymentState === 'PAID_CASH' && (
-            <div className="flex items-center justify-between gap-3 bg-white border border-slate-200 rounded-xl px-3 py-2">
-              <label className="text-xs font-bold text-slate-700">
-                Cash Tendered (PHP):
-              </label>
-              <input
-                type="number"
-                min={0}
-                value={cashTendered}
-                onChange={(event) =>
-                  setCashTendered(Number(event.target.value))
-                }
-                className="w-28 text-right font-extrabold text-sm text-slate-900 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1 focus:outline-none focus:ring-2 focus:ring-blue-600"
-              />
-            </div>
-          )}
-
-          {paymentState === 'PARTIAL' && (
-            <div className="flex items-center justify-between gap-3 bg-white border border-slate-200 rounded-xl px-3 py-2">
-              <label className="text-xs font-bold text-slate-700">
-                Amount Paid Now (PHP):
-              </label>
-              <input
-                type="number"
-                min={0}
-                max={totalDue}
-                value={partialAmountPaid}
-                onChange={(event) =>
-                  setPartialAmountPaid(Number(event.target.value))
-                }
-                className="w-28 text-right font-extrabold text-sm text-slate-900 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1 focus:outline-none focus:ring-2 focus:ring-blue-600"
-              />
-            </div>
-          )}
-        </fieldset>
-
-        {/* ================================================================
-            STICKY CHECKOUT / SUBMIT FOOTER
-            ================================================================ */}
-        <div className="sticky bottom-0 z-10 bg-slate-900 text-white rounded-xl p-3.5 shadow-lg flex flex-col gap-3">
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex flex-col">
-              <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
-                TOTAL DUE
-              </span>
-              <span className="text-xs text-slate-300 mt-0.5">
-                {containerCount} × PHP {DEFAULT_REFILL_PRICE_PHP}
-                {includeDeliveryFee ? ' + PHP 30 delivery' : ' (Walk-in)'} • Net
-                PHP {trueNetProfit.toFixed(0)}
-              </span>
-            </div>
-
-            <div className="flex flex-col items-end">
-              <strong className="text-lg font-extrabold text-white leading-tight">
-                PHP {totalDue.toFixed(2)}
-              </strong>
-              {paymentState === 'PAID_CASH' && (
-                <span className="mt-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/20 text-emerald-300">
-                  Change: PHP {exactChange.toFixed(2)}
-                </span>
-              )}
-              {(paymentState === 'PARTIAL' ||
-                paymentState === 'UNPAID_CHARGE_SLIP') && (
-                <span className="mt-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/20 text-amber-300">
-                  Balance Due: PHP {balanceDue.toFixed(2)}
-                </span>
-              )}
+          <div className="text-right">
+            <div className="text-[11px] text-[#64748b]">Net Station Margin</div>
+            <div className="text-[13px] font-semibold text-[#15803d] num-mono">
+              +₱{trueNetProfit.toFixed(2)}
             </div>
           </div>
-
-          <button
-            type="submit"
-            disabled={isSavingOrder}
-            className="w-full py-2.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-60 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md shadow-blue-600/25 transition-colors cursor-pointer"
-          >
-            <Zap size={16} />
-            <span>
-              {isSavingOrder
-                ? 'Logging Order...'
-                : `Complete & Issue ${
-                    includeDeliveryFee
-                      ? `#INV-${props.nextOrderNumber}`
-                      : `#OR-${props.nextOrderNumber}`
-                  } (PHP ${totalDue.toFixed(2)})`}
-            </span>
-          </button>
         </div>
-      </form>
-    </div>
+
+        <button
+          type="submit"
+          disabled={isSavingOrder}
+          className="btn-primary w-full py-2.5 text-[13px] font-semibold cursor-pointer disabled:opacity-50"
+        >
+          {isSavingOrder
+            ? 'Logging Order to Station Ledger...'
+            : `Log Refill Order (#ORD-${props.nextOrderNumber})`}
+        </button>
+      </div>
+    </form>
   );
 }

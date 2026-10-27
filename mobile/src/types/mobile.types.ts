@@ -58,6 +58,54 @@ export interface MobileOrderItem {
   aiConfidencePercent: number;
   stopSequenceNumber: number;
   createdAtLabel: string;
+  latitude?: number;
+  longitude?: number;
+  etaMinutes?: number;
+  distanceKm?: number;
+}
+
+export interface MapCoordinate {
+  latitude: number;
+  longitude: number;
+}
+
+export interface RouteWaypoint extends MapCoordinate {
+  id: string;
+  label: string;
+  title: string;
+  subtitle: string;
+  type: 'STATION_HUB' | 'DELIVERY_STOP';
+  sequenceNumber: number;
+  orderId?: string;
+  isDelivered?: boolean;
+}
+
+export interface RouteManeuver {
+  instruction: string;
+  distanceMeters: number;
+  durationSeconds: number;
+  streetName: string;
+  type: string;
+  modifier?: string;
+}
+
+export interface RouteLeg {
+  fromWaypointId: string;
+  toWaypointId: string;
+  distanceMeters: number;
+  durationSeconds: number;
+  summary: string;
+  coordinates: MapCoordinate[];
+  maneuvers: RouteManeuver[];
+}
+
+export interface OptimizedRouteData {
+  totalDistanceMeters: number;
+  totalDurationSeconds: number;
+  fullCoordinates: MapCoordinate[];
+  legs: RouteLeg[];
+  allManeuvers: RouteManeuver[];
+  waypoints: RouteWaypoint[];
 }
 
 export interface CustomerAccountSummary {

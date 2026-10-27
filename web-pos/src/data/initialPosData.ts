@@ -11,6 +11,7 @@ import type {
   CustomerAccountabilityRecord,
   PosOrderItem,
   ProfitSummaryMetrics,
+  TransactionLogsFilter,
 } from '../types/pos.types';
 
 /**
@@ -53,6 +54,8 @@ export const INITIAL_POS_ORDERS: PosOrderItem[] = [
     assignedRiderName: 'J. Cruz',
     invoicedAt: '9:42 AM',
     deliveredAt: '11:15 AM',
+    orderDate: '2026-10-22',
+    createdAtIso: '2026-10-22T09:42:00.000Z',
   },
   {
     id: 'order-1043',
@@ -80,6 +83,8 @@ export const INITIAL_POS_ORDERS: PosOrderItem[] = [
     assignedRiderName: 'J. Cruz',
     invoicedAt: '10:05 AM',
     deliveredAt: null,
+    orderDate: '2026-10-22',
+    createdAtIso: '2026-10-22T10:05:00.000Z',
   },
   {
     id: 'order-1044',
@@ -553,4 +558,117 @@ export function calculateProfitSummaryMetrics(
     totalCostOfRefill,
     trueNetProfit,
   };
+}
+
+/**
+ * Checks whether an order is actively in-progress at the counter or on the road
+ * (i.e. not yet delivered and closed with an official receipt).
+ */
+export function isOrderActive(order: PosOrderItem): boolean {
+  if (order.status === 'DELIVERED' || order.status === 'CANCELLED') {
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Returns only the active orders that require station counter or dispatch action
+ */
+export function filterActiveOrders(orders: PosOrderItem[]): PosOrderItem[] {
+  return orders.filter(isOrderActive);
+}
+
+/**
+ * Parses an order's date and time into a comparable millisecond timestamp
+ */
+export function parseOrderTimestamp(order: PosOrderItem): number {
+  if (order.createdAtIso) {
+    const parsed = new Date(order.createdAtIso).getTime();
+    if (!isNaN(parsed)) return parsed;
+  }
+
+  const dateStr = order.orderDate ?? '2026-10-22';
+  const timeStr = order.deliveredAt ?? order.invoicedAt ?? '8:00 AM';
+
+  const match = timeStr.match(/(\d+):(\d+)\s*(AM|PM)/i);
+  if (match) {
+    let hours = parseInt(match[1], 10);
+    const minutes = parseInt(match[2], 10);
+    const period = match[3].toUpperCase();
+    if (period === 'PM' && hours < 12) hours += 12;
+    if (period === 'AM' && hours === 12) hours = 0;
+    const isoString = `${dateStr}T${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00`;
+    const parsed = new Date(isoString).getTime();
+    if (!isNaN(parsed)) return parsed;
+  }
+
+  return new Date(`${dateStr}T12:00:00`).getTime();
+}
+
+/**
+ * Filters historical transactions based on date range, custom date, search term, and payment status,
+ * sorted by timestamp (newest first by default).
+ */
+export function filterHistoricalOrders(
+  orders: PosOrderItem[],
+  filter: TransactionLogsFilter,
+): PosOrderItem[] {
+  const todayStr = '2026-10-22';
+  const yesterdayStr = '2026-10-21';
+
+  const filtered = orders.filter((order) => {
+    const orderDate = order.orderDate ?? todayStr;
+
+    // 1. Date filter
+    if (filter.specificDate) {
+      if (orderDate !== filter.specificDate) return false;
+    } else if (filter.dateRange === 'TODAY') {
+      if (orderDate !== todayStr) return false;
+    } else if (filter.dateRange === 'YESTERDAY') {
+      if (orderDate !== yesterdayStr) return false;
+    } else if (filter.dateRange === 'LAST_7_DAYS') {
+      const orderMs = new Date(orderDate).getTime();
+      const cutoffMs = new Date('2026-10-15').getTime();
+      if (orderMs < cutoffMs) return false;
+    }
+
+    // 2. Payment State filter
+    if (filter.paymentStateFilter !== 'ALL') {
+      if (order.paymentState !== filter.paymentStateFilter) return false;
+    }
+
+    // 3. Search query filter
+    if (filter.searchQuery.trim().length > 0) {
+      const q = filter.searchQuery.toLowerCase().trim();
+      const matchName = order.customerName.toLowerCase().includes(q);
+      const matchPhone = order.customerPhone.toLowerCase().includes(q);
+      const matchAddress = order.deliveryAddress.toLowerCase().includes(q);
+      const matchOrderNum = order.orderNumber.toLowerCase().includes(q);
+      const matchInv = order.invoiceNumber.toLowerCase().includes(q);
+      const matchRcpt = order.receiptNumber?.toLowerCase().includes(q) ?? false;
+      if (
+        !matchName &&
+        !matchPhone &&
+        !matchAddress &&
+        !matchOrderNum &&
+        !matchInv &&
+        !matchRcpt
+      ) {
+        return false;
+      }
+    }
+
+    return true;
+  });
+
+  filtered.sort((a, b) => {
+    const timeA = parseOrderTimestamp(a);
+    const timeB = parseOrderTimestamp(b);
+    if (filter.sortOrder === 'OLDEST_FIRST') {
+      return timeA - timeB;
+    }
+    return timeB - timeA;
+  });
+
+  return filtered;
 }

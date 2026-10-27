@@ -1,15 +1,11 @@
 /**
  * ============================================================================
  * FILE: src/components/pos/FloatingToastNotification.tsx
- * PURPOSE: Floating toast notification card with a live countdown progress bar
- *          that depletes smoothly over the lifespan of the toast.
- *          - Positioned as a fixed floating overlay (top-right) so it never
- *            shifts page layout.
- *          - Uses a keyed inner card (`key={toast.id}`) so each new toast
- *            starts cleanly at 100% (`durationMs`) without state race conditions.
- *          - Pauses countdown while hovered so the operator can read long
- *            messages if needed, and includes a manual dismiss button.
- *          - Uses Tailwind CSS and Lucide icons (lucide-react) strictly.
+ * PURPOSE: Floating toast notification card with countdown progress bar.
+ *          Adheres to tasteskill v2 app-screens:
+ *          - Crisp solid overlay (top-right), zero backdrop blur.
+ *          - 1px clean border, no heavy drop shadow.
+ *          - Strictly Lucide vector icons, zero Unicode emojis.
  * ============================================================================
  */
 
@@ -39,13 +35,11 @@ function ActiveToastCard(props: ActiveToastCardProps) {
   const activeToast = props.toast;
   const onDismissCallback = props.onDismiss;
 
-  // Initialized directly to durationMs (e.g. 4500ms) because ActiveToastCard is keyed by toast.id
   const [remainingMs, setRemainingMs] = useState<number>(
     activeToast.durationMs,
   );
   const [isPaused, setIsPaused] = useState<boolean>(false);
 
-  // Step-by-step interval timer that updates the progress bar every 40ms
   useEffect(() => {
     if (isPaused) {
       return;
@@ -54,13 +48,13 @@ function ActiveToastCard(props: ActiveToastCardProps) {
     const tickIntervalMs = 40;
 
     const timerId = window.setInterval(() => {
-      setRemainingMs((previousRemaining) => {
-        const nextRemaining = previousRemaining - tickIntervalMs;
-        if (nextRemaining <= 0) {
+      setRemainingMs((prev) => {
+        const next = prev - tickIntervalMs;
+        if (next <= 0) {
           window.clearInterval(timerId);
           return 0;
         }
-        return nextRemaining;
+        return next;
       });
     }, tickIntervalMs);
 
@@ -69,37 +63,31 @@ function ActiveToastCard(props: ActiveToastCardProps) {
     };
   }, [isPaused]);
 
-  // Dismiss only after the countdown has genuinely reached 0
   useEffect(() => {
     if (remainingMs <= 0) {
       onDismissCallback();
     }
   }, [remainingMs, onDismissCallback]);
 
-  // Calculate remaining percentage (0% to 100%) for the progress bar width
   const rawPercent = (remainingMs / activeToast.durationMs) * 100;
-  const clampedPercent =
-    rawPercent < 0 ? 0 : rawPercent > 100 ? 100 : rawPercent;
-
-  // Calculate remaining seconds for subtle numeric readout (e.g. "4.2s")
+  const clampedPercent = Math.max(0, Math.min(100, rawPercent));
   const remainingSecondsFormatted = (remainingMs / 1000).toFixed(1);
 
-  // Select visual styles based on toast variant
-  let iconElement = <CheckCircle2 size={18} className="text-emerald-400" />;
+  let iconElement = <CheckCircle2 size={16} className="text-[#15803d]" />;
   let badgeTitle = 'Operation Confirmed';
-  let progressBarColorClass = 'bg-emerald-400';
-  let borderAccentClass = 'border-emerald-500/40';
+  let progressBarColorClass = 'bg-[#15803d]';
+  let borderClass = 'border-[#334155]';
 
   if (activeToast.variant === 'error') {
-    iconElement = <AlertTriangle size={18} className="text-red-400" />;
+    iconElement = <AlertTriangle size={16} className="text-[#f87171]" />;
     badgeTitle = 'Action Alert';
-    progressBarColorClass = 'bg-red-400';
-    borderAccentClass = 'border-red-500/40';
+    progressBarColorClass = 'bg-[#b91c1c]';
+    borderClass = 'border-[#7f1d1d]';
   } else if (activeToast.variant === 'info') {
-    iconElement = <Info size={18} className="text-sky-400" />;
-    badgeTitle = 'Dispatch Notice';
-    progressBarColorClass = 'bg-sky-400';
-    borderAccentClass = 'border-sky-500/40';
+    iconElement = <Info size={16} className="text-[#38bdf8]" />;
+    badgeTitle = 'Station Notice';
+    progressBarColorClass = 'bg-[#0284c7]';
+    borderClass = 'border-[#0369a1]';
   }
 
   return (
@@ -108,24 +96,21 @@ function ActiveToastCard(props: ActiveToastCardProps) {
       aria-live="polite"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
-      className={`fixed top-20 right-5 z-50 w-full max-w-sm rounded-2xl bg-slate-900/95 backdrop-blur-md text-white shadow-2xl border ${borderAccentClass} overflow-hidden transition-all`}
+      className={`fixed top-16 right-5 z-50 w-full max-w-sm rounded-[8px] bg-[#0f172a] text-white border ${borderClass} overflow-hidden`}
     >
-      {/* Floating Card Body */}
-      <div className="p-3.5 flex items-start gap-3">
-        <div className="mt-0.5 shrink-0 w-8 h-8 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center">
-          {iconElement}
-        </div>
+      <div className="p-3 flex items-start gap-2.5">
+        <div className="mt-0.5 shrink-0">{iconElement}</div>
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between gap-2">
-            <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-[#94a3b8]">
               {badgeTitle}
             </span>
-            <span className="text-[10px] font-mono font-semibold text-slate-400 tabular-nums">
+            <span className="text-[10px] font-mono text-[#94a3b8] tabular-nums">
               {isPaused ? 'Paused' : `${remainingSecondsFormatted}s`}
             </span>
           </div>
-          <p className="text-xs font-semibold text-slate-100 leading-relaxed mt-0.5 break-words">
+          <p className="text-[12px] font-medium text-[#f1f5f9] leading-snug mt-0.5 break-words">
             {activeToast.message}
           </p>
         </div>
@@ -134,14 +119,13 @@ function ActiveToastCard(props: ActiveToastCardProps) {
           type="button"
           onClick={onDismissCallback}
           aria-label="Dismiss notification"
-          className="shrink-0 w-6 h-6 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+          className="shrink-0 p-1 rounded text-[#94a3b8] hover:text-white cursor-pointer"
         >
           <X size={14} />
         </button>
       </div>
 
-      {/* Countdown Progress Bar Track at the Bottom of the Floating Toast */}
-      <div className="h-1.5 w-full bg-slate-800 overflow-hidden">
+      <div className="h-1 w-full bg-[#1e293b] overflow-hidden">
         <div
           className={`h-full ${progressBarColorClass} transition-[width] duration-75 ease-linear`}
           style={{ width: `${clampedPercent}%` }}

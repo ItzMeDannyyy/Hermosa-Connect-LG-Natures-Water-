@@ -1,0 +1,2516 @@
+{
+ "url": "http://localhost:4173",
+ "at": "2026-10-21T16:58:55.537Z",
+ "allow": [],
+ "viewports": [
+  {
+   "width": 1440,
+   "height": 900,
+   "load": "load",
+   "screens": 5,
+   "filled": [
+    0.98,
+    1,
+    1,
+    1,
+    1
+   ],
+   "motion": {
+    "elements": 18,
+    "css": 0,
+    "transitions": 0,
+    "scripted": 18,
+    "videos": 0,
+    "playingVideos": 0
+   },
+   "metrics": {
+    "viewport": {
+     "w": 1440,
+     "h": 900
+    },
+    "page": {
+     "height": 4066,
+     "screens": 4.5,
+     "words": 625,
+     "img": 4,
+     "video": 0,
+     "canvas": 0,
+     "svg": 10,
+     "sections": 4,
+     "horizontalOverflow": 0,
+     "overflowCulprits": [],
+     "uiFragments": 5,
+     "uiAbuse": false,
+     "realPictures": 4,
+     "videoCount": 0,
+     "uiPictures": 2,
+     "pictureSamples": [
+      "drops-impact.jpg",
+      "water-station-bay.jpg",
+      "water-drop-001.jpg",
+      "blue-metal-water-drops-dtxr-wt-1.jpg"
+     ],
+     "blendText": 0,
+     "sideScrollers": 0,
+     "brokenImages": [],
+     "emoji": [],
+     "videosNoPoster": 0
+    },
+    "hero": {
+     "text": "Water station counter POS",
+     "words": 4,
+     "chars": 25,
+     "lines": 2,
+     "size": 61,
+     "vw": 4.2,
+     "font": "IBM Plex Sans",
+     "weight": 600,
+     "tracking": -0.02,
+     "leading": 1.05,
+     "top": 127,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "h1": {
+     "text": "Water station counter POS",
+     "words": 4,
+     "lines": 2,
+     "size": 60.8,
+     "font": "IBM Plex Sans"
+    },
+    "headings": [
+     {
+      "text": "Water station counter POS",
+      "words": 4,
+      "chars": 25,
+      "lines": 2,
+      "size": 60.8,
+      "vw": 4.2,
+      "font": "IBM Plex Sans",
+      "weight": 600,
+      "tracking": -0.025,
+      "leading": 1.05,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "right",
+      "widthRatio": 0.43,
+      "top": 127,
+      "tag": "h1",
+      "kind": "heading"
+     },
+     {
+      "text": "PHP 17.00",
+      "words": 2,
+      "chars": 9,
+      "lines": 1,
+      "size": 36,
+      "vw": 2.5,
+      "font": "IBM Plex Mono",
+      "weight": 700,
+      "tracking": 0,
+      "leading": 1.25,
+      "upper": true,
+      "italic": false,
+      "mono": true,
+      "align": "left",
+      "position": "right",
+      "widthRatio": 0.24,
+      "top": 519,
+      "tag": "span",
+      "kind": "heading"
+     },
+     {
+      "text": "Counter to gate",
+      "words": 3,
+      "chars": 15,
+      "lines": 1,
+      "size": 38.4,
+      "vw": 2.7,
+      "font": "IBM Plex Sans",
+      "weight": 600,
+      "tracking": -0.02,
+      "leading": 1.15,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.59,
+      "top": 789,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Four station documents",
+      "words": 3,
+      "chars": 22,
+      "lines": 1,
+      "size": 38.4,
+      "vw": 2.7,
+      "font": "IBM Plex Sans",
+      "weight": 600,
+      "tracking": -0.02,
+      "leading": 1.15,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.77,
+      "top": 2170,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Station refill rates",
+      "words": 3,
+      "chars": 20,
+      "lines": 1,
+      "size": 38.4,
+      "vw": 2.7,
+      "font": "IBM Plex Sans",
+      "weight": 600,
+      "tracking": -0.02,
+      "leading": 1.15,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.77,
+      "top": 2973,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "PHP 25",
+      "words": 2,
+      "chars": 6,
+      "lines": 1,
+      "size": 48,
+      "vw": 3.3,
+      "font": "IBM Plex Mono",
+      "weight": 700,
+      "tracking": 0,
+      "leading": 1,
+      "upper": true,
+      "italic": false,
+      "mono": true,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.12,
+      "top": 3376,
+      "tag": "span",
+      "kind": "heading"
+     },
+     {
+      "text": "PHP 30",
+      "words": 2,
+      "chars": 6,
+      "lines": 1,
+      "size": 48,
+      "vw": 3.3,
+      "font": "IBM Plex Mono",
+      "weight": 700,
+      "tracking": 0,
+      "leading": 1,
+      "upper": true,
+      "italic": false,
+      "mono": true,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.12,
+      "top": 3376,
+      "tag": "span",
+      "kind": "heading"
+     },
+     {
+      "text": "+63 917 000 0001",
+      "words": 4,
+      "chars": 16,
+      "lines": 1,
+      "size": 60.8,
+      "vw": 4.2,
+      "font": "IBM Plex Sans",
+      "weight": 600,
+      "tracking": -0.025,
+      "leading": 1.05,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.77,
+      "top": 3833,
+      "tag": "a",
+      "kind": "heading"
+     }
+    ],
+    "headingSummary": {
+     "count": 8,
+     "maxLines": 2,
+     "over2Lines": 0,
+     "statements": 0,
+     "centered": 0,
+     "medianWords": 3,
+     "mixedFontHeadings": 0
+    },
+    "type": {
+     "families": [
+      {
+       "family": "IBM Plex Sans",
+       "share": 0.96,
+       "mono": false
+      },
+      {
+       "family": "IBM Plex Mono",
+       "share": 0.04,
+       "mono": true
+      }
+     ],
+     "familyCount": 2,
+     "sizes": [
+      12,
+      13,
+      14,
+      16,
+      18,
+      20,
+      24,
+      36,
+      38,
+      48,
+      61
+     ],
+     "sizeCount": 11,
+     "notLoaded": [],
+     "body": {
+      "font": "IBM Plex Sans",
+      "size": 20.3,
+      "leading": 1.45,
+      "weight": 400,
+      "tracking": 0,
+      "contrast": 17.1
+     },
+     "measureChars": 96,
+     "max": {
+      "size": 60.8,
+      "vw": 4.2,
+      "font": "IBM Plex Sans",
+      "text": "Water station"
+     },
+     "monoShare": 0.04,
+     "monoProseShare": 0.04,
+     "monoFamilies": [
+      "IBM Plex Mono"
+     ],
+     "monoSamples": [
+      "PHP 17.00",
+      "PHP 200.00",
+      "PHP 30.00",
+      "PHP 230.00",
+      "PHP 130.00",
+      "PHP 100.00"
+     ],
+     "microLabels": 0,
+     "microLabelShare": 0,
+     "microSamples": [],
+     "upperShare": 0.04,
+     "centerShare": 0.04,
+     "smallText": 1
+    },
+    "eyebrows": [],
+    "numbered": [],
+    "color": {
+     "bodyBg": "#f1f5f9",
+     "bodyBgHsl": {
+      "h": 210,
+      "s": 0.4,
+      "l": 0.96
+     },
+     "dark": false,
+     "sectionBgs": [
+      {
+       "color": "#f8fafc",
+       "top": 0,
+       "hsl": {
+        "h": 210,
+        "s": 0.4,
+        "l": 0.98
+       }
+      },
+      {
+       "color": "#e2e8f0",
+       "top": 709,
+       "hsl": {
+        "h": 214,
+        "s": 0.32,
+        "l": 0.91
+       }
+      },
+      {
+       "color": "#0f172a",
+       "top": 3616,
+       "hsl": {
+        "h": 222,
+        "s": 0.47,
+        "l": 0.11
+       }
+      }
+     ],
+     "textColors": [
+      {
+       "color": "#0f172a",
+       "share": 0.46
+      },
+      {
+       "color": "#314158",
+       "share": 0.18
+      },
+      {
+       "color": "#ffffff",
+       "share": 0.15
+      },
+      {
+       "color": "#cad5e2",
+       "share": 0.09
+      },
+      {
+       "color": "#1d293d",
+       "share": 0.02
+      }
+     ],
+     "button": {
+      "bg": "#0f172a",
+      "hsl": {
+       "h": 222,
+       "s": 0.47,
+       "l": 0.11
+      },
+      "fg": "#ffffff"
+     },
+     "lowContrast": [
+      {
+       "text": "Workflow",
+       "ratio": 3.9,
+       "need": 4.5,
+       "size": 16,
+       "fg": "#0284c7",
+       "bg": "#f8fafc"
+      },
+      {
+       "text": "Documents",
+       "ratio": 3.9,
+       "need": 4.5,
+       "size": 16,
+       "fg": "#0284c7",
+       "bg": "#f8fafc"
+      },
+      {
+       "text": "Rates",
+       "ratio": 3.9,
+       "need": 4.5,
+       "size": 16,
+       "fg": "#0284c7",
+       "bg": "#f8fafc"
+      },
+      {
+       "text": "See counter workflow",
+       "ratio": 3.9,
+       "need": 4.5,
+       "size": 14,
+       "fg": "#0284c7",
+       "bg": "#f8fafc"
+      },
+      {
+       "text": "Operator Sign In",
+       "ratio": 4.1,
+       "need": 4.5,
+       "size": 13,
+       "fg": "#ffffff",
+       "bg": "#0284c7"
+      },
+      {
+       "text": "True net profit kept per 5-gallon jug af",
+       "ratio": 4.1,
+       "need": 4.5,
+       "size": 14,
+       "fg": "#ffffff",
+       "bg": "#0284c7"
+      }
+     ]
+    },
+    "buttons": {
+     "count": 8,
+     "inHero": 2,
+     "radius": 6,
+     "height": 79,
+     "withShadow": 0,
+     "withGradient": 0,
+     "mono": 0,
+     "upper": 0,
+     "heroLabels": [
+      "Operator Sign In",
+      "Open Operator Sign In"
+     ]
+    },
+    "surfaces": {
+     "shadowStatic": 0,
+     "shadowOverlay": 0,
+     "shadowSamples": [],
+     "gradients": 0,
+     "scrims": 0,
+     "gradientSamples": [],
+     "gradientText": 0,
+     "hairlines": 2,
+     "hairlineSamples": [
+      "div.flex.flex-col 1104px",
+      "div.pt-8.border-t 1104px"
+     ],
+     "outlinedBoxes": 0,
+     "dashed": 0,
+     "blurred": 0,
+     "roundedBoxes": 0,
+     "boxRadius": 0,
+     "squareMedia": 4,
+     "roundedMedia": 0,
+     "mediaRadius": 0,
+     "textShadow": 0,
+     "cardRows": []
+    },
+    "heroMedia": [],
+    "nav": {
+     "links": 3,
+     "fixed": false,
+     "height": 79,
+     "floatingPill": false,
+     "blur": false
+    },
+    "fontsLoaded": [
+     "ibm plex mono",
+     "ibm plex sans"
+    ]
+   },
+   "layout": {
+    "viewport": {
+     "w": 1440,
+     "h": 900
+    },
+    "pageH": 4066,
+    "margins": {
+     "left": 168,
+     "right": 171
+    },
+    "sections": [
+     {
+      "sel": "section.taste-wrap.max-w-6xl",
+      "tag": "section",
+      "top": 79,
+      "height": 629,
+      "words": 77,
+      "media": 2,
+      "middle": 52,
+      "heading": {
+       "text": "Water station",
+       "size": 61,
+       "tag": "h1"
+      },
+      "left": 168,
+      "right": 168,
+      "textLeft": 168,
+      "textRight": 431,
+      "fullBleed": false,
+      "footer": false,
+      "hero": true,
+      "continues": false,
+      "pinned": false
+     },
+     {
+      "sel": "section#workflow.py-20.bg-[var(--surface)]",
+      "tag": "section",
+      "top": 709,
+      "height": 1381,
+      "words": 239,
+      "media": 0,
+      "middle": 0,
+      "heading": {
+       "text": "Counter to gate",
+       "size": 38,
+       "tag": "h2"
+      },
+      "left": 296,
+      "right": 316,
+      "textLeft": 296,
+      "textRight": 316,
+      "fullBleed": false,
+      "footer": false,
+      "hero": false,
+      "continues": false,
+      "pinned": false
+     },
+     {
+      "sel": "section#documents.py-20",
+      "tag": "section",
+      "top": 2090,
+      "height": 803,
+      "words": 119,
+      "media": 2,
+      "middle": 0,
+      "heading": {
+       "text": "Four station documents",
+       "size": 38,
+       "tag": "h2"
+      },
+      "left": 168,
+      "right": 171,
+      "textLeft": 168,
+      "textRight": 171,
+      "fullBleed": false,
+      "footer": false,
+      "hero": false,
+      "continues": false,
+      "pinned": false
+     },
+     {
+      "sel": "section#rates.py-20.bg-[var(--surface)]",
+      "tag": "section",
+      "top": 2893,
+      "height": 723,
+      "words": 127,
+      "media": 0,
+      "middle": 0,
+      "heading": {
+       "text": "PHP 25",
+       "size": 48,
+       "tag": "span"
+      },
+      "left": 168,
+      "right": 208,
+      "textLeft": 168,
+      "textRight": 211,
+      "fullBleed": false,
+      "footer": false,
+      "hero": false,
+      "continues": false,
+      "pinned": false
+     },
+     {
+      "sel": "footer.pt-16.pb-12",
+      "tag": "footer",
+      "top": 3616,
+      "height": 450,
+      "words": 73,
+      "media": 0,
+      "middle": 0,
+      "heading": {
+       "text": "+63 917 000 0001",
+       "size": 61,
+       "tag": "a"
+      },
+      "left": 168,
+      "right": 168,
+      "textLeft": 168,
+      "textRight": 168,
+      "fullBleed": false,
+      "footer": true,
+      "hero": false,
+      "continues": false,
+      "pinned": false
+     }
+    ],
+    "gaps": [],
+    "h1s": [
+     {
+      "text": "Water station counter POS",
+      "size": 61,
+      "top": 127,
+      "firstScreen": true
+     }
+    ],
+    "edgeText": [],
+    "edges": [
+     {
+      "x": 168,
+      "n": 5
+     },
+     {
+      "x": 296,
+      "n": 5
+     },
+     {
+      "x": 208,
+      "n": 3
+     },
+     {
+      "x": 668,
+      "n": 3
+     },
+     {
+      "x": 648,
+      "n": 2
+     },
+     {
+      "x": 188,
+      "n": 1
+     }
+    ],
+    "leftBlocks": 19,
+    "bodySize": 14,
+    "stage": false,
+    "explains": true,
+    "slivers": [],
+    "voidShare": 0.14,
+    "voidBox": {
+     "x": 0,
+     "y": 480,
+     "w": 600,
+     "h": 300
+    }
+   },
+   "app": {
+    "viewport": {
+     "w": 1440,
+     "h": 900
+    },
+    "dark": false,
+    "ground": "#f1f5f9",
+    "sidebar": null,
+    "topbar": null,
+    "canvas": {
+     "left": 168,
+     "right": 12
+    },
+    "hero": {
+     "text": "Water station counter POS",
+     "words": 4,
+     "chars": 25,
+     "lines": 2,
+     "size": 61,
+     "vw": 4.2,
+     "font": "IBM Plex Sans",
+     "weight": 600,
+     "tracking": -0.02,
+     "leading": 1.05,
+     "top": 127,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "charts": 0,
+    "layout": {
+     "panels": 16,
+     "firstScreen": 2,
+     "ragged": [],
+     "voids": [
+      {
+       "gap": 89,
+       "at": 3287,
+       "panel": "Slim container refill"
+      },
+      {
+       "gap": 85,
+       "at": 3291,
+       "panel": "Doorstep route delivery"
+      }
+     ]
+    },
+    "tiles": 0,
+    "panels": {
+     "count": 19,
+     "radii": [
+      [
+       0,
+       19
+      ]
+     ],
+     "heavyBorders": 0,
+     "borderSamples": [],
+     "heavyShadows": 0,
+     "softShadows": 0,
+     "shadowSamples": [],
+     "glass": 0
+    },
+    "chips": {
+     "count": 0,
+     "hues": 0,
+     "samples": []
+    },
+    "numbers": {
+     "cells": 0,
+     "leftAligned": 0,
+     "figures": 1,
+     "tabularShare": 0,
+     "kpiMax": 60.8
+    },
+    "rows": {
+     "count": 6,
+     "median": 28
+    },
+    "chartHues": 0,
+    "placeholders": [],
+    "type": {
+     "under13": 0.05,
+     "tiny": 0,
+     "tinySamples": [],
+     "sizes": [
+      12,
+      13,
+      14,
+      16,
+      18,
+      20,
+      24,
+      36,
+      38,
+      48,
+      61
+     ]
+    },
+    "title": {
+     "text": "Water station\ncounter POS",
+     "size": 61,
+     "top": 127
+    },
+    "colourShare": 0.06
+   },
+   "consoleErrors": []
+  },
+  {
+   "width": 768,
+   "height": 1024,
+   "load": "load",
+   "screens": 6,
+   "filled": [
+    0.96,
+    1,
+    1,
+    1,
+    1,
+    1
+   ],
+   "motion": {
+    "elements": 18,
+    "css": 0,
+    "transitions": 0,
+    "scripted": 18,
+    "videos": 0,
+    "playingVideos": 0
+   },
+   "metrics": {
+    "viewport": {
+     "w": 768,
+     "h": 1024
+    },
+    "page": {
+     "height": 5379,
+     "screens": 5.3,
+     "words": 625,
+     "img": 4,
+     "video": 0,
+     "canvas": 0,
+     "svg": 10,
+     "sections": 4,
+     "horizontalOverflow": 0,
+     "overflowCulprits": [],
+     "uiFragments": 5,
+     "uiAbuse": false,
+     "realPictures": 4,
+     "videoCount": 0,
+     "uiPictures": 2,
+     "pictureSamples": [
+      "drops-impact.jpg",
+      "water-station-bay.jpg",
+      "water-drop-001.jpg",
+      "blue-metal-water-drops-dtxr-wt-1.jpg"
+     ],
+     "blendText": 0,
+     "sideScrollers": 0,
+     "brokenImages": [],
+     "emoji": [],
+     "videosNoPoster": 0
+    },
+    "hero": {
+     "text": "Water station counter POS",
+     "words": 4,
+     "chars": 25,
+     "lines": 2,
+     "size": 50,
+     "vw": 6.5,
+     "font": "IBM Plex Sans",
+     "weight": 600,
+     "tracking": -0.02,
+     "leading": 1.05,
+     "top": 458,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "h1": {
+     "text": "Water station counter POS",
+     "words": 4,
+     "lines": 2,
+     "size": 49.9,
+     "font": "IBM Plex Sans"
+    },
+    "headings": [
+     {
+      "text": "Water station counter POS",
+      "words": 4,
+      "chars": 25,
+      "lines": 2,
+      "size": 49.9,
+      "vw": 6.5,
+      "font": "IBM Plex Sans",
+      "weight": 600,
+      "tracking": -0.025,
+      "leading": 1.05,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.94,
+      "top": 458,
+      "tag": "h1",
+      "kind": "heading"
+     },
+     {
+      "text": "PHP 17.00",
+      "words": 2,
+      "chars": 9,
+      "lines": 1,
+      "size": 36,
+      "vw": 4.7,
+      "font": "IBM Plex Mono",
+      "weight": 700,
+      "tracking": 0,
+      "leading": 1.25,
+      "upper": true,
+      "italic": false,
+      "mono": true,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.45,
+      "top": 863,
+      "tag": "span",
+      "kind": "heading"
+     },
+     {
+      "text": "Counter to gate",
+      "words": 3,
+      "chars": 15,
+      "lines": 1,
+      "size": 33,
+      "vw": 4.3,
+      "font": "IBM Plex Sans",
+      "weight": 600,
+      "tracking": -0.02,
+      "leading": 1.15,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.94,
+      "top": 1133,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Four station documents",
+      "words": 3,
+      "chars": 22,
+      "lines": 1,
+      "size": 33,
+      "vw": 4.3,
+      "font": "IBM Plex Sans",
+      "weight": 600,
+      "tracking": -0.02,
+      "leading": 1.15,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.94,
+      "top": 2522,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Station refill rates",
+      "words": 3,
+      "chars": 20,
+      "lines": 1,
+      "size": 33,
+      "vw": 4.3,
+      "font": "IBM Plex Sans",
+      "weight": 600,
+      "tracking": -0.02,
+      "leading": 1.15,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.94,
+      "top": 3830,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "PHP 25",
+      "words": 2,
+      "chars": 6,
+      "lines": 1,
+      "size": 48,
+      "vw": 6.3,
+      "font": "IBM Plex Mono",
+      "weight": 700,
+      "tracking": 0,
+      "leading": 1,
+      "upper": true,
+      "italic": false,
+      "mono": true,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.23,
+      "top": 4221,
+      "tag": "span",
+      "kind": "heading"
+     },
+     {
+      "text": "PHP 30",
+      "words": 2,
+      "chars": 6,
+      "lines": 1,
+      "size": 48,
+      "vw": 6.3,
+      "font": "IBM Plex Mono",
+      "weight": 700,
+      "tracking": 0,
+      "leading": 1,
+      "upper": true,
+      "italic": false,
+      "mono": true,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.23,
+      "top": 4681,
+      "tag": "span",
+      "kind": "heading"
+     },
+     {
+      "text": "+63 917 000 0001",
+      "words": 4,
+      "chars": 16,
+      "lines": 1,
+      "size": 49.9,
+      "vw": 6.5,
+      "font": "IBM Plex Sans",
+      "weight": 600,
+      "tracking": -0.025,
+      "leading": 1.05,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.94,
+      "top": 5138,
+      "tag": "a",
+      "kind": "heading"
+     }
+    ],
+    "headingSummary": {
+     "count": 8,
+     "maxLines": 2,
+     "over2Lines": 0,
+     "statements": 0,
+     "centered": 0,
+     "medianWords": 3,
+     "mixedFontHeadings": 0
+    },
+    "type": {
+     "families": [
+      {
+       "family": "IBM Plex Sans",
+       "share": 0.96,
+       "mono": false
+      },
+      {
+       "family": "IBM Plex Mono",
+       "share": 0.04,
+       "mono": true
+      }
+     ],
+     "familyCount": 2,
+     "sizes": [
+      12,
+      13,
+      14,
+      16,
+      18,
+      24,
+      33,
+      36,
+      48,
+      50
+     ],
+     "sizeCount": 10,
+     "notLoaded": [],
+     "body": {
+      "font": "IBM Plex Sans",
+      "size": 18.3,
+      "leading": 1.45,
+      "weight": 400,
+      "tracking": 0,
+      "contrast": 17.1
+     },
+     "measureChars": 66,
+     "max": {
+      "size": 49.9,
+      "vw": 6.5,
+      "font": "IBM Plex Sans",
+      "text": "Water station"
+     },
+     "monoShare": 0.04,
+     "monoProseShare": 0.04,
+     "monoFamilies": [
+      "IBM Plex Mono"
+     ],
+     "monoSamples": [
+      "PHP 17.00",
+      "PHP 200.00",
+      "PHP 30.00",
+      "PHP 230.00",
+      "PHP 130.00",
+      "PHP 100.00"
+     ],
+     "microLabels": 0,
+     "microLabelShare": 0,
+     "microSamples": [],
+     "upperShare": 0.04,
+     "centerShare": 0.04,
+     "smallText": 1
+    },
+    "eyebrows": [],
+    "numbered": [],
+    "color": {
+     "bodyBg": "#f1f5f9",
+     "bodyBgHsl": {
+      "h": 210,
+      "s": 0.4,
+      "l": 0.96
+     },
+     "dark": false,
+     "sectionBgs": [
+      {
+       "color": "#f8fafc",
+       "top": 0,
+       "hsl": {
+        "h": 210,
+        "s": 0.4,
+        "l": 0.98
+       }
+      },
+      {
+       "color": "#e2e8f0",
+       "top": 1053,
+       "hsl": {
+        "h": 214,
+        "s": 0.32,
+        "l": 0.91
+       }
+      },
+      {
+       "color": "#0369a1",
+       "top": 4381,
+       "hsl": {
+        "h": 201,
+        "s": 0.96,
+        "l": 0.32
+       }
+      },
+      {
+       "color": "#0f172a",
+       "top": 4921,
+       "hsl": {
+        "h": 222,
+        "s": 0.47,
+        "l": 0.11
+       }
+      }
+     ],
+     "textColors": [
+      {
+       "color": "#0f172a",
+       "share": 0.46
+      },
+      {
+       "color": "#314158",
+       "share": 0.18
+      },
+      {
+       "color": "#ffffff",
+       "share": 0.15
+      },
+      {
+       "color": "#cad5e2",
+       "share": 0.09
+      },
+      {
+       "color": "#1d293d",
+       "share": 0.02
+      }
+     ],
+     "button": {
+      "bg": "#0f172a",
+      "hsl": {
+       "h": 222,
+       "s": 0.47,
+       "l": 0.11
+      },
+      "fg": "#ffffff"
+     },
+     "lowContrast": [
+      {
+       "text": "Workflow",
+       "ratio": 3.9,
+       "need": 4.5,
+       "size": 16,
+       "fg": "#0284c7",
+       "bg": "#f8fafc"
+      },
+      {
+       "text": "Documents",
+       "ratio": 3.9,
+       "need": 4.5,
+       "size": 16,
+       "fg": "#0284c7",
+       "bg": "#f8fafc"
+      },
+      {
+       "text": "Rates",
+       "ratio": 3.9,
+       "need": 4.5,
+       "size": 16,
+       "fg": "#0284c7",
+       "bg": "#f8fafc"
+      },
+      {
+       "text": "See counter workflow",
+       "ratio": 3.9,
+       "need": 4.5,
+       "size": 14,
+       "fg": "#0284c7",
+       "bg": "#f8fafc"
+      },
+      {
+       "text": "Operator Sign In",
+       "ratio": 4.1,
+       "need": 4.5,
+       "size": 13,
+       "fg": "#ffffff",
+       "bg": "#0284c7"
+      },
+      {
+       "text": "True net profit kept per 5-gallon jug af",
+       "ratio": 4.1,
+       "need": 4.5,
+       "size": 14,
+       "fg": "#ffffff",
+       "bg": "#0284c7"
+      }
+     ]
+    },
+    "buttons": {
+     "count": 8,
+     "inHero": 2,
+     "radius": 6,
+     "height": 79,
+     "withShadow": 0,
+     "withGradient": 0,
+     "mono": 0,
+     "upper": 0,
+     "heroLabels": [
+      "Operator Sign In",
+      "Open Operator Sign In"
+     ]
+    },
+    "surfaces": {
+     "shadowStatic": 0,
+     "shadowOverlay": 0,
+     "shadowSamples": [],
+     "gradients": 0,
+     "scrims": 0,
+     "gradientSamples": [],
+     "gradientText": 0,
+     "hairlines": 2,
+     "hairlineSamples": [
+      "div.flex.flex-col 720px",
+      "div.pt-8.border-t 720px"
+     ],
+     "outlinedBoxes": 0,
+     "dashed": 0,
+     "blurred": 0,
+     "roundedBoxes": 0,
+     "boxRadius": 0,
+     "squareMedia": 4,
+     "roundedMedia": 0,
+     "mediaRadius": 0,
+     "textShadow": 0,
+     "cardRows": []
+    },
+    "heroMedia": [
+     {
+      "type": "img",
+      "ratio": 0.12
+     },
+     {
+      "type": "img",
+      "ratio": 0.12
+     }
+    ],
+    "nav": {
+     "links": 3,
+     "fixed": false,
+     "height": 104,
+     "floatingPill": false,
+     "blur": false
+    },
+    "fontsLoaded": [
+     "ibm plex mono",
+     "ibm plex sans"
+    ]
+   },
+   "layout": {
+    "viewport": {
+     "w": 768,
+     "h": 1024
+    },
+    "pageH": 5379,
+    "margins": {
+     "left": 24,
+     "right": 24
+    },
+    "sections": [
+     {
+      "sel": "section.taste-wrap.max-w-6xl",
+      "tag": "section",
+      "top": 104,
+      "height": 949,
+      "words": 77,
+      "media": 2,
+      "middle": 0,
+      "heading": {
+       "text": "Water station",
+       "size": 50,
+       "tag": "h1"
+      },
+      "left": 24,
+      "right": 24,
+      "textLeft": 24,
+      "textRight": 45,
+      "fullBleed": false,
+      "footer": false,
+      "hero": true,
+      "continues": false,
+      "pinned": false
+     },
+     {
+      "sel": "section#workflow.py-20.bg-[var(--surface)]",
+      "tag": "section",
+      "top": 1053,
+      "height": 1389,
+      "words": 239,
+      "media": 0,
+      "middle": 0,
+      "heading": {
+       "text": "Counter to gate",
+       "size": 33,
+       "tag": "h2"
+      },
+      "left": 24,
+      "right": 37,
+      "textLeft": 24,
+      "textRight": 37,
+      "fullBleed": false,
+      "footer": false,
+      "hero": false,
+      "continues": false,
+      "pinned": false
+     },
+     {
+      "sel": "section#documents.py-20",
+      "tag": "section",
+      "top": 2442,
+      "height": 1308,
+      "words": 119,
+      "media": 2,
+      "middle": 0,
+      "heading": {
+       "text": "Four station documents",
+       "size": 33,
+       "tag": "h2"
+      },
+      "left": 24,
+      "right": 24,
+      "textLeft": 24,
+      "textRight": 53,
+      "fullBleed": false,
+      "footer": false,
+      "hero": false,
+      "continues": false,
+      "pinned": false
+     },
+     {
+      "sel": "section#rates.py-20.bg-[var(--surface)]",
+      "tag": "section",
+      "top": 3750,
+      "height": 1171,
+      "words": 127,
+      "media": 0,
+      "middle": 0,
+      "heading": {
+       "text": "PHP 25",
+       "size": 48,
+       "tag": "span"
+      },
+      "left": 24,
+      "right": 64,
+      "textLeft": 24,
+      "textRight": 70,
+      "fullBleed": false,
+      "footer": false,
+      "hero": false,
+      "continues": false,
+      "pinned": false
+     },
+     {
+      "sel": "footer.pt-16.pb-12",
+      "tag": "footer",
+      "top": 4921,
+      "height": 458,
+      "words": 73,
+      "media": 0,
+      "middle": 8,
+      "heading": {
+       "text": "+63 917 000 0001",
+       "size": 50,
+       "tag": "a"
+      },
+      "left": 24,
+      "right": 24,
+      "textLeft": 24,
+      "textRight": 24,
+      "fullBleed": false,
+      "footer": true,
+      "hero": false,
+      "continues": false,
+      "pinned": false
+     }
+    ],
+    "gaps": [],
+    "h1s": [
+     {
+      "text": "Water station counter POS",
+      "size": 50,
+      "top": 458,
+      "firstScreen": true
+     }
+    ],
+    "edgeText": [],
+    "edges": [
+     {
+      "x": 24,
+      "n": 12
+     },
+     {
+      "x": 64,
+      "n": 6
+     },
+     {
+      "x": 44,
+      "n": 1
+     }
+    ],
+    "leftBlocks": 19,
+    "bodySize": 14,
+    "stage": false,
+    "explains": true,
+    "slivers": [],
+    "voidShare": 0,
+    "voidBox": null
+   },
+   "app": {
+    "viewport": {
+     "w": 768,
+     "h": 1024
+    },
+    "dark": false,
+    "ground": "#f1f5f9",
+    "sidebar": null,
+    "topbar": null,
+    "canvas": {
+     "left": 24,
+     "right": 12
+    },
+    "hero": {
+     "text": "Water station counter POS",
+     "words": 4,
+     "chars": 25,
+     "lines": 2,
+     "size": 50,
+     "vw": 6.5,
+     "font": "IBM Plex Sans",
+     "weight": 600,
+     "tracking": -0.02,
+     "leading": 1.05,
+     "top": 458,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "charts": 0,
+    "layout": {
+     "panels": 16,
+     "firstScreen": 2,
+     "ragged": [],
+     "voids": [
+      {
+       "gap": 109,
+       "at": 4112,
+       "panel": "Slim container refill"
+      },
+      {
+       "gap": 85,
+       "at": 4596,
+       "panel": "Doorstep route delivery"
+      }
+     ]
+    },
+    "tiles": 0,
+    "panels": {
+     "count": 19,
+     "radii": [
+      [
+       0,
+       19
+      ]
+     ],
+     "heavyBorders": 0,
+     "borderSamples": [],
+     "heavyShadows": 0,
+     "softShadows": 0,
+     "shadowSamples": [],
+     "glass": 0
+    },
+    "chips": {
+     "count": 0,
+     "hues": 0,
+     "samples": []
+    },
+    "numbers": {
+     "cells": 0,
+     "leftAligned": 0,
+     "figures": 1,
+     "tabularShare": 0,
+     "kpiMax": 49.92
+    },
+    "rows": {
+     "count": 6,
+     "median": 28
+    },
+    "chartHues": 0,
+    "placeholders": [],
+    "type": {
+     "under13": 0.05,
+     "tiny": 0,
+     "tinySamples": [],
+     "sizes": [
+      12,
+      13,
+      14,
+      16,
+      18,
+      20,
+      24,
+      33,
+      36,
+      48,
+      50
+     ]
+    },
+    "title": {
+     "text": "Water station\ncounter POS",
+     "size": 50,
+     "top": 458
+    },
+    "colourShare": 0.108
+   },
+   "consoleErrors": []
+  },
+  {
+   "width": 390,
+   "height": 844,
+   "load": "load",
+   "screens": 8,
+   "filled": [
+    0.98,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+   ],
+   "motion": {
+    "elements": 18,
+    "css": 0,
+    "transitions": 0,
+    "scripted": 18,
+    "videos": 0,
+    "playingVideos": 0
+   },
+   "metrics": {
+    "viewport": {
+     "w": 390,
+     "h": 844
+    },
+    "page": {
+     "height": 6373,
+     "screens": 7.6,
+     "words": 616,
+     "img": 4,
+     "video": 0,
+     "canvas": 0,
+     "svg": 10,
+     "sections": 4,
+     "horizontalOverflow": 0,
+     "overflowCulprits": [],
+     "uiFragments": 5,
+     "uiAbuse": false,
+     "realPictures": 4,
+     "videoCount": 0,
+     "uiPictures": 3,
+     "pictureSamples": [
+      "drops-impact.jpg",
+      "water-station-bay.jpg",
+      "water-drop-001.jpg",
+      "blue-metal-water-drops-dtxr-wt-1.jpg"
+     ],
+     "blendText": 0,
+     "sideScrollers": 0,
+     "brokenImages": [],
+     "emoji": [],
+     "videosNoPoster": 0
+    },
+    "hero": {
+     "text": "Water station counter POS",
+     "words": 4,
+     "chars": 25,
+     "lines": 2,
+     "size": 35,
+     "vw": 8.9,
+     "font": "IBM Plex Sans",
+     "weight": 600,
+     "tracking": -0.02,
+     "leading": 1.05,
+     "top": 558,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "h1": {
+     "text": "Water station counter POS",
+     "words": 4,
+     "lines": 2,
+     "size": 34.8,
+     "font": "IBM Plex Sans"
+    },
+    "headings": [
+     {
+      "text": "LG Nature's Water",
+      "words": 3,
+      "chars": 17,
+      "lines": 2,
+      "size": 24,
+      "vw": 6.2,
+      "font": "IBM Plex Sans",
+      "weight": 700,
+      "tracking": -0.025,
+      "leading": 1.33,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.48,
+      "top": 24,
+      "tag": "div",
+      "kind": "heading"
+     },
+     {
+      "text": "Water station counter POS",
+      "words": 4,
+      "chars": 25,
+      "lines": 2,
+      "size": 34.8,
+      "vw": 8.9,
+      "font": "IBM Plex Sans",
+      "weight": 600,
+      "tracking": -0.025,
+      "leading": 1.05,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.88,
+      "top": 558,
+      "tag": "h1",
+      "kind": "heading"
+     },
+     {
+      "text": "PHP 17.00",
+      "words": 2,
+      "chars": 9,
+      "lines": 1,
+      "size": 30,
+      "vw": 7.7,
+      "font": "IBM Plex Mono",
+      "weight": 700,
+      "tracking": 0,
+      "leading": 1.25,
+      "upper": true,
+      "italic": false,
+      "mono": true,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.77,
+      "top": 1196,
+      "tag": "span",
+      "kind": "heading"
+     },
+     {
+      "text": "Counter to gate",
+      "words": 3,
+      "chars": 15,
+      "lines": 1,
+      "size": 26.2,
+      "vw": 6.7,
+      "font": "IBM Plex Sans",
+      "weight": 600,
+      "tracking": -0.02,
+      "leading": 1.15,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.88,
+      "top": 1458,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "First, snap the stacked container load at the bay.",
+      "words": 9,
+      "chars": 50,
+      "lines": 2,
+      "size": 24,
+      "vw": 6.2,
+      "font": "IBM Plex Sans",
+      "weight": 700,
+      "tracking": 0,
+      "leading": 1.33,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.88,
+      "top": 1565,
+      "tag": "h3",
+      "kind": "heading"
+     },
+     {
+      "text": "Next, sequence deliveries and pickups into one route.",
+      "words": 8,
+      "chars": 53,
+      "lines": 2,
+      "size": 24,
+      "vw": 6.2,
+      "font": "IBM Plex Sans",
+      "weight": 700,
+      "tracking": 0,
+      "leading": 1.33,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.88,
+      "top": 2059,
+      "tag": "h3",
+      "kind": "heading"
+     },
+     {
+      "text": "Finally, confirm payment to issue the official receipt.",
+      "words": 8,
+      "chars": 55,
+      "lines": 2,
+      "size": 24,
+      "vw": 6.2,
+      "font": "IBM Plex Sans",
+      "weight": 700,
+      "tracking": 0,
+      "leading": 1.33,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.88,
+      "top": 2581,
+      "tag": "h3",
+      "kind": "heading"
+     },
+     {
+      "text": "Four station documents",
+      "words": 3,
+      "chars": 22,
+      "lines": 1,
+      "size": 26.2,
+      "vw": 6.7,
+      "font": "IBM Plex Sans",
+      "weight": 600,
+      "tracking": -0.02,
+      "leading": 1.15,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.88,
+      "top": 3271,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Station refill rates",
+      "words": 3,
+      "chars": 20,
+      "lines": 1,
+      "size": 26.2,
+      "vw": 6.7,
+      "font": "IBM Plex Sans",
+      "weight": 600,
+      "tracking": -0.02,
+      "leading": 1.15,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.88,
+      "top": 4636,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Slim container refill",
+      "words": 3,
+      "chars": 21,
+      "lines": 1,
+      "size": 24,
+      "vw": 6.2,
+      "font": "IBM Plex Sans",
+      "weight": 700,
+      "tracking": 0,
+      "leading": 1.33,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.71,
+      "top": 4800,
+      "tag": "h3",
+      "kind": "heading"
+     },
+     {
+      "text": "PHP 25",
+      "words": 2,
+      "chars": 6,
+      "lines": 1,
+      "size": 48,
+      "vw": 12.3,
+      "font": "IBM Plex Mono",
+      "weight": 700,
+      "tracking": 0,
+      "leading": 1,
+      "upper": true,
+      "italic": false,
+      "mono": true,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.44,
+      "top": 5051,
+      "tag": "span",
+      "kind": "heading"
+     },
+     {
+      "text": "Doorstep route delivery",
+      "words": 3,
+      "chars": 23,
+      "lines": 1,
+      "size": 24,
+      "vw": 6.2,
+      "font": "IBM Plex Sans",
+      "weight": 700,
+      "tracking": 0,
+      "leading": 1.33,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.71,
+      "top": 5260,
+      "tag": "h3",
+      "kind": "heading"
+     },
+     {
+      "text": "PHP 30",
+      "words": 2,
+      "chars": 6,
+      "lines": 1,
+      "size": 48,
+      "vw": 12.3,
+      "font": "IBM Plex Mono",
+      "weight": 700,
+      "tracking": 0,
+      "leading": 1,
+      "upper": true,
+      "italic": false,
+      "mono": true,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.44,
+      "top": 5511,
+      "tag": "span",
+      "kind": "heading"
+     },
+     {
+      "text": "+63 917 000 0001",
+      "words": 4,
+      "chars": 16,
+      "lines": 1,
+      "size": 34.8,
+      "vw": 8.9,
+      "font": "IBM Plex Sans",
+      "weight": 600,
+      "tracking": -0.025,
+      "leading": 1.05,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.88,
+      "top": 6041,
+      "tag": "a",
+      "kind": "heading"
+     }
+    ],
+    "headingSummary": {
+     "count": 14,
+     "maxLines": 2,
+     "over2Lines": 0,
+     "statements": 0,
+     "centered": 0,
+     "medianWords": 3,
+     "mixedFontHeadings": 0
+    },
+    "type": {
+     "families": [
+      {
+       "family": "IBM Plex Sans",
+       "share": 0.96,
+       "mono": false
+      },
+      {
+       "family": "IBM Plex Mono",
+       "share": 0.04,
+       "mono": true
+      }
+     ],
+     "familyCount": 2,
+     "sizes": [
+      12,
+      13,
+      14,
+      16,
+      18,
+      24,
+      26,
+      30,
+      35,
+      48
+     ],
+     "sizeCount": 10,
+     "notLoaded": [],
+     "body": {
+      "font": "IBM Plex Sans",
+      "size": 17.6,
+      "leading": 1.45,
+      "weight": 400,
+      "tracking": 0,
+      "contrast": 17.1
+     },
+     "measureChars": 57,
+     "max": {
+      "size": 48,
+      "vw": 12.3,
+      "font": "IBM Plex Mono",
+      "text": "PHP 25"
+     },
+     "monoShare": 0.04,
+     "monoProseShare": 0.04,
+     "monoFamilies": [
+      "IBM Plex Mono"
+     ],
+     "monoSamples": [
+      "PHP 17.00",
+      "PHP 200.00",
+      "PHP 30.00",
+      "PHP 230.00",
+      "PHP 130.00",
+      "PHP 100.00"
+     ],
+     "microLabels": 0,
+     "microLabelShare": 0,
+     "microSamples": [],
+     "upperShare": 0.04,
+     "centerShare": 0.04,
+     "smallText": 1
+    },
+    "eyebrows": [],
+    "numbered": [],
+    "color": {
+     "bodyBg": "#f1f5f9",
+     "bodyBgHsl": {
+      "h": 210,
+      "s": 0.4,
+      "l": 0.96
+     },
+     "dark": false,
+     "sectionBgs": [
+      {
+       "color": "#f8fafc",
+       "top": 0,
+       "hsl": {
+        "h": 210,
+        "s": 0.4,
+        "l": 0.98
+       }
+      },
+      {
+       "color": "#e2e8f0",
+       "top": 1378,
+       "hsl": {
+        "h": 214,
+        "s": 0.32,
+        "l": 0.91
+       }
+      },
+      {
+       "color": "#ffffff",
+       "top": 2781,
+       "hsl": {
+        "h": 0,
+        "s": 0,
+        "l": 1
+       }
+      },
+      {
+       "color": "#0369a1",
+       "top": 5228,
+       "hsl": {
+        "h": 201,
+        "s": 0.96,
+        "l": 0.32
+       }
+      },
+      {
+       "color": "#0f172a",
+       "top": 5768,
+       "hsl": {
+        "h": 222,
+        "s": 0.47,
+        "l": 0.11
+       }
+      }
+     ],
+     "textColors": [
+      {
+       "color": "#0f172a",
+       "share": 0.47
+      },
+      {
+       "color": "#314158",
+       "share": 0.18
+      },
+      {
+       "color": "#ffffff",
+       "share": 0.15
+      },
+      {
+       "color": "#cad5e2",
+       "share": 0.09
+      },
+      {
+       "color": "#1d293d",
+       "share": 0.02
+      }
+     ],
+     "button": {
+      "bg": "#0f172a",
+      "hsl": {
+       "h": 222,
+       "s": 0.47,
+       "l": 0.11
+      },
+      "fg": "#ffffff"
+     },
+     "lowContrast": [
+      {
+       "text": "See counter workflow",
+       "ratio": 3.9,
+       "need": 4.5,
+       "size": 14,
+       "fg": "#0284c7",
+       "bg": "#f8fafc"
+      },
+      {
+       "text": "Operator Sign In",
+       "ratio": 4.1,
+       "need": 4.5,
+       "size": 13,
+       "fg": "#ffffff",
+       "bg": "#0284c7"
+      },
+      {
+       "text": "True net profit kept per 5-gallon jug af",
+       "ratio": 4.1,
+       "need": 4.5,
+       "size": 14,
+       "fg": "#ffffff",
+       "bg": "#0284c7"
+      }
+     ]
+    },
+    "buttons": {
+     "count": 8,
+     "inHero": 2,
+     "radius": 6,
+     "height": 79,
+     "withShadow": 0,
+     "withGradient": 0,
+     "mono": 0,
+     "upper": 0,
+     "heroLabels": [
+      "Operator Sign In",
+      "Open Operator Sign In"
+     ]
+    },
+    "surfaces": {
+     "shadowStatic": 0,
+     "shadowOverlay": 0,
+     "shadowSamples": [],
+     "gradients": 0,
+     "scrims": 0,
+     "gradientSamples": [],
+     "gradientText": 0,
+     "hairlines": 2,
+     "hairlineSamples": [
+      "div.flex.flex-col 342px",
+      "div.pt-8.border-t 342px"
+     ],
+     "outlinedBoxes": 0,
+     "dashed": 0,
+     "blurred": 0,
+     "roundedBoxes": 0,
+     "boxRadius": 0,
+     "squareMedia": 2,
+     "roundedMedia": 0,
+     "mediaRadius": 0,
+     "textShadow": 0,
+     "cardRows": []
+    },
+    "heroMedia": [
+     {
+      "type": "img",
+      "ratio": 0.22
+     }
+    ],
+    "nav": {
+     "links": 0,
+     "fixed": false,
+     "height": 104,
+     "floatingPill": false,
+     "blur": false
+    },
+    "fontsLoaded": [
+     "ibm plex mono",
+     "ibm plex sans"
+    ]
+   },
+   "layout": {
+    "viewport": {
+     "w": 390,
+     "h": 844
+    },
+    "pageH": 6373,
+    "margins": {
+     "left": 24,
+     "right": 24
+    },
+    "sections": [
+     {
+      "sel": "section.taste-wrap.max-w-6xl",
+      "tag": "section",
+      "top": 104,
+      "height": 1274,
+      "words": 77,
+      "media": 2,
+      "middle": 0,
+      "heading": {
+       "text": "Water station",
+       "size": 35,
+       "tag": "h1"
+      },
+      "left": 24,
+      "right": 24,
+      "textLeft": 24,
+      "textRight": 32,
+      "fullBleed": false,
+      "footer": false,
+      "hero": true,
+      "continues": false,
+      "pinned": false
+     },
+     {
+      "sel": "section#workflow.py-20.bg-[var(--surface)]",
+      "tag": "section",
+      "top": 1378,
+      "height": 1813,
+      "words": 239,
+      "media": 0,
+      "middle": 0,
+      "heading": {
+       "text": "Counter to gate",
+       "size": 26,
+       "tag": "h2"
+      },
+      "left": 24,
+      "right": 25,
+      "textLeft": 24,
+      "textRight": 25,
+      "fullBleed": false,
+      "footer": false,
+      "hero": false,
+      "continues": false,
+      "pinned": false
+     },
+     {
+      "sel": "section#documents.py-20",
+      "tag": "section",
+      "top": 3191,
+      "height": 1364,
+      "words": 119,
+      "media": 2,
+      "middle": 0,
+      "heading": {
+       "text": "Four station documents",
+       "size": 26,
+       "tag": "h2"
+      },
+      "left": 24,
+      "right": 24,
+      "textLeft": 24,
+      "textRight": 25,
+      "fullBleed": false,
+      "footer": false,
+      "hero": false,
+      "continues": false,
+      "pinned": false
+     },
+     {
+      "sel": "section#rates.py-20.bg-[var(--surface)]",
+      "tag": "section",
+      "top": 4556,
+      "height": 1212,
+      "words": 127,
+      "media": 0,
+      "middle": 0,
+      "heading": {
+       "text": "PHP 25",
+       "size": 48,
+       "tag": "span"
+      },
+      "left": 24,
+      "right": 28,
+      "textLeft": 24,
+      "textRight": 28,
+      "fullBleed": false,
+      "footer": false,
+      "hero": false,
+      "continues": false,
+      "pinned": false
+     },
+     {
+      "sel": "footer.pt-16.pb-12",
+      "tag": "footer",
+      "top": 5768,
+      "height": 605,
+      "words": 73,
+      "media": 0,
+      "middle": 0,
+      "heading": {
+       "text": "+63 917 000 0001",
+       "size": 35,
+       "tag": "a"
+      },
+      "left": 24,
+      "right": 24,
+      "textLeft": 24,
+      "textRight": 34,
+      "fullBleed": false,
+      "footer": true,
+      "hero": false,
+      "continues": false,
+      "pinned": false
+     }
+    ],
+    "gaps": [],
+    "h1s": [
+     {
+      "text": "Water station counter POS",
+      "size": 35,
+      "top": 558,
+      "firstScreen": true
+     }
+    ],
+    "edgeText": [],
+    "edges": [
+     {
+      "x": 24,
+      "n": 12
+     },
+     {
+      "x": 56,
+      "n": 6
+     },
+     {
+      "x": 44,
+      "n": 1
+     }
+    ],
+    "leftBlocks": 19,
+    "bodySize": 14,
+    "stage": false,
+    "explains": false,
+    "slivers": [],
+    "voidShare": 0,
+    "voidBox": null
+   },
+   "app": {
+    "viewport": {
+     "w": 390,
+     "h": 844
+    },
+    "dark": false,
+    "ground": "#f1f5f9",
+    "sidebar": null,
+    "topbar": null,
+    "canvas": {
+     "left": 24,
+     "right": 12
+    },
+    "hero": {
+     "text": "Water station counter POS",
+     "words": 4,
+     "chars": 25,
+     "lines": 2,
+     "size": 35,
+     "vw": 8.9,
+     "font": "IBM Plex Sans",
+     "weight": 600,
+     "tracking": -0.02,
+     "leading": 1.05,
+     "top": 558,
+     "tag": "h1",
+     "kind": "heading",
+     "align": "left",
+     "position": "left"
+    },
+    "charts": 0,
+    "layout": {
+     "panels": 16,
+     "firstScreen": 1,
+     "ragged": [],
+     "voids": []
+    },
+    "tiles": 0,
+    "panels": {
+     "count": 19,
+     "radii": [
+      [
+       0,
+       19
+      ]
+     ],
+     "heavyBorders": 0,
+     "borderSamples": [],
+     "heavyShadows": 0,
+     "softShadows": 0,
+     "shadowSamples": [],
+     "glass": 0
+    },
+    "chips": {
+     "count": 0,
+     "hues": 0,
+     "samples": []
+    },
+    "numbers": {
+     "cells": 0,
+     "leftAligned": 0,
+     "figures": 1,
+     "tabularShare": 0,
+     "kpiMax": 34.8
+    },
+    "rows": {
+     "count": 6,
+     "median": 48
+    },
+    "chartHues": 0,
+    "placeholders": [],
+    "type": {
+     "under13": 0.05,
+     "tiny": 0,
+     "tinySamples": [],
+     "sizes": [
+      12,
+      13,
+      14,
+      16,
+      18,
+      20,
+      24,
+      26,
+      30,
+      35,
+      48
+     ]
+    },
+    "title": {
+     "text": "Water station\ncounter POS",
+     "size": 35,
+     "top": 558
+    },
+    "colourShare": 0.052
+   },
+   "consoleErrors": []
+  }
+ ],
+ "findings": [
+  {
+   "level": "WARN",
+   "id": "contrast",
+   "width": 1440,
+   "message": "Low-contrast text: \"Workflow\" 3.9:1 needs 4.5:1; \"Documents\" 3.9:1 needs 4.5:1; \"Rates\" 3.9:1 needs 4.5:1; \"See counter workflow\" 3.9:1 needs 4.5:1",
+   "fix": "Darken or lighten the text colour.",
+   "alsoAt": [
+    768,
+    390
+   ]
+  },
+  {
+   "level": "WARN",
+   "id": "below-fold",
+   "width": 1440,
+   "message": "Only 2 of 16 blocks start on the first 1440px screen.",
+   "fix": "Every block the brief names shows its header and first rows on the first desktop screen: size the headline block to its question, cap long lists with \"View all\", and put time-sensitive blocks before long tables."
+  },
+  {
+   "level": "WARN",
+   "id": "panel-void",
+   "width": 1440,
+   "message": "2 card(s) hold a blank band inside: 89px in \"Slim container refill\", 85px in \"Doorstep route delivery\".",
+   "fix": "A card stretches to its neighbour only when it has content to fill. Keep a legend or a note directly under its chart (only an action or a total may sit at a stretched card's foot), let a short card keep its own height (align-items: start), and let a filtered block shrink to its rows."
+  },
+  {
+   "level": "WARN",
+   "id": "app-title-size",
+   "width": 1440,
+   "message": "The h1 is 61px (\"Water station\ncounter POS\").",
+   "fix": "An app screen is not a landing page: the title is 18-32px (20-24px on a phone).",
+   "alsoAt": [
+    768,
+    390
+   ]
+  },
+  {
+   "level": "WARN",
+   "id": "kpi-size",
+   "width": 1440,
+   "message": "A figure is set at 61px.",
+   "fix": "Figures run 16-40px on app screens; none of the studied screens reaches 48px. Size and isolation make a number loud, not display type.",
+   "alsoAt": [
+    768
+   ]
+  }
+ ],
+ "images": [
+  {
+   "viewport": "desktop",
+   "width": 1440,
+   "fold": "C:\\Users\\ThinkPad\\Desktop\\Danny\\LG-Natures Water\\.taste-skill\\inspect\\desktop-fold.jpg",
+   "pages": [
+    "C:\\Users\\ThinkPad\\Desktop\\Danny\\LG-Natures Water\\.taste-skill\\inspect\\desktop-page-01.jpg",
+    "C:\\Users\\ThinkPad\\Desktop\\Danny\\LG-Natures Water\\.taste-skill\\inspect\\desktop-page-02.jpg"
+   ],
+   "film": []
+  },
+  {
+   "viewport": "tablet",
+   "width": 768,
+   "fold": "C:\\Users\\ThinkPad\\Desktop\\Danny\\LG-Natures Water\\.taste-skill\\inspect\\tablet-fold.jpg",
+   "pages": [
+    "C:\\Users\\ThinkPad\\Desktop\\Danny\\LG-Natures Water\\.taste-skill\\inspect\\tablet-page-01.jpg"
+   ],
+   "film": []
+  },
+  {
+   "viewport": "mobile",
+   "width": 390,
+   "fold": "C:\\Users\\ThinkPad\\Desktop\\Danny\\LG-Natures Water\\.taste-skill\\inspect\\mobile-fold.jpg",
+   "pages": [
+    "C:\\Users\\ThinkPad\\Desktop\\Danny\\LG-Natures Water\\.taste-skill\\inspect\\mobile-page-01.jpg"
+   ],
+   "film": []
+  }
+ ]
+}

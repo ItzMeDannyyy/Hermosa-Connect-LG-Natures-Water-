@@ -131,6 +131,22 @@ function mapBackendPayloadToMobileState(rawPayload: {
       aiConfidencePercent: 96 + (index % 3),
       stopSequenceNumber: index + 1,
       createdAtLabel: String(rawOrder.invoicedAt ?? 'Today'),
+      latitude:
+        Number(rawOrder.latitude) ||
+        INITIAL_MOBILE_ORDERS[index % INITIAL_MOBILE_ORDERS.length]?.latitude ||
+        14.6415,
+      longitude:
+        Number(rawOrder.longitude) ||
+        INITIAL_MOBILE_ORDERS[index % INITIAL_MOBILE_ORDERS.length]?.longitude ||
+        121.0748,
+      etaMinutes:
+        Number(rawOrder.etaMinutes) ||
+        INITIAL_MOBILE_ORDERS[index % INITIAL_MOBILE_ORDERS.length]?.etaMinutes ||
+        5,
+      distanceKm:
+        Number(rawOrder.distanceKm) ||
+        INITIAL_MOBILE_ORDERS[index % INITIAL_MOBILE_ORDERS.length]?.distanceKm ||
+        1.0,
     });
   }
 

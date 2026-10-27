@@ -1,13 +1,14 @@
 /**
  * ============================================================================
  * FILE: src/components/common/DemoRoleSwitcherBar.tsx
- * PURPOSE: Top Ideathon 1-Tap Role Switcher Bar (Wireframe M0) allowing instant
- *          switching between Customer, Rider, and Operator views, plus Sign Out.
+ * PURPOSE: Top Mobile Role Switcher Bar allowing instant switching between
+ *          Customer and Rider mobile views, plus Sign Out.
+ *          Operator role removed per design architecture (Web POS only).
  *          Uses Lucide icons (lucide-react-native) strictly.
  * ============================================================================
  */
 
-import { Home, LogOut, Store, Terminal, Truck } from 'lucide-react-native';
+import { Droplets, LogOut, Truck, User } from 'lucide-react-native';
 import React from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { sharedStyles } from '../../styles/theme.styles';
@@ -23,86 +24,72 @@ interface DemoRoleSwitcherBarProps {
 export function DemoRoleSwitcherBar(props: DemoRoleSwitcherBarProps) {
   const isCustomerActive = props.activeRole === 'CUSTOMER';
   const isRiderActive = props.activeRole === 'RIDER';
-  const isOperatorActive = props.activeRole === 'OPERATOR';
 
   return (
     <View style={sharedStyles.demoSwitcherTopBar}>
       <View style={sharedStyles.demoBarLeftLabelRow}>
-        <Terminal size={13} color="#93c5fd" />
-        <Text style={sharedStyles.demoBarTitleText}>Demo Switcher</Text>
+        <Droplets size={14} color="#38bdf8" />
+        <Text style={sharedStyles.demoBarTitleText}>LG NATURE&apos;S WATER</Text>
       </View>
 
       <View style={sharedStyles.demoRolePillsRow}>
-        {/* 1. Customer Role Pill */}
-        <Pressable
-          onPress={() => {
-            props.onSelectRole('CUSTOMER');
-          }}
-          style={[
-            sharedStyles.demoRolePillButton,
-            isCustomerActive ? sharedStyles.demoRolePillButtonActive : null,
-          ]}
-        >
-          <Home size={12} color={isCustomerActive ? '#ffffff' : '#cbd5e1'} />
-          <Text
+        {/* Segmented Control: Customer | Rider */}
+        <View style={sharedStyles.segmentedControlTrack}>
+          <Pressable
+            onPress={() => {
+              props.onSelectRole('CUSTOMER');
+            }}
             style={[
-              sharedStyles.demoRolePillText,
-              isCustomerActive ? sharedStyles.demoRolePillTextActive : null,
+              sharedStyles.segmentedPillButton,
+              isCustomerActive ? sharedStyles.segmentedPillButtonActive : null,
             ]}
           >
-            Customer
-          </Text>
-        </Pressable>
+            <User
+              size={12}
+              color={isCustomerActive ? '#ffffff' : '#94a3b8'}
+            />
+            <Text
+              style={[
+                sharedStyles.segmentedPillText,
+                isCustomerActive ? sharedStyles.segmentedPillTextActive : null,
+              ]}
+            >
+              Customer
+            </Text>
+          </Pressable>
 
-        {/* 2. Rider Role Pill */}
-        <Pressable
-          onPress={() => {
-            props.onSelectRole('RIDER');
-          }}
-          style={[
-            sharedStyles.demoRolePillButton,
-            isRiderActive ? sharedStyles.demoRolePillButtonActive : null,
-          ]}
-        >
-          <Truck size={12} color={isRiderActive ? '#ffffff' : '#cbd5e1'} />
-          <Text
+          <Pressable
+            onPress={() => {
+              props.onSelectRole('RIDER');
+            }}
             style={[
-              sharedStyles.demoRolePillText,
-              isRiderActive ? sharedStyles.demoRolePillTextActive : null,
+              sharedStyles.segmentedPillButton,
+              isRiderActive ? sharedStyles.segmentedPillButtonActive : null,
             ]}
           >
-            Rider
-          </Text>
-        </Pressable>
+            <Truck
+              size={12}
+              color={isRiderActive ? '#ffffff' : '#94a3b8'}
+            />
+            <Text
+              style={[
+                sharedStyles.segmentedPillText,
+                isRiderActive ? sharedStyles.segmentedPillTextActive : null,
+              ]}
+            >
+              Rider
+            </Text>
+          </Pressable>
+        </View>
 
-        {/* 3. Operator Role Pill */}
-        <Pressable
-          onPress={() => {
-            props.onSelectRole('OPERATOR');
-          }}
-          style={[
-            sharedStyles.demoRolePillButton,
-            isOperatorActive ? sharedStyles.demoRolePillButtonActive : null,
-          ]}
-        >
-          <Store size={12} color={isOperatorActive ? '#ffffff' : '#cbd5e1'} />
-          <Text
-            style={[
-              sharedStyles.demoRolePillText,
-              isOperatorActive ? sharedStyles.demoRolePillTextActive : null,
-            ]}
-          >
-            Operator
-          </Text>
-        </Pressable>
-
-        {/* Sign Out Pill (only shown when logged in) */}
+        {/* Sign Out Action (only shown when authenticated) */}
         {props.isAuthenticated && (
           <Pressable
             onPress={props.onSignOut}
-            style={sharedStyles.demoRolePillButton}
+            accessibilityLabel="Sign Out"
+            style={sharedStyles.signOutIconButton}
           >
-            <LogOut size={12} color="#fca5a5" />
+            <LogOut size={13} color="#f87171" />
           </Pressable>
         )}
       </View>

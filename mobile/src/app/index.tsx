@@ -24,7 +24,6 @@ import { Pressable, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MobileLoginScreen } from '../components/auth/MobileLoginScreen';
 import { DemoRoleSwitcherBar } from '../components/common/DemoRoleSwitcherBar';
-import { OperatorMobileNoticeScreen } from '../components/common/OperatorMobileNoticeScreen';
 import { CustomerHomeScreen } from '../components/customer/CustomerHomeScreen';
 import { CustomerOrderTrackingScreen } from '../components/customer/CustomerOrderTrackingScreen';
 import { CustomerPickupScheduleScreen } from '../components/customer/CustomerPickupScheduleScreen';
@@ -569,7 +568,7 @@ export default function MobileApplicationIndexScreen() {
             >
               <Home
                 size={18}
-                color={activeCustomerTab === 'HOME' ? '#2563eb' : '#64748b'}
+                color={activeCustomerTab === 'HOME' ? '#0284c7' : '#64748b'}
               />
               <Text
                 style={[
@@ -579,7 +578,7 @@ export default function MobileApplicationIndexScreen() {
                     : null,
                 ]}
               >
-                Home (C1)
+                Home
               </Text>
             </Pressable>
 
@@ -596,7 +595,7 @@ export default function MobileApplicationIndexScreen() {
             >
               <Calendar
                 size={18}
-                color={activeCustomerTab === 'PICKUP' ? '#2563eb' : '#64748b'}
+                color={activeCustomerTab === 'PICKUP' ? '#0284c7' : '#64748b'}
               />
               <Text
                 style={[
@@ -606,7 +605,7 @@ export default function MobileApplicationIndexScreen() {
                     : null,
                 ]}
               >
-                Pickup (C2)
+                Schedule
               </Text>
             </Pressable>
 
@@ -623,7 +622,7 @@ export default function MobileApplicationIndexScreen() {
             >
               <Receipt
                 size={18}
-                color={activeCustomerTab === 'RECEIPTS' ? '#2563eb' : '#64748b'}
+                color={activeCustomerTab === 'RECEIPTS' ? '#0284c7' : '#64748b'}
               />
               <Text
                 style={[
@@ -633,7 +632,7 @@ export default function MobileApplicationIndexScreen() {
                     : null,
                 ]}
               >
-                Receipts (C3)
+                Tracking
               </Text>
             </Pressable>
           </View>
@@ -641,7 +640,7 @@ export default function MobileApplicationIndexScreen() {
       )}
 
       {/* ====================================================================
-          ROLE 2: DELIVERY RIDER VIEW (SCREENS R1, R2, R3 + BOTTOM TAB BAR)
+          ROLE 2: DELIVERY RIDER VIEW
           ==================================================================== */}
       {isAuthenticated && currentUser.role === 'RIDER' && (
         <View style={{ flex: 1 }}>
@@ -652,6 +651,7 @@ export default function MobileApplicationIndexScreen() {
                 branchName={currentUser.nearestBranchName}
                 orders={orders}
                 selectedOrderId={selectedRiderOrderId}
+                onSelectOrder={(orderId) => setSelectedRiderOrderId(orderId)}
                 onSelectOrderForAiCount={(orderId) => {
                   setSelectedRiderOrderId(orderId);
                   setActiveRiderTab('AI_COUNT');
@@ -712,7 +712,7 @@ export default function MobileApplicationIndexScreen() {
             )}
           </View>
 
-          {/* Rider Bottom Navigation Bar: [Route] [AI Count] [Printer / #OR] */}
+          {/* Rider Bottom Navigation Bar */}
           <View style={sharedStyles.bottomTabBar}>
             <Pressable
               onPress={() => {
@@ -727,7 +727,7 @@ export default function MobileApplicationIndexScreen() {
             >
               <Map
                 size={18}
-                color={activeRiderTab === 'ROUTE' ? '#2563eb' : '#64748b'}
+                color={activeRiderTab === 'ROUTE' ? '#0284c7' : '#64748b'}
               />
               <Text
                 style={[
@@ -737,7 +737,7 @@ export default function MobileApplicationIndexScreen() {
                     : null,
                 ]}
               >
-                Route (R1)
+                Manifest
               </Text>
             </Pressable>
 
@@ -754,7 +754,7 @@ export default function MobileApplicationIndexScreen() {
             >
               <Camera
                 size={18}
-                color={activeRiderTab === 'AI_COUNT' ? '#2563eb' : '#64748b'}
+                color={activeRiderTab === 'AI_COUNT' ? '#0284c7' : '#64748b'}
               />
               <Text
                 style={[
@@ -764,7 +764,7 @@ export default function MobileApplicationIndexScreen() {
                     : null,
                 ]}
               >
-                AI Count (R2)
+                AI Scanner
               </Text>
             </Pressable>
 
@@ -779,9 +779,9 @@ export default function MobileApplicationIndexScreen() {
                   : null,
               ]}
             >
-              <Printer
+              <Receipt
                 size={18}
-                color={activeRiderTab === 'DOORSTEP_OR' ? '#2563eb' : '#64748b'}
+                color={activeRiderTab === 'DOORSTEP_OR' ? '#0284c7' : '#64748b'}
               />
               <Text
                 style={[
@@ -791,22 +791,11 @@ export default function MobileApplicationIndexScreen() {
                     : null,
                 ]}
               >
-                Smart Receipt (R3)
+                Receipt
               </Text>
             </Pressable>
           </View>
         </View>
-      )}
-
-      {/* ====================================================================
-          ROLE 3: OPERATOR NOTICE SCREEN ON MOBILE
-          ==================================================================== */}
-      {isAuthenticated && currentUser.role === 'OPERATOR' && (
-        <OperatorMobileNoticeScreen
-          operatorName={currentUser.fullName}
-          branchName={currentUser.nearestBranchName}
-          onSwitchRole={handleDemoRoleSwitch}
-        />
       )}
     </SafeAreaView>
   );

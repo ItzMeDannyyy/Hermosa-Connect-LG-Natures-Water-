@@ -1,13 +1,10 @@
 /**
  * ============================================================================
  * FILE: src/components/customer/CustomerOrderTrackingScreen.tsx
- * PURPOSE: Implements Wireframe C3 (Live Order Status & "One Count, Two
- *          Documents" View — Features 05 & 06).
- *          - Shows 3-Step Progress Tracker (Photo Taken -> Out for Delivery -> Receipt Issued)
- *          - Shows Live Mini-Map Preview & Rider ETA
- *          - Shows Pre-Dispatch Invoice (#INV-1042) with AI Photo Boxed Count
- *            and converts automatically to Official Receipt (#OR-1042)
- *          - Uses Lucide icons (lucide-react-native) strictly.
+ * PURPOSE: Customer Live Order Tracking & "One Count, Two Documents" View.
+ *          Tracks order progression from Station Pre-Dispatch Invoice (#INV)
+ *          to Doorstep Official Receipt (#OR).
+ *          Strict Lucide icons (lucide-react-native).
  * ============================================================================
  */
 
@@ -16,6 +13,7 @@ import {
   Camera,
   CheckCircle2,
   Clock,
+  Droplets,
   FileText,
   Navigation,
   Receipt,
@@ -38,7 +36,7 @@ export function CustomerOrderTrackingScreen(
   const isOfficialReceiptIssued =
     props.order.documentStage === 'OFFICIAL_RECEIPT';
 
-  // Build explicit array of bounding box numbers [1..N] without complex chained syntax
+  // Build array of container indices
   const detectedBoxNumbers: number[] = [];
   for (let index = 1; index <= props.order.verifiedCount; index = index + 1) {
     detectedBoxNumbers.push(index);
@@ -46,7 +44,7 @@ export function CustomerOrderTrackingScreen(
 
   return (
     <ScrollView contentContainerStyle={customerStyles.scrollBody}>
-      {/* Top Back Bar */}
+      {/* Top Back Navigation Bar */}
       <Pressable
         onPress={props.onBackToHome}
         style={customerStyles.secondaryActionCard}
@@ -58,15 +56,16 @@ export function CustomerOrderTrackingScreen(
               Active Order #{props.order.orderNumber}
             </Text>
             <Text style={customerStyles.secondaryActionSub}>
-              One Count, Two Documents (#INV before dispatch -&gt; #OR at door)
+              Dual Document Tracking (#INV at station &rarr; #OR at door)
             </Text>
           </View>
         </View>
       </Pressable>
 
-      {/* 1. Three-Stage Order Progress Bar */}
+      {/* 1. Three-Stage Delivery Progress Stepper */}
       <View style={customerStyles.whitePanelCard}>
-        <Text style={customerStyles.sectionLabel}>LIVE ORDER PROGRESS</Text>
+        <Text style={customerStyles.sectionLabel}>Live Delivery Status</Text>
+
         <View style={customerStyles.progressStepsRow}>
           <View
             style={[
@@ -74,8 +73,8 @@ export function CustomerOrderTrackingScreen(
               customerStyles.progressStepBadgeDone,
             ]}
           >
-            <Camera size={14} color="#059669" />
-            <Text style={customerStyles.progressStepText}>Photo Taken</Text>
+            <Camera size={13} color="#059669" />
+            <Text style={customerStyles.progressStepText}>AI Audited</Text>
           </View>
 
           <View
@@ -87,77 +86,71 @@ export function CustomerOrderTrackingScreen(
             ]}
           >
             <Truck
-              size={14}
-              color={isOfficialReceiptIssued ? '#059669' : '#2563eb'}
+              size={13}
+              color={isOfficialReceiptIssued ? '#059669' : '#0284c7'}
             />
-            <Text style={customerStyles.progressStepText}>
-              Out for Delivery
-            </Text>
+            <Text style={customerStyles.progressStepText}>In Transit</Text>
           </View>
 
           <View
             style={[
               customerStyles.progressStepBadge,
-              isOfficialReceiptIssued
-                ? customerStyles.progressStepBadgeDone
-                : null,
+              isOfficialReceiptIssued ? customerStyles.progressStepBadgeDone : null,
             ]}
           >
             <Receipt
-              size={14}
-              color={isOfficialReceiptIssued ? '#059669' : '#64748b'}
+              size={13}
+              color={isOfficialReceiptIssued ? '#059669' : '#94a3b8'}
             />
-            <Text style={customerStyles.progressStepText}>Receipt Issued</Text>
+            <Text style={customerStyles.progressStepText}>Delivered &amp; OR</Text>
           </View>
         </View>
 
-        {/* Live Mini-Map Preview */}
+        {/* Live Rider ETA Preview */}
         <View style={customerStyles.miniMapPreviewBox}>
           <View style={customerStyles.miniMapTitleRow}>
             <View style={customerStyles.greetingRow}>
-              <Navigation size={15} color="#38bdf8" />
+              <Navigation size={14} color="#38bdf8" />
               <Text style={customerStyles.miniMapEtaText}>
                 {isOfficialReceiptIssued
                   ? `Delivered by Rider ${props.order.assignedRiderName}`
-                  : `Rider ${props.order.assignedRiderName} is 2 stops away (4 min)`}
+                  : `Rider ${props.order.assignedRiderName} is en route (ETA ~4 min)`}
               </Text>
             </View>
           </View>
           <Text style={customerStyles.miniMapSubText}>
-            Live Route: Station 1 -&gt; Pansol St Sequenced Corridor (
-            {props.order.scheduledTimeSlot})
+            Corridor: Station 1 &rarr; Pansol St, Quezon City ({props.order.scheduledTimeSlot})
           </Text>
         </View>
       </View>
 
-      {/* 2. Smart Document Card (#INV before dispatch -> #OR upon delivery) */}
+      {/* 2. Smart Billing Document Card */}
       <View style={customerStyles.whitePanelCard}>
         <View style={customerStyles.usualOrderHeaderRow}>
           <View style={customerStyles.usualOrderTitleRow}>
             <FileText
-              size={18}
-              color={isOfficialReceiptIssued ? '#059669' : '#2563eb'}
+              size={17}
+              color={isOfficialReceiptIssued ? '#059669' : '#0284c7'}
             />
             <Text style={customerStyles.usualOrderTitle}>
               {isOfficialReceiptIssued
                 ? `OFFICIAL RECEIPT #${props.order.receiptNumber}`
-                : `INVOICE #${props.order.invoiceNumber} (Before Dispatch)`}
+                : `PRE-DISPATCH INVOICE #${props.order.invoiceNumber}`}
             </Text>
           </View>
         </View>
 
         <Text style={customerStyles.secondaryActionSub}>
-          Issued {props.order.createdAtLabel} • Verified by Roboflow AI Photo (
+          Issued {props.order.createdAtLabel} &bull; Verified by Gemini AI Vision (
           {props.order.aiConfidencePercent}% confidence)
         </Text>
 
-        {/* AI Photo Boxed Containers Thumbnail Preview */}
+        {/* AI Verified Containers Grid */}
         <View style={customerStyles.aiPhotoThumbnailBox}>
           <View style={customerStyles.greetingRow}>
-            <Camera size={14} color="#34d399" />
+            <Droplets size={13} color="#34d399" />
             <Text style={customerStyles.miniMapSubText}>
-              Photo Thumbnail: {props.order.verifiedCount} Containers Boxed by
-              AI
+              Audit: {props.order.verifiedCount} Containers Verified on Vehicle
             </Text>
           </View>
 
@@ -174,7 +167,7 @@ export function CustomerOrderTrackingScreen(
           </View>
         </View>
 
-        {/* Itemized Billing Lines */}
+        {/* Itemized Billing Breakdown */}
         <View style={customerStyles.billRow}>
           <Text style={customerStyles.billRowLabel}>
             {props.order.verifiedCount} containers refilled (PHP{' '}
@@ -200,22 +193,21 @@ export function CustomerOrderTrackingScreen(
         </View>
 
         {isOfficialReceiptIssued ? (
-          <View style={customerStyles.reminderNoticeBox}>
-            <CheckCircle2 size={18} color="#059669" />
-            <Text style={customerStyles.reminderNoticeText}>
-              Official Receipt #{props.order.receiptNumber} issued! Paid PHP{' '}
-              {props.order.amountPaid.toFixed(2)} • Balance Due: PHP{' '}
+          <View style={[customerStyles.reminderNoticeBox, { backgroundColor: '#ecfdf5', borderColor: '#a7f3d0' }]}>
+            <CheckCircle2 size={16} color="#059669" />
+            <Text style={[customerStyles.reminderNoticeText, { color: '#065f46' }]}>
+              Official Receipt #{props.order.receiptNumber} confirmed. Paid PHP{' '}
+              {props.order.amountPaid.toFixed(2)} &bull; Balance Due: PHP{' '}
               {props.order.balanceDue.toFixed(2)} ({props.order.paymentState})
             </Text>
           </View>
         ) : (
           <View style={{ gap: 10 }}>
             <View style={customerStyles.reminderNoticeBox}>
-              <Clock size={18} color="#d97706" />
+              <Clock size={16} color="#b45309" />
               <Text style={customerStyles.reminderNoticeText}>
-                Status: AWAITING DELIVERY — Converts to Official Receipt #OR-
-                {props.order.orderNumber} automatically upon doorstep
-                confirmation.
+                Status: In Transit. Converts automatically to BIR Official Receipt #OR-
+                {props.order.orderNumber} upon doorstep payment confirmation.
               </Text>
             </View>
 
@@ -223,10 +215,9 @@ export function CustomerOrderTrackingScreen(
               onPress={props.onSimulateRiderDoorstepArrival}
               style={customerStyles.oneClickOrderButton}
             >
-              <CheckCircle2 size={17} color="#ffffff" />
+              <CheckCircle2 size={16} color="#ffffff" />
               <Text style={customerStyles.oneClickOrderButtonText}>
-                Simulate Doorstep Confirmation (-&gt; #OR-
-                {props.order.orderNumber})
+                CONFIRM DOORSTEP RECEIPT (#OR-{props.order.orderNumber})
               </Text>
             </Pressable>
           </View>

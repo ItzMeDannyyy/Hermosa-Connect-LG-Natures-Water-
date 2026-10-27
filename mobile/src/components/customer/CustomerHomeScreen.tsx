@@ -1,26 +1,22 @@
 /**
  * ============================================================================
  * FILE: src/components/customer/CustomerHomeScreen.tsx
- * PURPOSE: Implements Wireframe C1 (1-Click Order Home & Account Accountability).
- *          - Shows Customer Greeting, Pinned Address & Nearest Station Badge
- *          - Shows Accountability Summary (Empty Containers Out + Unpaid Balance)
- *          - Shows One-Click Usual Order Card (8x 5-Gal Slim + Delivery Fee)
- *          - Uses modular StyleSheet rules from src/styles/customer.styles.ts
- *          - Uses Lucide icons (lucide-react-native) strictly.
+ * PURPOSE: Customer Dashboard & 1-Tap Refill Ordering.
+ *          Displays real customer accountability metrics (empty jugs held +
+ *          unpaid balance), station status, and quick order repeat.
+ *          Strict Lucide icons (lucide-react-native).
  * ============================================================================
  */
 
 import {
   ArrowRight,
   Banknote,
-  Bell,
   Calendar,
   Droplets,
   FileText,
   MapPin,
   RefreshCw,
   Store,
-  User,
   Zap,
 } from 'lucide-react-native';
 import React from 'react';
@@ -50,61 +46,53 @@ export function CustomerHomeScreen(props: CustomerHomeScreenProps) {
       ? `#${props.activeOrder.receiptNumber} (Official Receipt)`
       : `#${props.activeOrder.invoiceNumber} (Out for Delivery)`;
 
+  const hasUnpaidBalance = props.customerSummary.unpaidBalanceAmount > 0;
+
   return (
     <ScrollView contentContainerStyle={customerStyles.scrollBody}>
-      {/* 1. Customer Greeting & Nearest Station Header Card */}
+      {/* 1. Customer Greeting & Station Status */}
       <View style={customerStyles.headerCard}>
         <View style={customerStyles.headerTopRow}>
           <View style={customerStyles.greetingRow}>
-            <Droplets size={20} color="#38bdf8" />
+            <Droplets size={18} color="#38bdf8" />
             <Text style={customerStyles.greetingText}>
-              Hi, {props.customerSummary.customerName}
+              {props.customerSummary.customerName}
             </Text>
           </View>
 
-          <View style={customerStyles.headerIconsRow}>
-            <View style={customerStyles.iconPillButton}>
-              <Bell size={14} color="#fde047" />
-              <Text style={customerStyles.iconPillBadgeText}>1</Text>
-            </View>
-            <View style={customerStyles.iconPillButton}>
-              <User size={14} color="#ffffff" />
-            </View>
+          <View style={customerStyles.nearestStationBadge}>
+            <Store size={12} color="#7dd3fc" />
+            <Text style={customerStyles.nearestStationText}>
+              {props.customerSummary.nearestStationLabel}
+            </Text>
           </View>
         </View>
 
         <View style={customerStyles.locationLine}>
-          <MapPin size={14} color="#93c5fd" />
+          <MapPin size={13} color="#7dd3fc" />
           <Text style={customerStyles.locationText}>
             {props.customerSummary.address}
           </Text>
         </View>
-
-        <View style={customerStyles.nearestStationBadge}>
-          <Store size={13} color="#7dd3fc" />
-          <Text style={customerStyles.nearestStationText}>
-            Nearest: {props.customerSummary.nearestStationLabel}
-          </Text>
-        </View>
       </View>
 
-      {/* 2. Accountability Summary (Empty Containers Out + Unpaid Balance) */}
+      {/* 2. Accountability Summary (Empty Jugs Out + Balance) */}
       <View>
-        <Text style={customerStyles.sectionLabel}>ACCOUNTABILITY SUMMARY</Text>
+        <Text style={customerStyles.sectionLabel}>Account Accountability</Text>
         <View style={customerStyles.accountabilityGrid}>
           {/* Empty Containers Held Card */}
           <View style={customerStyles.accountabilityCard}>
             <View style={customerStyles.accountabilityCardTitleRow}>
               <Text style={customerStyles.accountabilityCardLabel}>
-                Empty Containers
+                Containers Held
               </Text>
-              <RefreshCw size={15} color="#0284c7" />
+              <RefreshCw size={13} color="#0284c7" />
             </View>
             <Text style={customerStyles.accountabilityValueText}>
-              {props.customerSummary.emptyContainersOut} Gallons Out
+              {props.customerSummary.emptyContainersOut} Gallons
             </Text>
             <Text style={customerStyles.accountabilityMetaText}>
-              Due: {props.customerSummary.containersDueDateLabel}
+              Return Due: {props.customerSummary.containersDueDateLabel}
             </Text>
           </View>
 
@@ -112,31 +100,42 @@ export function CustomerHomeScreen(props: CustomerHomeScreenProps) {
           <View style={customerStyles.accountabilityCard}>
             <View style={customerStyles.accountabilityCardTitleRow}>
               <Text style={customerStyles.accountabilityCardLabel}>
-                Unpaid Balance
+                Outstanding Due
               </Text>
-              <Banknote size={15} color="#dc2626" />
+              <Banknote
+                size={13}
+                color={hasUnpaidBalance ? '#dc2626' : '#059669'}
+              />
             </View>
-            <Text style={customerStyles.accountabilityValueDanger}>
+            <Text
+              style={
+                hasUnpaidBalance
+                  ? customerStyles.accountabilityValueDanger
+                  : [customerStyles.accountabilityValueText, { color: '#059669' }]
+              }
+            >
               PHP {props.customerSummary.unpaidBalanceAmount.toFixed(2)}
             </Text>
             <Text style={customerStyles.accountabilityMetaText}>
-              From {props.customerSummary.unpaidFromReceiptCode}
+              {hasUnpaidBalance
+                ? `From ${props.customerSummary.unpaidFromReceiptCode}`
+                : 'All previous orders settled'}
             </Text>
           </View>
         </View>
       </View>
 
-      {/* 3. One-Click Usual Order Card */}
+      {/* 3. One-Click Usual Refill Card */}
       <View style={customerStyles.usualOrderCard}>
         <View style={customerStyles.usualOrderHeaderRow}>
           <View style={customerStyles.usualOrderTitleRow}>
-            <Zap size={17} color="#2563eb" />
+            <Zap size={16} color="#0284c7" />
             <Text style={customerStyles.usualOrderTitle}>
-              ONE-CLICK USUAL ORDER
+              1-Tap Usual Refill Order
             </Text>
           </View>
           <View style={customerStyles.presetTagPill}>
-            <Text style={customerStyles.presetTagText}>1-Tap Repeat</Text>
+            <Text style={customerStyles.presetTagText}>Quick Repeat</Text>
           </View>
         </View>
 
@@ -151,14 +150,14 @@ export function CustomerHomeScreen(props: CustomerHomeScreenProps) {
         </View>
 
         <View style={customerStyles.billRow}>
-          <Text style={customerStyles.billRowLabel}>Delivery Fee</Text>
+          <Text style={customerStyles.billRowLabel}>Station Delivery Fee</Text>
           <Text style={customerStyles.billRowValue}>
             PHP {usualBill.deliveryFee.toFixed(2)}
           </Text>
         </View>
 
         <View style={customerStyles.billTotalRow}>
-          <Text style={customerStyles.billTotalLabel}>Total</Text>
+          <Text style={customerStyles.billTotalLabel}>Total Due (COD / GCash)</Text>
           <Text style={customerStyles.billTotalValue}>
             PHP {usualBill.totalDue.toFixed(2)}
           </Text>
@@ -168,49 +167,49 @@ export function CustomerHomeScreen(props: CustomerHomeScreenProps) {
           onPress={props.onPlaceOneClickUsualOrder}
           style={customerStyles.oneClickOrderButton}
         >
-          <Droplets size={18} color="#ffffff" />
+          <Droplets size={16} color="#ffffff" />
           <Text style={customerStyles.oneClickOrderButtonText}>
-            TAP TO ORDER USUAL ({props.customerSummary.usualOrderGallons})
+            PLACE USUAL ORDER ({props.customerSummary.usualOrderGallons} JUGS)
           </Text>
         </Pressable>
       </View>
 
-      {/* 4. Quick Navigation to Schedule Empty Container Pickup (C2) */}
+      {/* 4. Quick Action: Schedule Empty Container Pickup */}
       <Pressable
         onPress={props.onNavigateToPickupSchedule}
         style={customerStyles.secondaryActionCard}
       >
         <View style={customerStyles.secondaryActionLeft}>
-          <Calendar size={20} color="#2563eb" />
+          <Calendar size={18} color="#0284c7" />
           <View style={{ flex: 1 }}>
             <Text style={customerStyles.secondaryActionTitle}>
-              Schedule Empty Container Pickup
+              Schedule Empty Jug Pickup
             </Text>
             <Text style={customerStyles.secondaryActionSub}>
-              Need a custom pickup day or time window? Set your schedule.
+              Return empty 5-gallon carboys on your preferred time slot
             </Text>
           </View>
         </View>
-        <ArrowRight size={18} color="#64748b" />
+        <ArrowRight size={16} color="#94a3b8" />
       </Pressable>
 
-      {/* 5. Quick Navigation to Live Order & Smart Receipt Tracking (C3) */}
+      {/* 5. Quick Action: Active Order Tracking */}
       <Pressable
         onPress={props.onNavigateToOrderTracking}
         style={customerStyles.secondaryActionCard}
       >
         <View style={customerStyles.secondaryActionLeft}>
-          <FileText size={20} color="#059669" />
+          <FileText size={18} color="#059669" />
           <View style={{ flex: 1 }}>
             <Text style={customerStyles.secondaryActionTitle}>
-              View Active Order: {activeDocLabel}
+              Active Order: {activeDocLabel}
             </Text>
             <Text style={customerStyles.secondaryActionSub}>
-              Live rider tracking &amp; AI photo-verified smart billing
+              View live driver status and AI photo verification
             </Text>
           </View>
         </View>
-        <ArrowRight size={18} color="#64748b" />
+        <ArrowRight size={16} color="#94a3b8" />
       </Pressable>
     </ScrollView>
   );

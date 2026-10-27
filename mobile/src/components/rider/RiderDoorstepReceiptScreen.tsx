@@ -1,12 +1,11 @@
 /**
  * ============================================================================
  * FILE: src/components/rider/RiderDoorstepReceiptScreen.tsx
- * PURPOSE: Implements Wireframe R3 (Doorstep Proof of Delivery & 4-State Smart
- *          Receipt — Features 05 & 06).
- *          - Converts #INV to Official Receipt #OR with zero re-encoding
- *          - Adapts to PAID_CASH, E_PAYMENT, PARTIAL, or UNPAID_CHARGE_SLIP
- *          - Shows Live Thermal Smart Receipt Preview (#OR) + Print / Send
- *          - Uses Lucide icons (lucide-react-native) strictly.
+ * PURPOSE: Doorstep Proof of Delivery & 4-State Smart Receipt.
+ *          Converts Station Pre-Dispatch Invoice (#INV) into Official
+ *          Receipt (#OR) with 4 payment states (Cash, GCash, Partial, Credit),
+ *          empty jug return tracking, and 58mm thermal print preview.
+ *          Strict Lucide icons (lucide-react-native).
  * ============================================================================
  */
 
@@ -100,7 +99,7 @@ export function RiderDoorstepReceiptScreen(
 
   return (
     <ScrollView contentContainerStyle={riderStyles.scrollBody}>
-      {/* Top Back Bar */}
+      {/* Top Back Navigation Bar */}
       <Pressable
         onPress={props.onBackToRoute}
         style={customerStyles.secondaryActionCard}
@@ -109,39 +108,44 @@ export function RiderDoorstepReceiptScreen(
           <ArrowLeft size={18} color="#0f172a" />
           <View>
             <Text style={customerStyles.secondaryActionTitle}>
-              Confirm Delivery • #{props.order.invoiceNumber} -&gt; #
-              {officialReceiptCode}
+              Confirm Delivery &bull; Order #{props.order.orderNumber}
             </Text>
             <Text style={customerStyles.secondaryActionSub}>
-              Customer: {props.order.customerName} • Zero re-encoding
+              Customer: {props.order.customerName} &bull; #{props.order.invoiceNumber} &rarr; #{officialReceiptCode}
             </Text>
           </View>
         </View>
       </Pressable>
 
-      {/* 1. Locked AI Count & Empty Containers Collected Stepper */}
+      {/* 1. Verified Load & Empty Containers Collected */}
       <View style={customerStyles.whitePanelCard}>
         <View style={customerStyles.billRow}>
-          <Text style={customerStyles.billRowLabel}>Verified Refill Count</Text>
+          <Text style={customerStyles.billRowLabel}>AI Verified Refills</Text>
           <Text style={customerStyles.billRowValue}>
-            {props.order.verifiedCount} Refills (Locked by AI)
+            {props.order.verifiedCount} Containers Refilled
           </Text>
         </View>
 
         <View style={customerStyles.billRow}>
           <Text style={customerStyles.billRowLabel}>
-            Empty Containers Collected
+            Empty Carboys Collected
           </Text>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
             <Pressable
               onPress={() => {
                 handleAdjustEmptyCollected(-1);
               }}
-              style={customerStyles.stepperButton}
+              disabled={emptyCollected <= 0}
+              style={[
+                customerStyles.stepperButton,
+                emptyCollected <= 0 ? { opacity: 0.4 } : null,
+              ]}
             >
               <Minus size={15} color="#0f172a" />
             </Pressable>
-            <Text style={customerStyles.billRowValue}>{emptyCollected}</Text>
+            <Text style={[customerStyles.billRowValue, { minWidth: 20, textAlign: 'center' }]}>
+              {emptyCollected}
+            </Text>
             <Pressable
               onPress={() => {
                 handleAdjustEmptyCollected(1);
@@ -161,10 +165,10 @@ export function RiderDoorstepReceiptScreen(
         </View>
       </View>
 
-      {/* 2. Select 4-State Payment at Doorstep */}
+      {/* 2. Select Doorstep Payment State */}
       <View style={customerStyles.whitePanelCard}>
         <Text style={customerStyles.sectionLabel}>
-          SELECT PAYMENT STATE AT DOORSTEP
+          Doorstep Payment State
         </Text>
 
         <View style={riderStyles.paymentStatesGrid}>
@@ -183,7 +187,7 @@ export function RiderDoorstepReceiptScreen(
             <Banknote
               size={15}
               color={
-                selectedPaymentState === 'PAID_CASH' ? '#2563eb' : '#475569'
+                selectedPaymentState === 'PAID_CASH' ? '#0284c7' : '#475569'
               }
             />
             <Text
@@ -194,7 +198,7 @@ export function RiderDoorstepReceiptScreen(
                   : null,
               ]}
             >
-              PAID (CASH)
+              Cash (COD)
             </Text>
           </Pressable>
 
@@ -213,7 +217,7 @@ export function RiderDoorstepReceiptScreen(
             <Smartphone
               size={15}
               color={
-                selectedPaymentState === 'E_PAYMENT' ? '#2563eb' : '#475569'
+                selectedPaymentState === 'E_PAYMENT' ? '#0284c7' : '#475569'
               }
             />
             <Text
@@ -224,7 +228,7 @@ export function RiderDoorstepReceiptScreen(
                   : null,
               ]}
             >
-              E-PAY (GCASH)
+              GCash / E-Pay
             </Text>
           </Pressable>
 
@@ -242,7 +246,7 @@ export function RiderDoorstepReceiptScreen(
           >
             <PieChart
               size={15}
-              color={selectedPaymentState === 'PARTIAL' ? '#2563eb' : '#475569'}
+              color={selectedPaymentState === 'PARTIAL' ? '#0284c7' : '#475569'}
             />
             <Text
               style={[
@@ -252,7 +256,7 @@ export function RiderDoorstepReceiptScreen(
                   : null,
               ]}
             >
-              PARTIAL
+              Partial
             </Text>
           </Pressable>
 
@@ -272,7 +276,7 @@ export function RiderDoorstepReceiptScreen(
               size={15}
               color={
                 selectedPaymentState === 'UNPAID_CHARGE_SLIP'
-                  ? '#2563eb'
+                  ? '#0284c7'
                   : '#475569'
               }
             />
@@ -284,14 +288,14 @@ export function RiderDoorstepReceiptScreen(
                   : null,
               ]}
             >
-              UNPAID SLIP
+              Account Charge
             </Text>
           </Pressable>
         </View>
 
         {selectedPaymentState === 'PARTIAL' && (
           <View style={{ marginTop: 6, gap: 6 }}>
-            <Text style={authStyles.fieldLabel}>Amount Paid Now (PHP)</Text>
+            <Text style={authStyles.fieldLabel}>Amount Paid Today (PHP)</Text>
             <View style={authStyles.inputRowBox}>
               <TextInput
                 value={partialPaidInput}
@@ -303,17 +307,17 @@ export function RiderDoorstepReceiptScreen(
               />
             </View>
             <Text style={customerStyles.secondaryActionSub}>
-              Balance Carried Automatically: PHP{' '}
+              Remaining balance due: PHP{' '}
               {paymentComputation.balanceDue.toFixed(2)}
             </Text>
           </View>
         )}
       </View>
 
-      {/* 3. Live Smart Receipt Preview (#OR) */}
+      {/* 3. Authentic 58mm Thermal Receipt Preview */}
       <View style={customerStyles.whitePanelCard}>
         <Text style={customerStyles.sectionLabel}>
-          LIVE SMART RECEIPT PREVIEW (#{officialReceiptCode})
+          Thermal Receipt Preview (#{officialReceiptCode})
         </Text>
 
         <View style={riderStyles.thermalReceiptPaper}>
@@ -321,7 +325,7 @@ export function RiderDoorstepReceiptScreen(
             LG NATURE&apos;S WATER
           </Text>
           <Text style={riderStyles.thermalReceiptSubtitle}>
-            OFFICIAL RECEIPT #{officialReceiptCode}
+            BIR OFFICIAL RECEIPT #{officialReceiptCode}
           </Text>
 
           <View style={customerStyles.billRow}>
@@ -332,9 +336,9 @@ export function RiderDoorstepReceiptScreen(
           </View>
 
           <View style={customerStyles.billRow}>
-            <Text style={customerStyles.billRowLabel}>Rider / Branch:</Text>
+            <Text style={customerStyles.billRowLabel}>Rider / Hub:</Text>
             <Text style={customerStyles.billRowValue}>
-              {props.order.assignedRiderName} • Station 1
+              {props.order.assignedRiderName} &bull; Station 1 Hub
             </Text>
           </View>
 
@@ -355,7 +359,7 @@ export function RiderDoorstepReceiptScreen(
           </View>
 
           <View style={customerStyles.billTotalRow}>
-            <Text style={customerStyles.billTotalLabel}>TOTAL</Text>
+            <Text style={customerStyles.billTotalLabel}>TOTAL DUE</Text>
             <Text style={customerStyles.billTotalValue}>
               PHP {props.order.totalDue.toFixed(2)}
             </Text>
@@ -389,7 +393,7 @@ export function RiderDoorstepReceiptScreen(
           </View>
         </View>
 
-        {/* Print & Issue Receipt Buttons */}
+        {/* Print & Confirm Actions */}
         <View style={riderStyles.stopActionsRow}>
           <Pressable
             onPress={() => {
@@ -397,7 +401,7 @@ export function RiderDoorstepReceiptScreen(
             }}
             style={riderStyles.stopSecondaryButton}
           >
-            <Printer size={15} color="#2563eb" />
+            <Printer size={15} color="#0284c7" />
             <Text style={riderStyles.stopSecondaryButtonText}>
               Print 58mm
             </Text>
@@ -409,7 +413,7 @@ export function RiderDoorstepReceiptScreen(
           >
             <Send size={15} color="#ffffff" />
             <Text style={riderStyles.stopPrimaryButtonText}>
-              Send &amp; Issue #{officialReceiptCode}
+              Issue #{officialReceiptCode}
             </Text>
           </Pressable>
         </View>

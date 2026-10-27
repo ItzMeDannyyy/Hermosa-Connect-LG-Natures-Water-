@@ -1,12 +1,10 @@
 /**
  * ============================================================================
  * FILE: src/components/customer/CustomerPickupScheduleScreen.tsx
- * PURPOSE: Implements Wireframe C2 (Schedule & Container Pickup — Feature 02).
- *          - 1. Select Pickup Day (MON 12, TUE 13, WED 14, THU 15)
- *          - 2. Select Time Window (8-10 AM, 1-3 PM, 4-6 PM)
- *          - 3. Empty Containers Ready for Pickup (+/- stepper)
- *          - Day-Before Auto-Reminder Notice + Confirm Button
- *          - Uses Lucide icons (lucide-react-native) strictly.
+ * PURPOSE: Schedule Empty Container Pickup.
+ *          Allows customers to pick date chips, time windows, and set empty
+ *          container quantities to return to Station 1.
+ *          Strict Lucide icons (lucide-react-native).
  * ============================================================================
  */
 
@@ -46,7 +44,7 @@ export function CustomerPickupScheduleScreen(
 ) {
   return (
     <ScrollView contentContainerStyle={customerStyles.scrollBody}>
-      {/* Top Back Bar */}
+      {/* Top Back Navigation Bar */}
       <Pressable
         onPress={props.onBackToHome}
         style={customerStyles.secondaryActionCard}
@@ -55,10 +53,10 @@ export function CustomerPickupScheduleScreen(
           <ArrowLeft size={18} color="#0f172a" />
           <View>
             <Text style={customerStyles.secondaryActionTitle}>
-              Schedule an Empty Container Pickup
+              Schedule Empty Jug Pickup
             </Text>
             <Text style={customerStyles.secondaryActionSub}>
-              Customer-set pickup slot &amp; automatic day-before reminder
+              Select your pickup day &amp; preferred delivery window
             </Text>
           </View>
         </View>
@@ -66,7 +64,7 @@ export function CustomerPickupScheduleScreen(
 
       {/* 1. Select Pickup Day */}
       <View style={customerStyles.whitePanelCard}>
-        <Text style={customerStyles.sectionLabel}>1. SELECT PICKUP DAY</Text>
+        <Text style={customerStyles.sectionLabel}>Select Pickup Day</Text>
         <View style={customerStyles.dayCardsRow}>
           {PICKUP_DAY_OPTIONS.map((dayItem) => {
             const isSelected =
@@ -84,7 +82,7 @@ export function CustomerPickupScheduleScreen(
               >
                 <Calendar
                   size={14}
-                  color={isSelected ? '#2563eb' : '#64748b'}
+                  color={isSelected ? '#0284c7' : '#64748b'}
                 />
                 <Text
                   style={[
@@ -110,7 +108,7 @@ export function CustomerPickupScheduleScreen(
 
       {/* 2. Select Time Window */}
       <View style={customerStyles.whitePanelCard}>
-        <Text style={customerStyles.sectionLabel}>2. SELECT TIME WINDOW</Text>
+        <Text style={customerStyles.sectionLabel}>Preferred Time Window</Text>
         <View>
           {PICKUP_TIME_SLOT_OPTIONS.map((slot) => {
             const isSelected = props.scheduleForm.selectedTimeSlot === slot;
@@ -126,7 +124,7 @@ export function CustomerPickupScheduleScreen(
                 ]}
               >
                 <View style={customerStyles.slotRadioLeft}>
-                  <Clock size={16} color={isSelected ? '#2563eb' : '#64748b'} />
+                  <Clock size={16} color={isSelected ? '#0284c7' : '#64748b'} />
                   <Text style={customerStyles.slotRadioLabel}>{slot}</Text>
                 </View>
 
@@ -144,11 +142,10 @@ export function CustomerPickupScheduleScreen(
       {/* 3. Empty Containers Ready for Pickup */}
       <View style={customerStyles.whitePanelCard}>
         <Text style={customerStyles.sectionLabel}>
-          3. EMPTY CONTAINERS READY FOR PICKUP
+          Containers Ready for Pickup
         </Text>
         <Text style={customerStyles.secondaryActionSub}>
-          You currently have {props.emptyContainersOut} empty containers held at
-          your address.
+          You currently hold {props.emptyContainersOut} empty containers at your address.
         </Text>
 
         <View style={customerStyles.stepperContainer}>
@@ -156,7 +153,11 @@ export function CustomerPickupScheduleScreen(
             onPress={() => {
               props.onAdjustContainerCount(-1);
             }}
-            style={customerStyles.stepperButton}
+            disabled={props.scheduleForm.containersToReturn <= 0}
+            style={[
+              customerStyles.stepperButton,
+              props.scheduleForm.containersToReturn <= 0 ? { opacity: 0.4 } : null,
+            ]}
           >
             <Minus size={18} color="#0f172a" />
           </Pressable>
@@ -176,13 +177,12 @@ export function CustomerPickupScheduleScreen(
         </View>
       </View>
 
-      {/* 4. Day-Before Auto-Reminder Notice */}
+      {/* 4. Automated SMS Reminder Notice */}
       <View style={customerStyles.reminderNoticeBox}>
-        <Bell size={18} color="#d97706" />
+        <Bell size={18} color="#b45309" />
         <Text style={customerStyles.reminderNoticeText}>
-          Auto-Reminder: We will notify you &amp; Station 1 the day before your{' '}
-          {props.scheduleForm.selectedDayLabel} (
-          {props.scheduleForm.selectedTimeSlot}) pickup.
+          Automated Notice: Station 1 will dispatch rider J. Cruz for your{' '}
+          {props.scheduleForm.selectedDayLabel} ({props.scheduleForm.selectedTimeSlot}) return.
         </Text>
       </View>
 
@@ -191,7 +191,7 @@ export function CustomerPickupScheduleScreen(
         onPress={props.onConfirmSchedule}
         style={customerStyles.oneClickOrderButton}
       >
-        <CheckCircle2 size={18} color="#ffffff" />
+        <CheckCircle2 size={16} color="#ffffff" />
         <Text style={customerStyles.oneClickOrderButtonText}>
           CONFIRM PICKUP SCHEDULE
         </Text>

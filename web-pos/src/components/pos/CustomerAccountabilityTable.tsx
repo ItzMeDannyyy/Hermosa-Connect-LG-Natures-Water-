@@ -1,19 +1,12 @@
 /**
  * ============================================================================
  * FILE: src/components/pos/CustomerAccountabilityTable.tsx
- * PURPOSE: Implements Wireframe W2 — Jug & Balance Ledger.
- *          Refined 4-column operational layout:
- *          1. 4 Columns: Customer (Name + Phone · Short Address), Jugs Out
- *             (count + friendly due/overdue text), Balance (bold amount or —),
- *             and Contextual Action ([Settle] / [Remind] + ⋯ menu).
- *          2. Hides fully cleared customers (0 jugs & PHP 0 balance) by default
- *             with a "Show cleared" toggle.
- *          3. 3-Stat Urgency Strip (Jugs out · Unpaid · Overdue) + Filter Chips
- *             (All · Overdue · With balance · Jugs out).
- *          4. Priority sorting: Overdue first, then highest balance, then jugs.
- *          5. Row-click expandable detail drawer showing Last Receipt / Doc,
- *             full street address, and actions.
- *          - Styled with Tailwind CSS and Lucide icons (lucide-react) strictly.
+ * PURPOSE: Customer Container & Balance Ledger adhering to tasteskill v2 framed-sheet.
+ *          - High-density 4-column ledger (Customer, Jugs Held, Balance, Action).
+ *          - Urgency strip with quiet 1px dividers.
+ *          - Immediate action buttons (Settle Balance, Trigger SMS Reminder).
+ *          - High-contrast tabular numbers (IBM Plex Mono).
+ *          - Strictly Lucide vector icons, zero Unicode emojis.
  * ============================================================================
  */
 
@@ -22,14 +15,9 @@ import {
   Banknote,
   Bell,
   CheckCircle2,
-  Droplets,
-  Eye,
-  EyeOff,
-  FileText,
+  ChevronDown,
+  ChevronUp,
   MapPin,
-  MoreHorizontal,
-  Phone,
-  RefreshCw,
   Search,
 } from 'lucide-react';
 import React, { useState } from 'react';
@@ -55,677 +43,371 @@ export function CustomerAccountabilityTable(
   const [showClearedCustomers, setShowClearedCustomers] =
     useState<boolean>(false);
   const [expandedRowId, setExpandedRowId] = useState<string | null>(null);
-  const [openMenuRowId, setOpenMenuRowId] = useState<string | null>(null);
 
-  /**
-   * Computes the 3-stat urgency strip totals using a clear step-by-step loop
-   */
+  // Compute summary metrics
   let totalJugsOut = 0;
   let totalUnpaidPhp = 0;
   let totalOverdueCount = 0;
   let totalClearedCount = 0;
 
-  for (let index = 0; index < props.records.length; index = index + 1) {
-    const rec = props.records[index];
-    if (rec === undefined) {
-      continue;
-    }
-
-    totalJugsOut = totalJugsOut + rec.emptyContainersHeld;
-    totalUnpaidPhp = totalUnpaidPhp + rec.runningUnpaidBalance;
+  for (let i = 0; i < props.records.length; i++) {
+    const rec = props.records[i];
+    totalJugsOut += rec.emptyContainersHeld;
+    totalUnpaidPhp += rec.runningUnpaidBalance;
 
     if (rec.isOverdue && rec.emptyContainersHeld > 0) {
-      totalOverdueCount = totalOverdueCount + 1;
+      totalOverdueCount += 1;
     }
 
-    const isCleared =
-      rec.emptyContainersHeld === 0 && rec.runningUnpaidBalance <= 0;
-    if (isCleared) {
-      totalClearedCount = totalClearedCount + 1;
+    if (rec.emptyContainersHeld === 0 && rec.runningUnpaidBalance <= 0) {
+      totalClearedCount += 1;
     }
   }
 
-  /**
-   * Extracts a concise neighborhood/street label from the full address
-   * e.g., "Blk 4 Lot 12 Pansol St, Quezon City" -> "Pansol St"
-   */
-  function getShortAddressLabel(fullAddress: string): string {
-    const commaParts = fullAddress.split(',');
-    const firstPart = commaParts[0];
-    if (firstPart !== undefined && firstPart.trim().length > 0) {
-      return firstPart.trim();
+  // Filter records
+  const filteredRecords = props.records.filter((rec) => {
+    // Hidden cleared filter
+    if (
+      !showClearedCustomers &&
+      rec.emptyContainersHeld === 0 &&
+      rec.runningUnpaidBalance <= 0
+    ) {
+      return false;
     }
-    return fullAddress;
+
+    if (activeFilter === 'OVERDUE' && (!rec.isOverdue || rec.emptyContainersHeld === 0)) {
+      return false;
+    }
+    if (activeFilter === 'WITH_BALANCE' && rec.runningUnpaidBalance <= 0) {
+      return false;
+    }
+    if (activeFilter === 'JUGS_OUT' && rec.emptyContainersHeld === 0) {
+      return false;
+    }
+
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      return (
+        rec.customerName.toLowerCase().includes(q) ||
+        rec.phoneNumber.includes(q) ||
+        rec.address.toLowerCase().includes(q)
+      );
+    }
+
+    return true;
+  });
+
+  function getShortAddress(full: string): string {
+    const parts = full.split(',');
+    return parts[0]?.trim() || full;
   }
-
-  /**
-   * Formats a raw YYYY-MM-DD date string into a friendly operational label
-   * e.g., "due Oct 22 · in 2 days" or "8 days overdue"
-   */
-  function getFriendlyDueDateText(
-    isoDateStr: string,
-    isOverdueFlag: boolean,
-  ): string {
-    if (!isoDateStr || isoDateStr === '—') {
-      return 'No due date';
-    }
-
-    const parsedDate = new Date(`${isoDateStr}T00:00:00`);
-    if (Number.isNaN(parsedDate.getTime())) {
-      return isoDateStr;
-    }
-
-    // Reference anchor date (Oct 20, 2026) so seeded dates show realistic relative days
-    const referenceToday = new Date('2026-10-20T00:00:00');
-    const diffMs = parsedDate.getTime() - referenceToday.getTime();
-    const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
-
-    const shortMonthDay = parsedDate.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-    });
-
-    if (isOverdueFlag || diffDays < 0) {
-      const overdueDays = Math.max(1, Math.abs(diffDays));
-      if (overdueDays === 1) {
-        return `1 day overdue (${shortMonthDay})`;
-      }
-      return `${overdueDays} days overdue`;
-    }
-
-    if (diffDays === 0) {
-      return `due today (${shortMonthDay})`;
-    }
-
-    if (diffDays === 1) {
-      return `due tomorrow (${shortMonthDay})`;
-    }
-
-    if (diffDays <= 7) {
-      return `due ${shortMonthDay} (in ${diffDays} days)`;
-    }
-
-    return `due ${shortMonthDay}`;
-  }
-
-  /**
-   * Filters and sorts customer records by priority:
-   * 1. Overdue first
-   * 2. Highest unpaid balance
-   * 3. Highest jugs out
-   */
-  function getFilteredAndSortedRecords(): CustomerAccountabilityRecord[] {
-    const matchingList: CustomerAccountabilityRecord[] = [];
-    const normalizedQuery = searchQuery.trim().toLowerCase();
-
-    for (let index = 0; index < props.records.length; index = index + 1) {
-      const record = props.records[index];
-      if (record === undefined) {
-        continue;
-      }
-
-      const isCleared =
-        record.emptyContainersHeld === 0 && record.runningUnpaidBalance <= 0;
-
-      // Hide cleared customers by default unless "Show cleared" is toggled on
-      if (isCleared && !showClearedCustomers && activeFilter === 'ALL') {
-        continue;
-      }
-
-      // Check Filter Chip
-      if (activeFilter === 'OVERDUE') {
-        if (!record.isOverdue || record.emptyContainersHeld <= 0) {
-          continue;
-        }
-      } else if (activeFilter === 'WITH_BALANCE') {
-        if (record.runningUnpaidBalance <= 0) {
-          continue;
-        }
-      } else if (activeFilter === 'JUGS_OUT') {
-        if (record.emptyContainersHeld <= 0) {
-          continue;
-        }
-      }
-
-      // Check Search Input
-      if (normalizedQuery.length > 0) {
-        const nameMatch = record.customerName
-          .toLowerCase()
-          .includes(normalizedQuery);
-        const addressMatch = record.address
-          .toLowerCase()
-          .includes(normalizedQuery);
-        const phoneMatch = record.phoneNumber
-          .toLowerCase()
-          .includes(normalizedQuery);
-        const receiptMatch = record.lastOrderNumber
-          .toLowerCase()
-          .includes(normalizedQuery);
-
-        if (!nameMatch && !addressMatch && !phoneMatch && !receiptMatch) {
-          continue;
-        }
-      }
-
-      matchingList.push(record);
-    }
-
-    // Sort by Priority: Overdue first -> Highest Balance -> Most Jugs Out
-    matchingList.sort((left, right) => {
-      const leftOverdue = left.isOverdue && left.emptyContainersHeld > 0 ? 1 : 0;
-      const rightOverdue =
-        right.isOverdue && right.emptyContainersHeld > 0 ? 1 : 0;
-
-      if (leftOverdue !== rightOverdue) {
-        return rightOverdue - leftOverdue;
-      }
-
-      if (left.runningUnpaidBalance !== right.runningUnpaidBalance) {
-        return right.runningUnpaidBalance - left.runningUnpaidBalance;
-      }
-
-      return right.emptyContainersHeld - left.emptyContainersHeld;
-    });
-
-    return matchingList;
-  }
-
-  function handleToggleRowDrawer(recordId: string) {
-    setOpenMenuRowId(null);
-    if (expandedRowId === recordId) {
-      setExpandedRowId(null);
-    } else {
-      setExpandedRowId(recordId);
-    }
-  }
-
-  function handleToggleMoreMenu(
-    event: React.MouseEvent<HTMLButtonElement>,
-    recordId: string,
-  ) {
-    event.stopPropagation();
-    if (openMenuRowId === recordId) {
-      setOpenMenuRowId(null);
-    } else {
-      setOpenMenuRowId(recordId);
-    }
-  }
-
-  const visibleRecords = getFilteredAndSortedRecords();
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-5">
+    <div className="flex flex-col gap-4">
       {/* ====================================================================
-          1. HEADER ROW: SHORTER TITLE + SUBTITLE + SEARCH INPUT
+          1. TITLE ROW
           ==================================================================== */}
-      <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-100">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h2 className="flex items-center gap-2 text-lg font-extrabold text-slate-900 tracking-tight">
-            <RefreshCw size={18} className="text-blue-600" />
-            <span>Jug &amp; Balance Ledger</span>
-          </h2>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Customer Container Accountability &amp; Unpaid Balance Ledger
+          <h1 className="text-[20px] font-semibold text-[#0f172a] tracking-tight">
+            Container &amp; Balance Ledger
+          </h1>
+          <p className="text-[12px] text-[#64748b] mt-0.5">
+            Tracks loaned 5-gallon containers, overdue return cycles, and customer running balances.
           </p>
         </div>
 
-        <div className="relative w-full sm:w-80">
+        <div className="flex items-center gap-2">
+          <label className="inline-flex items-center gap-2 text-[12px] text-[#475569] cursor-pointer">
+            <input
+              type="checkbox"
+              checked={showClearedCustomers}
+              onChange={(e) => setShowClearedCustomers(e.target.checked)}
+              className="rounded-[3px] border-[#cbd5e1] text-[#0284c7] focus:ring-0"
+            />
+            <span>Show cleared accounts ({totalClearedCount})</span>
+          </label>
+        </div>
+      </div>
+
+      {/* ====================================================================
+          2. URGENCY SUMMARY STRIP (App-screens: quiet 1px hairlines)
+          ==================================================================== */}
+      <div className="bg-white border border-[#e2e8f0] rounded-[8px] overflow-hidden">
+        <div className="grid grid-cols-2 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-[#e2e8f0]">
+          <div className="p-3.5">
+            <div className="text-[11px] font-medium text-[#64748b]">Jugs in field</div>
+            <div className="text-[20px] font-semibold text-[#0f172a] num-mono mt-1">
+              {totalJugsOut} <span className="text-[12px] font-normal text-[#64748b]">gallons</span>
+            </div>
+          </div>
+
+          <div className="p-3.5">
+            <div className="text-[11px] font-medium text-[#64748b]">Overdue returns</div>
+            <div className="text-[20px] font-semibold text-[#b91c1c] num-mono mt-1">
+              {totalOverdueCount} <span className="text-[12px] font-normal text-[#64748b]">accounts</span>
+            </div>
+          </div>
+
+          <div className="p-3.5">
+            <div className="text-[11px] font-medium text-[#64748b]">Unpaid credit balance</div>
+            <div className="text-[20px] font-semibold text-[#0f172a] num-mono mt-1">
+              ₱{totalUnpaidPhp.toFixed(2)}
+            </div>
+          </div>
+
+          <div className="p-3.5">
+            <div className="text-[11px] font-medium text-[#64748b]">Cleared accounts</div>
+            <div className="text-[20px] font-semibold text-[#15803d] num-mono mt-1">
+              {totalClearedCount} <span className="text-[12px] font-normal text-[#64748b]">accounts</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ====================================================================
+          3. FILTER CHIPS & SEARCH
+          ==================================================================== */}
+      <div className="bg-white border border-[#e2e8f0] rounded-[8px] p-3 flex flex-col md:flex-row items-center justify-between gap-3">
+        <div className="flex items-center gap-1.5 flex-wrap w-full md:w-auto">
+          <button
+            type="button"
+            onClick={() => setActiveFilter('ALL')}
+            className={`px-3 py-1 text-[12px] font-medium rounded-[5px] cursor-pointer transition-colors ${
+              activeFilter === 'ALL'
+                ? 'bg-[#0f172a] text-white'
+                : 'bg-[#f1f5f9] text-[#64748b] hover:text-[#0f172a]'
+            }`}
+          >
+            All Active
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveFilter('OVERDUE')}
+            className={`px-3 py-1 text-[12px] font-medium rounded-[5px] cursor-pointer transition-colors ${
+              activeFilter === 'OVERDUE'
+                ? 'bg-[#b91c1c] text-white'
+                : 'bg-[#f1f5f9] text-[#64748b] hover:text-[#b91c1c]'
+            }`}
+          >
+            Overdue Jugs ({totalOverdueCount})
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveFilter('WITH_BALANCE')}
+            className={`px-3 py-1 text-[12px] font-medium rounded-[5px] cursor-pointer transition-colors ${
+              activeFilter === 'WITH_BALANCE'
+                ? 'bg-[#0f172a] text-white'
+                : 'bg-[#f1f5f9] text-[#64748b] hover:text-[#0f172a]'
+            }`}
+          >
+            With Balance
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveFilter('JUGS_OUT')}
+            className={`px-3 py-1 text-[12px] font-medium rounded-[5px] cursor-pointer transition-colors ${
+              activeFilter === 'JUGS_OUT'
+                ? 'bg-[#0f172a] text-white'
+                : 'bg-[#f1f5f9] text-[#64748b] hover:text-[#0f172a]'
+            }`}
+          >
+            Holding Jugs
+          </button>
+        </div>
+
+        <div className="relative w-full md:w-72">
           <Search
-            size={15}
-            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+            size={14}
+            className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#94a3b8]"
           />
           <input
             type="text"
             value={searchQuery}
-            onChange={(event) => {
-              setSearchQuery(event.target.value);
-            }}
-            placeholder="Search customer, street, phone, or #OR..."
-            className="w-full pl-9 pr-3.5 py-2 text-xs font-medium text-slate-900 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white transition-all"
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search customer, phone, address..."
+            className="w-full bg-[#ffffff] border border-[#e2e8f0] focus:border-[#0284c7] rounded-[6px] pl-8 pr-3 py-1.5 text-[12px] text-[#0f172a] outline-none"
           />
         </div>
       </div>
 
       {/* ====================================================================
-          2. URGENCY 3-STAT STRIP + FILTER CHIPS + "SHOW CLEARED" TOGGLE
+          4. TABLE
           ==================================================================== */}
-      <div className="py-3.5 flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 mb-4">
-        {/* Three-Stat Urgency Strip */}
-        <div className="flex flex-wrap items-center gap-2 text-xs">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-700">
-            <Droplets size={13} className="text-sky-600" />
-            <span className="text-slate-500 font-medium">Jugs out</span>
-            <strong className="font-extrabold text-slate-900">
-              {totalJugsOut}
-            </strong>
+      <div className="bg-white border border-[#e2e8f0] rounded-[8px] overflow-hidden">
+        {filteredRecords.length === 0 ? (
+          <div className="p-8 text-center text-[#64748b] text-[13px]">
+            No customer accounts found matching this filter.
           </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-[12px] border-collapse">
+              <thead>
+                <tr className="border-b border-[#e2e8f0] bg-[#f8fafc] text-[#64748b] font-medium text-[11px] uppercase tracking-wider">
+                  <th className="py-2.5 px-4">Customer &amp; Contact</th>
+                  <th className="py-2.5 px-4">Jugs Held</th>
+                  <th className="py-2.5 px-4 text-right">Running Balance</th>
+                  <th className="py-2.5 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#e2e8f0]">
+                {filteredRecords.map((rec) => {
+                  const isExpanded = expandedRowId === rec.id;
 
-          <span className="text-slate-300">·</span>
-
-          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-700">
-            <Banknote size={13} className="text-amber-600" />
-            <span className="text-slate-500 font-medium">Unpaid</span>
-            <strong className="font-extrabold text-slate-900">
-              PHP {totalUnpaidPhp.toFixed(0)}
-            </strong>
-          </div>
-
-          <span className="text-slate-300">·</span>
-
-          <div
-            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border ${
-              totalOverdueCount > 0
-                ? 'bg-red-50 border-red-200 text-red-700'
-                : 'bg-slate-50 border-slate-200 text-slate-600'
-            }`}
-          >
-            <AlertTriangle
-              size={13}
-              className={
-                totalOverdueCount > 0 ? 'text-red-600' : 'text-slate-400'
-              }
-            />
-            <span className="font-medium">Overdue</span>
-            <strong className="font-extrabold">{totalOverdueCount}</strong>
-          </div>
-        </div>
-
-        {/* Filter Chips + Show Cleared Toggle */}
-        <div className="flex flex-wrap items-center gap-1.5">
-          {(
-            [
-              { id: 'ALL', label: 'All needing action' },
-              { id: 'OVERDUE', label: 'Overdue' },
-              { id: 'WITH_BALANCE', label: 'With balance' },
-              { id: 'JUGS_OUT', label: 'Jugs out' },
-            ] as const
-          ).map((chip) => {
-            const isSelected = activeFilter === chip.id;
-            return (
-              <button
-                key={chip.id}
-                type="button"
-                onClick={() => {
-                  setActiveFilter(chip.id);
-                }}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors cursor-pointer ${
-                  isSelected
-                    ? 'bg-slate-900 text-white border-slate-900'
-                    : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
-                }`}
-              >
-                {chip.label}
-              </button>
-            );
-          })}
-
-          {totalClearedCount > 0 && (
-            <button
-              type="button"
-              onClick={() => {
-                setShowClearedCustomers(!showClearedCustomers);
-              }}
-              className={`ml-1 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors cursor-pointer ${
-                showClearedCustomers
-                  ? 'bg-blue-50 text-blue-700 border-blue-200'
-                  : 'bg-slate-50 text-slate-500 border-slate-200 hover:text-slate-700'
-              }`}
-            >
-              {showClearedCustomers ? (
-                <EyeOff size={13} />
-              ) : (
-                <Eye size={13} />
-              )}
-              <span>
-                {showClearedCustomers
-                  ? `Hide cleared (${totalClearedCount})`
-                  : `Show cleared (${totalClearedCount})`}
-              </span>
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* ====================================================================
-          3. STREAMLINED 4-COLUMN TABLE + EXPANDABLE DETAIL DRAWER
-          ==================================================================== */}
-      <div className="rounded-xl border border-slate-200 overflow-visible">
-        <table className="w-full border-collapse text-left">
-          <thead>
-            <tr className="bg-slate-50 border-b border-slate-200">
-              <th className="py-3 px-4 text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                Customer
-              </th>
-              <th className="py-3 px-4 text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                Jugs Out
-              </th>
-              <th className="py-3 px-4 text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                Balance
-              </th>
-              <th className="py-3 px-4 text-[11px] font-bold uppercase tracking-wider text-slate-500 text-right">
-                Action
-              </th>
-            </tr>
-          </thead>
-
-          <tbody className="divide-y divide-slate-100">
-            {visibleRecords.length === 0 && (
-              <tr>
-                <td
-                  colSpan={4}
-                  className="py-10 px-4 text-center text-xs text-slate-500"
-                >
-                  No customers match the current filter.
-                </td>
-              </tr>
-            )}
-
-            {visibleRecords.map((record) => {
-              const hasJugsOut = record.emptyContainersHeld > 0;
-              const hasBalance = record.runningUnpaidBalance > 0;
-              const isOverdueRow = record.isOverdue && hasJugsOut;
-              const isReminded = Boolean(record.pickupReminderSent);
-              const isExpanded = expandedRowId === record.id;
-              const isMenuOpen = openMenuRowId === record.id;
-              const shortAddress = getShortAddressLabel(record.address);
-              const friendlyDueText = getFriendlyDueDateText(
-                record.containersDueBackDate,
-                isOverdueRow,
-              );
-
-              return (
-                <React.Fragment key={record.id}>
-                  <tr
-                    onClick={() => {
-                      handleToggleRowDrawer(record.id);
-                    }}
-                    className={`cursor-pointer transition-colors ${
-                      isOverdueRow
-                        ? 'border-l-4 border-l-red-500 bg-red-50/35 hover:bg-red-50/60'
-                        : isExpanded
-                          ? 'bg-sky-50/50'
-                          : 'bg-white hover:bg-slate-50/80'
-                    }`}
-                  >
-                    {/* COLUMN 1: CUSTOMER (Semibold Name + Muted Phone · Short Address) */}
-                    <td className="py-3.5 px-4 align-middle max-w-[290px]">
-                      <div className="text-sm font-semibold text-slate-900 truncate">
-                        {record.customerName}
-                      </div>
-                      <div
-                        title={`${record.phoneNumber} • ${record.address}`}
-                        className="text-xs text-slate-500 truncate mt-0.5"
-                      >
-                        {record.phoneNumber} · {shortAddress}
-                      </div>
-                    </td>
-
-                    {/* COLUMN 2: JUGS OUT (Count + Friendly Due / Overdue Text) */}
-                    <td className="py-3.5 px-4 align-middle whitespace-nowrap">
-                      {hasJugsOut ? (
-                        <div>
-                          <div className="text-sm font-semibold text-slate-900">
-                            {record.emptyContainersHeld}{' '}
-                            {record.emptyContainersHeld === 1 ? 'jug' : 'jugs'}
+                  return (
+                    <React.Fragment key={rec.id}>
+                      <tr className="hover:bg-[#fcfdfd] transition-colors">
+                        {/* Customer */}
+                        <td className="py-3 px-4">
+                          <div className="font-semibold text-[#0f172a]">
+                            {rec.customerName}
                           </div>
-                          <div
-                            className={`text-xs mt-0.5 ${
-                              isOverdueRow
-                                ? 'font-semibold text-red-600'
-                                : 'text-slate-500'
-                            }`}
-                          >
-                            {friendlyDueText}
+                          <div className="text-[11px] text-[#64748b] flex items-center gap-2 mt-0.5">
+                            <span className="num-mono">{rec.phoneNumber}</span>
+                            <span>•</span>
+                            <span className="flex items-center gap-1 truncate max-w-[220px]">
+                              <MapPin size={10} className="text-[#94a3b8]" />
+                              {getShortAddress(rec.address)}
+                            </span>
                           </div>
-                        </div>
-                      ) : (
-                        <span className="text-sm text-slate-300 select-none">
-                          —
-                        </span>
-                      )}
-                    </td>
+                        </td>
 
-                    {/* COLUMN 3: UNPAID BALANCE (Boldest Element in Row or Quiet Dash) */}
-                    <td className="py-3.5 px-4 align-middle whitespace-nowrap">
-                      {hasBalance ? (
-                        <strong className="text-sm font-extrabold text-slate-900">
-                          PHP {record.runningUnpaidBalance.toFixed(2)}
-                        </strong>
-                      ) : (
-                        <span className="text-sm text-slate-300 select-none">
-                          —
-                        </span>
-                      )}
-                    </td>
+                        {/* Jugs Held */}
+                        <td className="py-3 px-4">
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold text-[#0f172a] num-mono text-[13px]">
+                              {rec.emptyContainersHeld} gal
+                            </span>
+                            {rec.isOverdue && rec.emptyContainersHeld > 0 ? (
+                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-[4px] bg-[#fef2f2] text-[#b91c1c] text-[10px] font-semibold num-mono">
+                                <AlertTriangle size={10} />
+                                <span>Due: {rec.containersDueBackDate}</span>
+                              </span>
+                            ) : rec.emptyContainersHeld > 0 ? (
+                              <span className="text-[11px] text-[#64748b] num-mono">
+                                (Due: {rec.containersDueBackDate})
+                              </span>
+                            ) : (
+                              <span className="text-[11px] text-[#15803d]">All returned</span>
+                            )}
+                          </div>
+                        </td>
 
-                    {/* COLUMN 4: CONTEXTUAL ACTION (One Primary Button + ⋯ Menu) */}
-                    <td
-                      className="py-3.5 px-4 align-middle whitespace-nowrap text-right"
-                      onClick={(event) => {
-                        event.stopPropagation();
-                      }}
-                    >
-                      <div className="inline-flex items-center justify-end gap-1.5 relative">
-                        {/* Primary Contextual Button */}
-                        {hasBalance && (
-                          <button
-                            type="button"
-                            onClick={(event) => {
-                              event.stopPropagation();
-                              props.onSettleCustomerBalance(record.id);
-                            }}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 transition-colors cursor-pointer"
-                          >
-                            <Banknote size={13} />
-                            <span>Settle</span>
-                          </button>
-                        )}
-
-                        {hasJugsOut &&
-                          (isReminded ? (
-                            <span
-                              title={
-                                record.lastRemindedAt
-                                  ? `Reminded at ${record.lastRemindedAt} (use ⋯ menu to Remind Again)`
-                                  : 'Customer has been reminded (use ⋯ menu to Remind Again)'
-                              }
-                              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 select-none"
-                            >
-                              <CheckCircle2
-                                size={13}
-                                className="text-emerald-600"
-                              />
-                              <span>Reminded</span>
+                        {/* Running Balance */}
+                        <td className="py-3 px-4 text-right">
+                          {rec.runningUnpaidBalance > 0 ? (
+                            <span className="font-semibold text-[#b91c1c] num-mono text-[13px]">
+                              ₱{rec.runningUnpaidBalance.toFixed(2)}
                             </span>
                           ) : (
+                            <span className="text-[#64748b] num-mono">—</span>
+                          )}
+                        </td>
+
+                        {/* Actions */}
+                        <td className="py-3 px-4 text-right">
+                          <div className="inline-flex items-center justify-end gap-1.5">
+                            {rec.runningUnpaidBalance > 0 && (
+                              <button
+                                type="button"
+                                onClick={() => props.onSettleCustomerBalance(rec.id)}
+                                className="btn-secondary text-[11px] py-1 px-2.5"
+                                title="Mark running balance as settled"
+                              >
+                                <Banknote size={12} className="text-[#15803d]" />
+                                <span>Settle</span>
+                              </button>
+                            )}
+
+                            {rec.emptyContainersHeld > 0 && (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  props.onTriggerPickupReminder(
+                                    rec.id,
+                                    rec.customerName,
+                                    Boolean(rec.pickupReminderSent),
+                                  )
+                                }
+                                className={`text-[11px] py-1 px-2.5 rounded-[4px] border cursor-pointer inline-flex items-center gap-1 transition-colors ${
+                                  rec.pickupReminderSent
+                                    ? 'bg-[#f0fdf4] text-[#15803d] border-[#bbf7d0]'
+                                    : 'bg-white text-[#334155] border-[#e2e8f0] hover:bg-[#f8fafc]'
+                                }`}
+                              >
+                                {rec.pickupReminderSent ? (
+                                  <>
+                                    <CheckCircle2 size={12} />
+                                    <span>Reminded {rec.lastRemindedAt ?? ''}</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Bell size={12} className="text-[#0284c7]" />
+                                    <span>Remind Pickup</span>
+                                  </>
+                                )}
+                              </button>
+                            )}
+
                             <button
                               type="button"
-                              title={`Send pickup reminder to ${record.customerName}`}
-                              onClick={(event) => {
-                                event.stopPropagation();
-                                props.onTriggerPickupReminder(
-                                  record.id,
-                                  record.customerName,
-                                  false,
-                                );
-                              }}
-                              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-white text-slate-700 border border-slate-300 hover:bg-sky-50 hover:text-sky-700 hover:border-sky-300 transition-colors cursor-pointer"
+                              onClick={() =>
+                                setExpandedRowId(isExpanded ? null : rec.id)
+                              }
+                              className="p-1 text-[#94a3b8] hover:text-[#0f172a] rounded-[4px]"
+                              title="Toggle account history drawer"
                             >
-                              <Bell size={13} className="text-sky-600" />
-                              <span>Remind</span>
+                              {isExpanded ? (
+                                <ChevronUp size={15} />
+                              ) : (
+                                <ChevronDown size={15} />
+                              )}
                             </button>
-                          ))}
+                          </div>
+                        </td>
+                      </tr>
 
-                        {/* ⋯ Secondary Overflow / Detail Menu Button */}
-                        <button
-                          type="button"
-                          aria-label="More customer actions"
-                          onClick={(event) => {
-                            handleToggleMoreMenu(event, record.id);
-                          }}
-                          className="w-8 h-8 rounded-lg border border-transparent hover:border-slate-200 hover:bg-slate-100 text-slate-500 flex items-center justify-center transition-colors cursor-pointer"
-                        >
-                          <MoreHorizontal size={16} />
-                        </button>
-
-                        {/* Contextual Overflow Popover Menu */}
-                        {isMenuOpen && (
-                          <div className="absolute right-0 top-full mt-1 w-56 bg-white border border-slate-200 rounded-xl shadow-lg p-1.5 z-30 text-left">
-                            <div className="px-2.5 py-1.5 border-b border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
-                              <span>Last Receipt:</span>
-                              <code className="font-mono font-bold text-slate-700">
-                                {record.lastOrderNumber}
-                              </code>
-                            </div>
-
-                            {isReminded && record.lastRemindedAt && (
-                              <div className="px-2.5 py-1 border-b border-slate-100 flex items-center justify-between text-[11px] text-emerald-700 bg-emerald-50/60">
-                                <span>Last Reminded:</span>
-                                <span className="font-semibold">
-                                  {record.lastRemindedAt}
+                      {/* Expanded Account Details */}
+                      {isExpanded && (
+                        <tr className="bg-[#f8fafc]">
+                          <td colSpan={4} className="p-3.5 text-[11px] text-[#475569]">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                              <div>
+                                <span className="font-semibold text-[#0f172a] block">
+                                  Full Street Address:
+                                </span>
+                                <span>{rec.address}</span>
+                              </div>
+                              <div>
+                                <span className="font-semibold text-[#0f172a] block">
+                                  Last Order Reference:
+                                </span>
+                                <span className="num-mono">
+                                  {rec.lastOrderNumber}
                                 </span>
                               </div>
-                            )}
-
-                            {hasJugsOut && (
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setOpenMenuRowId(null);
-                                  props.onTriggerPickupReminder(
-                                    record.id,
-                                    record.customerName,
-                                    isReminded,
-                                  );
-                                }}
-                                className="w-full mt-1 flex items-center gap-2 px-2.5 py-2 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
-                              >
-                                <Bell size={13} className="text-blue-600" />
-                                <span>
-                                  {isReminded
-                                    ? 'Remind Again'
-                                    : 'Send Pickup Reminder'}
+                              <div>
+                                <span className="font-semibold text-[#0f172a] block">
+                                  Account Status:
                                 </span>
-                              </button>
-                            )}
-
-                            {hasBalance && (
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setOpenMenuRowId(null);
-                                  props.onSettleCustomerBalance(record.id);
-                                }}
-                                className="w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-xs font-semibold text-emerald-700 hover:bg-emerald-50 transition-colors cursor-pointer"
-                              >
-                                <Banknote size={13} />
-                                <span>Settle Balance</span>
-                              </button>
-                            )}
-
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setOpenMenuRowId(null);
-                                setExpandedRowId(
-                                  isExpanded ? null : record.id,
-                                );
-                              }}
-                              className="w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
-                            >
-                              <FileText size={13} />
-                              <span>
-                                {isExpanded ? 'Hide Details' : 'View Details'}
-                              </span>
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-
-                  {/* ROW-CLICK DETAIL DRAWER (Houses Last Receipt Number, Full Address & Actions) */}
-                  {isExpanded && (
-                    <tr className="bg-slate-50/80">
-                      <td colSpan={4} className="px-4 py-3.5">
-                        <div className="flex flex-wrap items-center justify-between gap-4 bg-white border border-slate-200 rounded-xl p-3.5 text-xs">
-                          <div className="flex flex-wrap items-center gap-5">
-                            <div className="flex items-center gap-1.5 text-slate-700">
-                              <FileText size={14} className="text-blue-600" />
-                              <span className="text-slate-500">
-                                Last Receipt / Doc:
-                              </span>
-                              <code className="px-2 py-0.5 rounded bg-slate-100 font-mono font-bold text-slate-900">
-                                {record.lastOrderNumber}
-                              </code>
-                            </div>
-
-                            <div className="flex items-center gap-1.5 text-slate-700">
-                              <MapPin size={14} className="text-slate-400" />
-                              <span className="text-slate-500">
-                                Full Address:
-                              </span>
-                              <span className="font-medium text-slate-900">
-                                {record.address}
-                              </span>
-                            </div>
-
-                            <div className="flex items-center gap-1.5 text-slate-700">
-                              <Phone size={14} className="text-slate-400" />
-                              <span className="font-medium text-slate-900">
-                                {record.phoneNumber}
-                              </span>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center gap-2">
-                            {hasJugsOut && (
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  props.onTriggerPickupReminder(
-                                    record.id,
-                                    record.customerName,
-                                    isReminded,
-                                  );
-                                }}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors cursor-pointer"
-                              >
-                                <Bell size={13} />
                                 <span>
-                                  {isReminded
-                                    ? 'Remind Again'
-                                    : 'Send Pickup Reminder'}
+                                  {rec.emptyContainersHeld === 0 &&
+                                  rec.runningUnpaidBalance <= 0
+                                    ? 'Cleared (Good standing)'
+                                    : `${rec.emptyContainersHeld} empty jugs out, ₱${rec.runningUnpaidBalance.toFixed(2)} unpaid.`}
                                 </span>
-                              </button>
-                            )}
-
-                            {hasBalance && (
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  props.onSettleCustomerBalance(record.id);
-                                }}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white transition-colors cursor-pointer"
-                              >
-                                <CheckCircle2 size={13} />
-                                <span>
-                                  Mark PHP{' '}
-                                  {record.runningUnpaidBalance.toFixed(2)}{' '}
-                                  Settled
-                                </span>
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      </td>
-                    </tr>
-                  )}
-                </React.Fragment>
-              );
-            })}
-          </tbody>
-        </table>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );

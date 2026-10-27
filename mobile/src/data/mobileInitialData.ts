@@ -75,6 +75,15 @@ export const PICKUP_TIME_SLOT_OPTIONS: TimeSlotOption[] = [
   '4:00 – 6:00 PM',
 ];
 
+export const DEMO_STATION_HUB = {
+  id: 'stn-01',
+  name: "LG Nature's Water - Station 1 (Main Hub)",
+  shortLabel: 'Stn 1 (Hub)',
+  address: '124 Katipunan Ave, Loyola Heights, QC',
+  latitude: 14.6415,
+  longitude: 121.0748,
+};
+
 export const INITIAL_MOBILE_ORDERS: MobileOrderItem[] = [
   {
     id: 'ord-1042',
@@ -99,6 +108,10 @@ export const INITIAL_MOBILE_ORDERS: MobileOrderItem[] = [
     aiConfidencePercent: 96,
     stopSequenceNumber: 1,
     createdAtLabel: '9:42 AM',
+    latitude: 14.6455,
+    longitude: 121.0762,
+    etaMinutes: 4,
+    distanceKm: 0.8,
   },
   {
     id: 'ord-1043',
@@ -123,6 +136,10 @@ export const INITIAL_MOBILE_ORDERS: MobileOrderItem[] = [
     aiConfidencePercent: 98,
     stopSequenceNumber: 2,
     createdAtLabel: '10:05 AM',
+    latitude: 14.6401,
+    longitude: 121.0729,
+    etaMinutes: 7,
+    distanceKm: 1.4,
   },
   {
     id: 'ord-1044',
@@ -147,6 +164,10 @@ export const INITIAL_MOBILE_ORDERS: MobileOrderItem[] = [
     aiConfidencePercent: 97,
     stopSequenceNumber: 3,
     createdAtLabel: '10:30 AM',
+    latitude: 14.638,
+    longitude: 121.074,
+    etaMinutes: 5,
+    distanceKm: 1.1,
   },
 ];
 

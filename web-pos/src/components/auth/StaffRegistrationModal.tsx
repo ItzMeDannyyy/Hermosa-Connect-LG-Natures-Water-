@@ -1,8 +1,10 @@
 /**
  * ============================================================================
  * FILE: src/components/auth/StaffRegistrationModal.tsx
- * PURPOSE: Modal allowing a logged-in Station Operator to provision new RIDER
- *          or OPERATOR staff accounts. Styled with Tailwind CSS and Lucide icons.
+ * PURPOSE: Station Staff Provisioning Modal conforming to tasteskill v2 framed-sheet.
+ *          - High touch-accuracy and clean input fields.
+ *          - Flat dialog with 1px border, zero backdrop blur.
+ *          - Strictly Lucide vector icons, zero Unicode emojis.
  * ============================================================================
  */
 
@@ -60,119 +62,129 @@ export function StaffRegistrationModal(props: StaffRegistrationModalProps) {
   }
 
   return (
-    <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-lg p-6">
+    <div className="fixed inset-0 bg-[#0f172a]/50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white border border-[#cbd5e1] rounded-[10px] w-full max-w-md p-5 text-[12px]">
         {/* Header */}
-        <div className="flex items-start justify-between gap-4 pb-4 mb-4 border-b border-slate-100">
+        <div className="flex items-start justify-between pb-3 mb-3 border-b border-[#e2e8f0]">
           <div>
-            <h3 className="flex items-center gap-2 text-lg font-extrabold text-slate-900">
-              <UserPlus size={20} className="text-blue-600" />
-              <span>Provision New Station Staff</span>
-            </h3>
-            <p className="text-xs text-slate-500 mt-1">
-              Branch: <strong className="text-slate-700">{props.branchName}</strong>
+            <div className="flex items-center gap-2">
+              <UserPlus size={16} className="text-[#0284c7]" />
+              <h3 className="text-[14px] font-semibold text-[#0f172a]">
+                Provision Station Staff Account
+              </h3>
+            </div>
+            <p className="text-[11px] text-[#64748b] mt-0.5">
+              Branch: {props.branchName}
             </p>
           </div>
           <button
             type="button"
-            className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors cursor-pointer"
             onClick={props.onClose}
+            className="p-1 rounded-[4px] border border-[#e2e8f0] text-[#64748b] hover:text-[#0f172a] hover:bg-[#f8fafc] cursor-pointer"
           >
-            <X size={18} />
+            <X size={15} />
           </button>
         </div>
 
         {errorMessage !== null && (
-          <div className="mb-4 px-3.5 py-2.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-medium">
+          <div className="mb-3 px-3 py-2 rounded-[5px] bg-[#fef2f2] border border-[#fecaca] text-[#b91c1c] text-[11px]">
             {errorMessage}
           </div>
         )}
 
         {successMessage !== null && (
-          <div className="mb-4 px-3.5 py-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-medium">
-            {successMessage}
+          <div className="mb-3 px-3 py-2 rounded-[5px] bg-[#f0fdf4] border border-[#bbf7d0] text-[#15803d] text-[11px] flex items-center gap-1.5">
+            <CheckCircle2 size={13} />
+            <span>{successMessage}</span>
           </div>
         )}
 
-        <form onSubmit={handleStaffFormSubmit} className="flex flex-col gap-3.5">
+        <form onSubmit={handleStaffFormSubmit} className="flex flex-col gap-3">
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1.5">
+            <label className="block text-[11px] font-semibold text-[#64748b] uppercase tracking-wider mb-1">
               Staff Full Name
             </label>
             <input
               type="text"
+              required
               value={fullName}
-              onChange={(event) => setFullName(event.target.value)}
-              placeholder="e.g., Mark Reyes (Delivery Rider)"
-              required
-              className="w-full px-3.5 py-2.5 text-sm font-medium text-slate-900 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white transition-all"
+              onChange={(e) => setFullName(e.target.value)}
+              placeholder="e.g. Juan De La Cruz"
+              className="field-input"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1.5">
-              Phone Number (+63)
+            <label className="block text-[11px] font-semibold text-[#64748b] uppercase tracking-wider mb-1">
+              Mobile Phone Number
             </label>
             <input
               type="text"
+              required
               value={phoneNumber}
-              onChange={(event) => setPhoneNumber(event.target.value)}
-              placeholder="+639175554433"
-              required
-              className="w-full px-3.5 py-2.5 text-sm font-medium text-slate-900 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white transition-all"
+              onChange={(e) => setPhoneNumber(e.target.value)}
+              placeholder="+639171234567"
+              className="field-input num-mono"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1.5">
-              Assign Staff Role
-            </label>
-            <select
-              value={role}
-              onChange={(event) =>
-                setRole(event.target.value as 'RIDER' | 'OPERATOR')
-              }
-              className="w-full px-3.5 py-2.5 text-sm font-medium text-slate-900 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white transition-all"
-            >
-              <option value="RIDER">
-                RIDER (Delivery Route, AI Photo Count &amp; Smart Receipts)
-              </option>
-              <option value="OPERATOR">
-                OPERATOR (Station Counter POS &amp; Profit Dashboard)
-              </option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1.5">
-              Temporary Password
+            <label className="block text-[11px] font-semibold text-[#64748b] uppercase tracking-wider mb-1">
+              Initial Password
             </label>
             <input
-              type="text"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
+              type="password"
               required
-              className="w-full px-3.5 py-2.5 text-sm font-medium text-slate-900 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white transition-all"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="field-input num-mono"
             />
           </div>
 
-          <div className="flex justify-end gap-2.5 mt-2 pt-4 border-t border-slate-100">
-            <button
-              type="button"
-              className="px-4 py-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors cursor-pointer"
-              onClick={props.onClose}
-            >
-              Close
-            </button>
+          <div>
+            <label className="block text-[11px] font-semibold text-[#64748b] uppercase tracking-wider mb-1">
+              Assigned Operational Role
+            </label>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => setRole('RIDER')}
+                className={`py-2 px-3 rounded-[5px] border text-center text-[11px] font-medium cursor-pointer transition-colors ${
+                  role === 'RIDER'
+                    ? 'border-[#0284c7] bg-[#f0f9ff] text-[#0284c7] font-semibold'
+                    : 'border-[#e2e8f0] bg-white text-[#475569] hover:bg-[#f8fafc]'
+                }`}
+              >
+                Delivery Rider (Mobile)
+              </button>
+              <button
+                type="button"
+                onClick={() => setRole('OPERATOR')}
+                className={`py-2 px-3 rounded-[5px] border text-center text-[11px] font-medium cursor-pointer transition-colors ${
+                  role === 'OPERATOR'
+                    ? 'border-[#0284c7] bg-[#f0f9ff] text-[#0284c7] font-semibold'
+                    : 'border-[#e2e8f0] bg-white text-[#475569] hover:bg-[#f8fafc]'
+                }`}
+              >
+                Station Operator (Web POS)
+              </button>
+            </div>
+          </div>
+
+          <div className="flex gap-2 pt-2 mt-2 border-t border-[#e2e8f0]">
             <button
               type="submit"
               disabled={isSubmitting}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white shadow-md shadow-blue-600/20 transition-colors cursor-pointer"
+              className="btn-primary flex-1 py-2 text-[12px] disabled:opacity-50"
             >
-              <CheckCircle2 size={15} />
-              <span>
-                {isSubmitting ? 'Creating Account...' : 'Create Staff Account'}
-              </span>
+              {isSubmitting ? 'Provisioning...' : 'Create Staff Credentials'}
+            </button>
+            <button
+              type="button"
+              onClick={props.onClose}
+              className="btn-secondary py-2 px-4 text-[12px]"
+            >
+              Cancel
             </button>
           </div>
         </form>

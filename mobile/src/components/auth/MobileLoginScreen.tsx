@@ -1,10 +1,10 @@
 /**
  * ============================================================================
  * FILE: src/components/auth/MobileLoginScreen.tsx
- * PURPOSE: Implements Wireframe M0 (Shared Mobile Login & 2-Step Customer
- *          Delivery Profile Setup).
- *          - Uses modular StyleSheet rules from src/styles/auth.styles.ts
- *          - Uses Lucide icons (lucide-react-native) strictly.
+ * PURPOSE: Mobile Authentication & Customer Delivery Profile Onboarding.
+ *          Features refined water refilling station aesthetics, instant demo
+ *          credential pickers (Customer / Rider), and clean typography.
+ *          Strict Lucide icons (lucide-react-native).
  * ============================================================================
  */
 
@@ -17,6 +17,8 @@ import {
   LogIn,
   MapPin,
   Phone,
+  Truck,
+  User,
   UserPlus,
 } from 'lucide-react-native';
 import React, { useState } from 'react';
@@ -40,14 +42,26 @@ export function MobileLoginScreen(props: MobileLoginScreenProps) {
   const [phoneNumber, setPhoneNumber] = useState<string>('+639170000003');
   const [password, setPassword] = useState<string>('password123');
   const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [activePreset, setActivePreset] = useState<'CUSTOMER' | 'RIDER'>('CUSTOMER');
 
-  // 2-Step Customer Delivery Profile Setup State
+  // Customer Delivery Profile Setup State
   const [isStepTwoOpen, setIsStepTwoOpen] = useState<boolean>(false);
   const [newCustomerName, setNewCustomerName] = useState<string>('Maria Santos');
   const [pinnedAddress, setPinnedAddress] = useState<string>(
     'Blk 4 Lot 12 Pansol St, Quezon City',
   );
   const [defaultGallonsCount, setDefaultGallonsCount] = useState<string>('8');
+
+  function handleSelectPreset(role: 'CUSTOMER' | 'RIDER') {
+    setActivePreset(role);
+    if (role === 'CUSTOMER') {
+      setPhoneNumber('+639170000003');
+      setPassword('password123');
+    } else {
+      setPhoneNumber('+639170000002');
+      setPassword('password123');
+    }
+  }
 
   function handleTogglePasswordVisibility() {
     setShowPassword(!showPassword);
@@ -70,53 +84,71 @@ export function MobileLoginScreen(props: MobileLoginScreenProps) {
   return (
     <ScrollView contentContainerStyle={authStyles.scrollContainer}>
       <View style={authStyles.contentMaxWrapper}>
-        {/* 1. Brand Header Lockup with Logo Placeholder & Colored Cursive Name */}
+        {/* Brand Crest & Title */}
         <View style={authStyles.brandHeaderBlock}>
-          <View style={authStyles.brandTopLockup}>
-            <View style={authStyles.logoPlaceholderBox}>
-              <Droplets size={22} color="#38bdf8" />
-              <Text style={authStyles.logoPlaceholderLabel}>LOGO</Text>
-            </View>
-
-            <View style={{ flex: 1 }}>
-              <View style={authStyles.brandColoredTitleRow}>
-                <Text style={authStyles.brandTextLg}>LG </Text>
-                <Text style={authStyles.brandTextNatures}>Nature&apos;s </Text>
-                <Text style={authStyles.brandTextWater}>Water</Text>
-              </View>
-              <Text style={authStyles.brandTaglineSubtitle}>
-                One Tap Water Delivery &amp; Smart Station POS
-              </Text>
-            </View>
+          <View style={authStyles.brandCrestBox}>
+            <Droplets size={32} color="#38bdf8" />
           </View>
+          <Text style={authStyles.brandTitleText}>LG NATURE&apos;S WATER</Text>
+          <Text style={authStyles.brandSubtitleText}>
+            Purified Water Refilling &amp; Smart Dispatch
+          </Text>
         </View>
 
-        {/* 2. Outer Glass Ring + White Sign In Card */}
+        {/* White Sign In Card */}
         <View style={authStyles.loginOuterRing}>
           <View style={authStyles.loginWhiteCard}>
             <View style={authStyles.cardTopHeaderRow}>
               <View style={authStyles.cardIconBadge}>
-                <Droplets size={20} color="#2563eb" />
+                <Droplets size={18} color="#0284c7" />
               </View>
 
               <View style={authStyles.onlineStatusPill}>
                 <View style={authStyles.onlineDot} />
                 <Text style={authStyles.onlineStatusText}>
-                  Station 1 Online
+                  Station 1 Hub Online
                 </Text>
               </View>
             </View>
 
-            <Text style={authStyles.cardHeading}>Mobile Sign In</Text>
-            <Text style={authStyles.cardSubtitle}>
-              Sign in with your mobile number or use the top Demo Switcher bar.
-            </Text>
+            <View>
+              <Text style={authStyles.cardHeading}>Sign In</Text>
+              <Text style={authStyles.cardSubtitle}>
+                Select an account role or enter your mobile credentials.
+              </Text>
+            </View>
+
+            {/* Quick Demo Account Selector */}
+            <View style={authStyles.demoAccountQuickRow}>
+              <Pressable
+                onPress={() => handleSelectPreset('CUSTOMER')}
+                style={[
+                  authStyles.demoQuickPill,
+                  activePreset === 'CUSTOMER' ? authStyles.demoQuickPillActive : null,
+                ]}
+              >
+                <User size={13} color={activePreset === 'CUSTOMER' ? '#0284c7' : '#64748b'} />
+                <Text style={authStyles.demoQuickPillText}>Customer (Maria)</Text>
+              </Pressable>
+
+              <Pressable
+                onPress={() => handleSelectPreset('RIDER')}
+                style={[
+                  authStyles.demoQuickPill,
+                  activePreset === 'RIDER' ? authStyles.demoQuickPillActive : null,
+                ]}
+              >
+                <Truck size={13} color={activePreset === 'RIDER' ? '#0284c7' : '#64748b'} />
+                <Text style={authStyles.demoQuickPillText}>Rider (J. Cruz)</Text>
+              </Pressable>
+            </View>
 
             {/* Phone Number Field */}
             <View style={authStyles.fieldBlock}>
-              <Text style={authStyles.fieldLabel}>Phone Number</Text>
+              <Text style={authStyles.fieldLabel}>Mobile Number</Text>
               <View style={authStyles.inputRowBox}>
-                <Phone size={16} color="#64748b" />
+                <Text style={authStyles.phFlagPrefix}>PH +63</Text>
+                <Phone size={15} color="#64748b" />
                 <TextInput
                   value={phoneNumber}
                   onChangeText={(text) => {
@@ -133,7 +165,7 @@ export function MobileLoginScreen(props: MobileLoginScreenProps) {
             <View style={authStyles.fieldBlock}>
               <Text style={authStyles.fieldLabel}>Password</Text>
               <View style={authStyles.inputRowBox}>
-                <Lock size={16} color="#64748b" />
+                <Lock size={15} color="#64748b" />
                 <TextInput
                   value={password}
                   onChangeText={(text) => {
@@ -146,9 +178,9 @@ export function MobileLoginScreen(props: MobileLoginScreenProps) {
                 />
                 <Pressable onPress={handleTogglePasswordVisibility}>
                   {showPassword ? (
-                    <EyeOff size={17} color="#64748b" />
+                    <EyeOff size={16} color="#64748b" />
                   ) : (
-                    <Eye size={17} color="#64748b" />
+                    <Eye size={16} color="#64748b" />
                   )}
                 </Pressable>
               </View>
@@ -160,16 +192,16 @@ export function MobileLoginScreen(props: MobileLoginScreenProps) {
               disabled={props.isSubmitting}
               style={authStyles.primaryLoginButton}
             >
-              <LogIn size={17} color="#ffffff" />
+              <LogIn size={16} color="#ffffff" />
               <Text style={authStyles.primaryLoginButtonText}>
-                {props.isSubmitting ? 'Signing In...' : 'LOG IN (ONE TAP)'}
+                {props.isSubmitting ? 'SIGNING IN...' : 'SIGN IN TO STATION'}
               </Text>
             </Pressable>
 
-            {/* 2-Step Customer Onboarding Section (Wireframe M0) */}
+            {/* Customer Onboarding Section */}
             <View style={authStyles.signupDividerBlock}>
               <Text style={authStyles.signupPromptText}>
-                New Household or Office Customer?
+                Need a new delivery address profile?
               </Text>
 
               <Pressable
@@ -178,28 +210,28 @@ export function MobileLoginScreen(props: MobileLoginScreenProps) {
                 }}
                 style={authStyles.secondaryOutlineButton}
               >
-                <UserPlus size={15} color="#2563eb" />
+                <UserPlus size={14} color="#0369a1" />
                 <Text style={authStyles.secondaryOutlineButtonText}>
-                  Set Up 1-Click Delivery Profile
+                  {isStepTwoOpen ? 'Close Delivery Setup' : 'Register 1-Click Delivery Profile'}
                 </Text>
               </Pressable>
 
               {isStepTwoOpen && (
                 <View style={authStyles.stepTwoProfileBox}>
                   <Text style={authStyles.stepTwoTitle}>
-                    Step 2: Pin GPS on Map &amp; Set Default Gallons
+                    Delivery Address &amp; Usual Refill Volume
                   </Text>
 
                   <View style={authStyles.gpsPinPreviewCard}>
-                    <MapPin size={16} color="#0284c7" />
+                    <MapPin size={15} color="#0284c7" />
                     <Text style={authStyles.gpsPinText}>
-                      Auto-Linked Nearest Branch: Station 1 (Main Hub - 0.3km)
+                      Assigned Station: Station 1 Hub (Pansol / Katipunan)
                     </Text>
                   </View>
 
-                  <View>
+                  <View style={authStyles.fieldBlock}>
                     <Text style={authStyles.fieldLabel}>
-                      Household / Office Name
+                      Customer / Household Name
                     </Text>
                     <View style={authStyles.inputRowBox}>
                       <TextInput
@@ -212,9 +244,9 @@ export function MobileLoginScreen(props: MobileLoginScreenProps) {
                     </View>
                   </View>
 
-                  <View>
+                  <View style={authStyles.fieldBlock}>
                     <Text style={authStyles.fieldLabel}>
-                      Pinned Street Address
+                      Delivery Street Address
                     </Text>
                     <View style={authStyles.inputRowBox}>
                       <TextInput
@@ -227,9 +259,9 @@ export function MobileLoginScreen(props: MobileLoginScreenProps) {
                     </View>
                   </View>
 
-                  <View>
+                  <View style={authStyles.fieldBlock}>
                     <Text style={authStyles.fieldLabel}>
-                      Default Usual Gallons per Order
+                      Default Gallons per Order
                     </Text>
                     <View style={authStyles.inputRowBox}>
                       <TextInput
@@ -249,7 +281,7 @@ export function MobileLoginScreen(props: MobileLoginScreenProps) {
                   >
                     <CheckCircle2 size={16} color="#ffffff" />
                     <Text style={authStyles.primaryLoginButtonText}>
-                      Save Profile &amp; Open 1-Click Home
+                      Save Profile &amp; Continue
                     </Text>
                   </Pressable>
                 </View>

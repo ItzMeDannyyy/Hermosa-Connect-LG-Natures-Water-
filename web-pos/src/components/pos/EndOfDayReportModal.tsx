@@ -1,22 +1,20 @@
 /**
  * ============================================================================
  * FILE: src/components/pos/EndOfDayReportModal.tsx
- * PURPOSE: Implements Wireframe W3 (Feature 03: One-Tap End-of-Day Report).
- *          Styled with Tailwind CSS and Lucide icons (lucide-react) strictly.
+ * PURPOSE: End-of-Day Z-Reading Closing Report conforming to tasteskill v2 framed-sheet.
+ *          - High-contrast tabular figures (IBM Plex Mono).
+ *          - Flat, engineered surface with 1px border, no backdrop blur.
+ *          - True net cash & operational cost reconciliation.
+ *          - Strictly Lucide vector icons, zero Unicode emojis.
  * ============================================================================
  */
 
 import {
-  Award,
   Banknote,
-  ClipboardList,
-  Droplets,
   FileBarChart,
   Printer,
-  RefreshCw,
   Smartphone,
   X,
-  Zap,
 } from 'lucide-react';
 import type { ProfitSummaryMetrics } from '../../types/pos.types';
 
@@ -39,161 +37,135 @@ export function EndOfDayReportModal(props: EndOfDayReportModalProps) {
     year: 'numeric',
   });
 
-  function handlePrintReport() {
-    window.print();
-  }
-
   return (
-    <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-xl p-6">
-        {/* Modal Header */}
-        <div className="flex items-start justify-between gap-4 pb-4 mb-4 border-b border-slate-100">
+    <div className="fixed inset-0 bg-[#0f172a]/50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white border border-[#cbd5e1] rounded-[10px] w-full max-w-lg p-5 text-[12px]">
+        {/* Header */}
+        <div className="flex items-start justify-between pb-3 mb-3 border-b border-[#e2e8f0]">
           <div>
-            <h3 className="flex items-center gap-2 text-lg font-extrabold text-slate-900">
-              <FileBarChart size={20} className="text-blue-600" />
-              <span>1-Tap End-of-Day Closing Report</span>
-            </h3>
-            <p className="text-xs text-slate-500 mt-1">
-              {props.branchName} • {todayFormatted} • Operator:{' '}
-              <strong className="text-slate-700">{props.operatorName}</strong>
+            <div className="flex items-center gap-2">
+              <FileBarChart size={16} className="text-[#0284c7]" />
+              <h3 className="text-[14px] font-semibold text-[#0f172a]">
+                End-of-Day Closing Report (Z-Reading)
+              </h3>
+            </div>
+            <p className="text-[11px] text-[#64748b] mt-0.5">
+              {props.branchName} · {todayFormatted} · Operator: {props.operatorName}
             </p>
           </div>
           <button
             type="button"
-            className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors cursor-pointer"
             onClick={props.onClose}
+            className="p-1 rounded-[4px] border border-[#e2e8f0] text-[#64748b] hover:text-[#0f172a] hover:bg-[#f8fafc] cursor-pointer"
           >
-            <X size={18} />
+            <X size={15} />
           </button>
         </div>
 
-        {/* Report Content Sections */}
-        <div className="flex flex-col gap-3.5">
-          {/* Section 1: Operations & Container Volume */}
-          <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5">
-            <h4 className="text-[11px] font-extrabold uppercase tracking-wider text-blue-700 mb-2">
-              1. OPERATIONS &amp; CONTAINER VOLUME
-            </h4>
-            <div className="flex justify-between text-xs text-slate-700 py-1">
+        {/* Content Breakdown */}
+        <div className="flex flex-col gap-3 font-mono text-[11px]">
+          {/* Operations & Volume */}
+          <div className="bg-[#f8fafc] border border-[#e2e8f0] rounded-[6px] p-3">
+            <div className="text-[10px] font-semibold uppercase text-[#64748b] tracking-wider mb-2 font-sans">
+              1. Volume &amp; Operations
+            </div>
+            <div className="flex justify-between py-0.5 text-[#334155]">
               <span>Total Orders Processed:</span>
-              <strong className="font-bold text-slate-900">
-                {props.metrics.totalOrdersCount} Orders
-              </strong>
-            </div>
-            <div className="flex justify-between text-xs text-slate-700 py-1">
-              <span>Total Water Containers Refilled:</span>
-              <strong className="font-bold text-slate-900">
-                {props.metrics.totalContainersRefilled} Containers
-              </strong>
-            </div>
-            <div className="flex justify-between text-xs text-slate-700 py-1">
-              <span>Total Empty Containers Collected:</span>
-              <strong className="font-bold text-slate-900">
-                {props.metrics.totalEmptyContainersPickedUp} Containers
-              </strong>
-            </div>
-          </div>
-
-          {/* Section 2: Gross Sales by Payment State */}
-          <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5">
-            <h4 className="text-[11px] font-extrabold uppercase tracking-wider text-blue-700 mb-2">
-              2. GROSS SALES BY PAYMENT STATE
-            </h4>
-            <div className="flex justify-between items-center text-xs text-slate-700 py-1">
-              <span className="inline-flex items-center gap-1.5">
-                <Banknote size={15} className="text-slate-400" />
-                <span>Cash Collected at Door / Counter:</span>
-              </span>
-              <span className="font-semibold">
-                PHP {props.metrics.cashCollected.toFixed(2)}
+              <span className="font-semibold text-[#0f172a]">
+                {props.metrics.totalOrdersCount} orders
               </span>
             </div>
-            <div className="flex justify-between items-center text-xs text-slate-700 py-1">
-              <span className="inline-flex items-center gap-1.5">
-                <Smartphone size={15} className="text-slate-400" />
-                <span>GCash / Maya E-Payment Collected:</span>
-              </span>
-              <span className="font-semibold">
-                PHP {props.metrics.ePaymentCollected.toFixed(2)}
+            <div className="flex justify-between py-0.5 text-[#334155]">
+              <span>Refill Jugs Filled:</span>
+              <span className="font-semibold text-[#0f172a]">
+                {props.metrics.totalContainersRefilled} gallons
               </span>
             </div>
-            <div className="flex justify-between items-center text-xs text-slate-700 py-1">
-              <span className="inline-flex items-center gap-1.5">
-                <ClipboardList size={15} className="text-slate-400" />
-                <span>Partial / Unpaid Charge Slips Added:</span>
+            <div className="flex justify-between py-0.5 text-[#334155]">
+              <span>Empty Jugs Collected:</span>
+              <span className="font-semibold text-[#0f172a]">
+                {props.metrics.totalEmptyContainersPickedUp} gallons
               </span>
-              <span className="font-semibold">
-                PHP {props.metrics.unpaidReceivablesAdded.toFixed(2)}
-              </span>
-            </div>
-            <div className="flex justify-between items-center text-xs text-slate-900 pt-2 mt-1.5 border-t border-slate-200">
-              <strong className="font-extrabold">Gross Sales Revenue:</strong>
-              <strong className="font-extrabold">
-                PHP {props.metrics.grossSalesRevenue.toFixed(2)}
-              </strong>
             </div>
           </div>
 
-          {/* Section 3: Deducted Cost of Refill & True Net Profit */}
-          <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5">
-            <h4 className="text-[11px] font-extrabold uppercase tracking-wider text-blue-700 mb-2">
-              3. DEDUCTED COST OF REFILL (TRUE PROFIT ENGINE)
-            </h4>
-            <div className="flex justify-between items-center text-xs text-slate-700 py-1">
-              <span className="inline-flex items-center gap-1.5">
-                <Droplets size={15} className="text-slate-400" />
-                <span>Water Filtration Cost (PHP 3.00 / jug):</span>
+          {/* Revenue Breakdown */}
+          <div className="bg-[#f8fafc] border border-[#e2e8f0] rounded-[6px] p-3">
+            <div className="text-[10px] font-semibold uppercase text-[#64748b] tracking-wider mb-2 font-sans">
+              2. Revenue by Payment Tender
+            </div>
+            <div className="flex justify-between py-0.5 text-[#334155]">
+              <span className="flex items-center gap-1">
+                <Banknote size={12} className="text-[#64748b]" />
+                <span>Cash Drawer Intake:</span>
               </span>
-              <span className="font-semibold text-red-600">
-                - PHP {props.metrics.waterCostTotal.toFixed(2)}
+              <span className="font-semibold text-[#0f172a]">
+                ₱{props.metrics.cashCollected.toFixed(2)}
               </span>
             </div>
-            <div className="flex justify-between items-center text-xs text-slate-700 py-1">
-              <span className="inline-flex items-center gap-1.5">
-                <Zap size={15} className="text-slate-400" />
-                <span>Electricity &amp; Pump Cost (PHP 3.00 / jug):</span>
+            <div className="flex justify-between py-0.5 text-[#334155]">
+              <span className="flex items-center gap-1">
+                <Smartphone size={12} className="text-[#64748b]" />
+                <span>GCash / Maya Digital:</span>
               </span>
-              <span className="font-semibold text-red-600">
-                - PHP {props.metrics.electricityCostTotal.toFixed(2)}
-              </span>
-            </div>
-            <div className="flex justify-between items-center text-xs text-slate-700 py-1">
-              <span className="inline-flex items-center gap-1.5">
-                <RefreshCw size={15} className="text-slate-400" />
-                <span>Container Cap, Seal &amp; Wear (PHP 2.00 / jug):</span>
-              </span>
-              <span className="font-semibold text-red-600">
-                - PHP {props.metrics.containerWearCostTotal.toFixed(2)}
+              <span className="font-semibold text-[#0f172a]">
+                ₱{props.metrics.ePaymentCollected.toFixed(2)}
               </span>
             </div>
-            <div className="flex justify-between items-center text-sm text-emerald-700 pt-2.5 mt-1.5 border-t-2 border-emerald-500">
-              <strong className="inline-flex items-center gap-1.5 font-extrabold">
-                <Award size={17} />
-                <span>TRUE NET PROFIT TODAY:</span>
-              </strong>
-              <strong className="font-extrabold">
-                PHP {props.metrics.trueNetProfit.toFixed(2)}
-              </strong>
+            <div className="flex justify-between py-0.5 text-[#334155]">
+              <span>Unpaid Charge Slips:</span>
+              <span className="font-semibold text-[#b91c1c]">
+                ₱{props.metrics.unpaidReceivablesAdded.toFixed(2)}
+              </span>
+            </div>
+            <div className="h-px bg-[#e2e8f0] my-1.5" />
+            <div className="flex justify-between font-bold text-[#0f172a] text-[12px]">
+              <span>Gross Sales Total:</span>
+              <span>₱{props.metrics.grossSalesRevenue.toFixed(2)}</span>
+            </div>
+          </div>
+
+          {/* Utility Deductions & True Net Profit */}
+          <div className="bg-[#f8fafc] border border-[#e2e8f0] rounded-[6px] p-3">
+            <div className="text-[10px] font-semibold uppercase text-[#64748b] tracking-wider mb-2 font-sans">
+              3. Operational Cost Deductions
+            </div>
+            <div className="flex justify-between py-0.5 text-[#334155]">
+              <span>Raw Deepwell Water:</span>
+              <span>−₱{props.metrics.waterCostTotal.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between py-0.5 text-[#334155]">
+              <span>RO/UV Purification Power:</span>
+              <span>−₱{props.metrics.electricityCostTotal.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between py-0.5 text-[#334155]">
+              <span>Sanitization &amp; Wear:</span>
+              <span>−₱{props.metrics.containerWearCostTotal.toFixed(2)}</span>
+            </div>
+            <div className="h-px bg-[#e2e8f0] my-1.5" />
+            <div className="flex justify-between font-bold text-[#15803d] text-[12px]">
+              <span>True Net Profit:</span>
+              <span>₱{props.metrics.trueNetProfit.toFixed(2)}</span>
             </div>
           </div>
         </div>
 
         {/* Footer Actions */}
-        <div className="flex justify-end gap-2.5 mt-5 pt-4 border-t border-slate-100">
+        <div className="flex gap-2 mt-4 pt-3 border-t border-[#e2e8f0]">
           <button
             type="button"
-            className="px-4 py-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors cursor-pointer"
-            onClick={props.onClose}
+            onClick={() => window.print()}
+            className="btn-primary flex-1 py-2 text-[12px]"
           >
-            Close Report
+            <Printer size={14} />
+            <span>Print Z-Reading</span>
           </button>
           <button
             type="button"
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-600/20 transition-colors cursor-pointer"
-            onClick={handlePrintReport}
+            onClick={props.onClose}
+            className="btn-secondary py-2 px-4 text-[12px]"
           >
-            <Printer size={15} />
-            <span>Print / Export Closing Summary</span>
+            Dismiss
           </button>
         </div>
       </div>
