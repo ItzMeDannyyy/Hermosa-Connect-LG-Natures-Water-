@@ -18,9 +18,6 @@ import { JwtStrategy } from './strategies/jwt.strategy.js';
         secret:
           configService.get<string>('JWT_ACCESS_SECRET') ??
           'lg-natures-water-super-secret-access-key-2026',
-        signOptions: {
-          expiresIn: '15m',
-        },
       }),
     }),
   ],

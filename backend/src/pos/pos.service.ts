@@ -13,12 +13,16 @@ import {
 import {
   billingDocuments,
   containerPresets,
+  deliveryCustomers,
   orders,
   stationBranches,
 } from '../database/schema/index.js';
 import type {
+  BulkCreateDeliveryCustomersDto,
   ConvertOrderReceiptDto,
+  CreateDeliveryCustomerDto,
   CreatePosOrderDto,
+  UpdateDeliveryCustomerDto,
   UpdateOrderAiCountDto,
 } from './dto/pos.dto.js';
 
@@ -29,7 +33,7 @@ export class PosService implements OnModuleInit {
   constructor(@Inject(DATABASE_CONNECTION) private readonly db: Database) {}
 
   async onModuleInit() {
-    await this.seedInitialPosOrdersIfEmpty();
+    this.logger.log('PosService initialized: Clean live database ready (no mock orders seeded).');
   }
 
   /**
@@ -332,135 +336,175 @@ export class PosService implements OnModuleInit {
   }
 
   /**
-   * Auto-seeds realistic initial POS Orders (#1042-#1045) into PostgreSQL on startup if empty.
+   * 5. GET /api/pos/delivery-customers
+   *    Retrieves delivery customers sorted by Barangay and customer name.
    */
-  private async seedInitialPosOrdersIfEmpty() {
-    try {
-      const existingOrders = await this.db.select().from(orders);
-      if (existingOrders.length > 0) {
-        return;
+  async getDeliveryCustomers() {
+    const rawCustomers = await this.db
+      .select()
+      .from(deliveryCustomers)
+      .orderBy(deliveryCustomers.barangay, deliveryCustomers.name);
+
+    let fotonCount = 0;
+    let sidecarCount = 0;
+    const barangayMap = new Map<string, typeof rawCustomers>();
+
+    for (const customer of rawCustomers) {
+      if (customer.vehicleType === 'FOTON') {
+        fotonCount += 1;
+      } else {
+        sidecarCount += 1;
       }
 
-      const [branch] = await this.db.select().from(stationBranches).limit(1);
-      if (!branch) {
-        return;
-      }
-
-      const [preset] = await this.db
-        .select()
-        .from(containerPresets)
-        .where(eq(containerPresets.branchId, branch.id))
-        .limit(1);
-
-      const seedOrders = [
-        {
-          customerName: 'Maria Santos',
-          phoneNumber: '+639170000003',
-          address: 'Blk 4 Lot 12 Pansol St, Quezon City',
-          orderNum: 1042,
-          qty: 8,
-          pickupQty: 3,
-          slot: 'SLOT_1_3_PM' as const,
-          status: 'DELIVERED' as const,
-          docStage: 'OFFICIAL_RECEIPT' as const,
-          payState: 'PARTIAL' as const,
-          paid: 130,
-          bal: 100,
-        },
-        {
-          customerName: 'Carlo Mendoza',
-          phoneNumber: '+639178889900',
-          address: '18 Xavierville Ave, Loyola Heights, QC',
-          orderNum: 1043,
-          qty: 6,
-          pickupQty: 6,
-          slot: 'SLOT_1_3_PM' as const,
-          status: 'INVOICED' as const,
-          docStage: 'INVOICE_ONLY' as const,
-          payState: 'UNPAID_CHARGE_SLIP' as const,
-          paid: 0,
-          bal: 180,
-        },
-        {
-          customerName: 'Katipunan Study Hub (Office)',
-          phoneNumber: '+639173334455',
-          address: '102 Katipunan Ave, Quezon City',
-          orderNum: 1044,
-          qty: 12,
-          pickupQty: 10,
-          slot: 'SLOT_8_10_AM' as const,
-          status: 'DELIVERED' as const,
-          docStage: 'OFFICIAL_RECEIPT' as const,
-          payState: 'PAID_CASH' as const,
-          paid: 330,
-          bal: 0,
-        },
-        {
-          customerName: 'Elena Bautista',
-          phoneNumber: '+639176667788',
-          address: '24 Rosa Alvero St, Loyola Heights, QC',
-          orderNum: 1045,
-          qty: 10,
-          pickupQty: 8,
-          slot: 'SLOT_4_6_PM' as const,
-          status: 'DELIVERED' as const,
-          docStage: 'OFFICIAL_RECEIPT' as const,
-          payState: 'PAID_CASH' as const,
-          paid: 280,
-          bal: 0,
-        },
-      ];
-
-      for (const item of seedOrders) {
-        const subtotal = item.qty * 25;
-        const deliveryFee = 30;
-        const totalDue = subtotal + deliveryFee;
-
-        const [createdOrder] = await this.db
-          .insert(orders)
-          .values({
-            customerName: item.customerName,
-            customerPhone: item.phoneNumber,
-            deliveryAddress: item.address,
-            branchId: branch.id,
-            presetId: preset?.id ?? null,
-            orderType: 'BOTH',
-            status: item.status,
-            requestedQty: item.qty,
-            verifiedCount: item.qty,
-            emptyContainersToPickup: item.pickupQty,
-            scheduledPickupDate: '2026-10-20',
-            scheduledTimeSlot: item.slot,
-          })
-          .returning();
-
-        await this.db.insert(billingDocuments).values({
-          orderId: createdOrder!.id,
-          invoiceNumber: `INV-${item.orderNum}`,
-          receiptNumber:
-            item.docStage === 'OFFICIAL_RECEIPT'
-              ? `OR-${item.orderNum}`
-              : null,
-          documentStage: item.docStage,
-          paymentState: item.payState,
-          subtotalAmount: subtotal.toFixed(2),
-          deliveryFee: deliveryFee.toFixed(2),
-          totalDue: totalDue.toFixed(2),
-          amountPaid: item.paid.toFixed(2),
-          changeGiven: '0.00',
-          balanceDue: item.bal.toFixed(2),
-          receiptIssuedAt:
-            item.docStage === 'OFFICIAL_RECEIPT' ? new Date() : null,
-        });
-      }
-
-      this.logger.log(
-        'Seeded initial POS Orders (#1042-#1045) into PostgreSQL!',
-      );
-    } catch (error) {
-      this.logger.warn(
-        `Skipped POS orders auto-seed: ${(error as Error).message}`,
-      );
+      const list = barangayMap.get(customer.barangay) ?? [];
+      list.push(customer);
+      barangayMap.set(customer.barangay, list);
     }
+
+    const barangays = Array.from(barangayMap.entries()).map(
+      ([barangayName, items]) => ({
+        barangay: barangayName,
+        totalCustomers: items.length,
+        fotonCount: items.filter((c) => c.vehicleType === 'FOTON').length,
+        sidecarCount: items.filter((c) => c.vehicleType === 'SIDECAR').length,
+        customers: items,
+      }),
+    );
+
+    return {
+      totalCustomers: rawCustomers.length,
+      fotonCount,
+      sidecarCount,
+      barangays,
+      allCustomers: rawCustomers,
+    };
+  }
+
+  /**
+   * 6. POST /api/pos/delivery-customers
+   *    Adds a single delivery customer with designated barangay and vehicle type.
+   */
+  async createDeliveryCustomer(dto: CreateDeliveryCustomerDto) {
+    const [branch] = await this.db.select().from(stationBranches).limit(1);
+
+    const [newCustomer] = await this.db
+      .insert(deliveryCustomers)
+      .values({
+        name: dto.name.trim(),
+        phoneNumber: dto.phoneNumber?.trim() || null,
+        barangay: dto.barangay.trim(),
+        deliveryAddress: dto.deliveryAddress?.trim() || '',
+        vehicleType: dto.vehicleType ?? 'FOTON',
+        scheduledDeliveryTime: dto.scheduledDeliveryTime?.trim() || null,
+        notes: dto.notes?.trim() || null,
+        branchId: branch?.id ?? null,
+      })
+      .returning();
+
+    return {
+      message: `Delivery customer ${newCustomer!.name} added under ${newCustomer!.barangay} (${newCustomer!.vehicleType}).`,
+      customer: newCustomer,
+    };
+  }
+
+  /**
+   * 7. POST /api/pos/delivery-customers/bulk
+   *    Bulk creates delivery customers from spreadsheet import.
+   */
+  async bulkCreateDeliveryCustomers(dto: BulkCreateDeliveryCustomersDto) {
+    const [branch] = await this.db.select().from(stationBranches).limit(1);
+
+    if (!dto.customers || dto.customers.length === 0) {
+      return { insertedCount: 0, customers: [] };
+    }
+
+    const recordsToInsert = dto.customers.map((c) => ({
+      name: c.name.trim(),
+      phoneNumber: c.phoneNumber?.trim() || null,
+      barangay: (c.barangay || dto.defaultBarangay || 'Station Area').trim(),
+      deliveryAddress: c.deliveryAddress?.trim() || '',
+      vehicleType: c.vehicleType || dto.defaultVehicleType || 'FOTON',
+      scheduledDeliveryTime: c.scheduledDeliveryTime?.trim() || null,
+      notes: c.notes?.trim() || null,
+      branchId: branch?.id ?? null,
+    }));
+
+    const inserted = await this.db
+      .insert(deliveryCustomers)
+      .values(recordsToInsert)
+      .returning();
+
+    return {
+      message: `Successfully imported ${inserted.length} delivery customers.`,
+      insertedCount: inserted.length,
+      customers: inserted,
+    };
+  }
+
+  /**
+   * 8. PATCH /api/pos/delivery-customers/:id
+   *    Updates a delivery customer's details or vehicle assignment.
+   */
+  async updateDeliveryCustomer(id: string, dto: UpdateDeliveryCustomerDto) {
+    const [existing] = await this.db
+      .select()
+      .from(deliveryCustomers)
+      .where(eq(deliveryCustomers.id, id))
+      .limit(1);
+
+    if (!existing) {
+      throw new NotFoundException('Delivery customer not found');
+    }
+
+    const [updated] = await this.db
+      .update(deliveryCustomers)
+      .set({
+        name: dto.name !== undefined ? dto.name.trim() : existing.name,
+        phoneNumber:
+          dto.phoneNumber !== undefined
+            ? dto.phoneNumber.trim() || null
+            : existing.phoneNumber,
+        barangay:
+          dto.barangay !== undefined ? dto.barangay.trim() : existing.barangay,
+        deliveryAddress:
+          dto.deliveryAddress !== undefined
+            ? dto.deliveryAddress.trim()
+            : existing.deliveryAddress,
+        vehicleType: dto.vehicleType ?? existing.vehicleType,
+        scheduledDeliveryTime:
+          dto.scheduledDeliveryTime !== undefined
+            ? dto.scheduledDeliveryTime.trim() || null
+            : existing.scheduledDeliveryTime,
+        notes:
+          dto.notes !== undefined ? dto.notes.trim() || null : existing.notes,
+        updatedAt: new Date(),
+      })
+      .where(eq(deliveryCustomers.id, id))
+      .returning();
+
+    return {
+      message: `Customer ${updated!.name} updated successfully.`,
+      customer: updated,
+    };
+  }
+
+  /**
+   * 9. DELETE /api/pos/delivery-customers/:id
+   *    Removes a delivery customer.
+   */
+  async deleteDeliveryCustomer(id: string) {
+    const [deleted] = await this.db
+      .delete(deliveryCustomers)
+      .where(eq(deliveryCustomers.id, id))
+      .returning();
+
+    if (!deleted) {
+      throw new NotFoundException('Delivery customer not found');
+    }
+
+    return {
+      message: `Customer ${deleted.name} removed from delivery roster.`,
+      deletedId: deleted.id,
+    };
   }
 }

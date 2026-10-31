@@ -7,3 +7,4 @@ export * from './photo-count-logs.schema.js';
 export * from './billing-documents.schema.js';
 export * from './relations.schema.js';
 export * from './devices.schema.js';
+export * from './delivery-customers.schema.js';

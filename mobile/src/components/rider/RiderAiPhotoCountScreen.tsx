@@ -37,7 +37,7 @@ import { riderStyles } from '../../styles/rider.styles';
 import type { MobileOrderItem } from '../../types/mobile.types';
 
 interface RiderAiPhotoCountScreenProps {
-  order: MobileOrderItem;
+  order?: MobileOrderItem | null;
   onUpdateVerifiedCount: (orderId: string, newCount: number) => void;
   onIssueInvoiceAndProceedToDoorstep: () => void;
   onBackToDeliveries: () => void;
@@ -51,11 +51,63 @@ export function RiderAiPhotoCountScreen(props: RiderAiPhotoCountScreenProps) {
     null,
   );
 
-  const billBreakdown = calculateOrderBillBreakdown(props.order.verifiedCount);
+  if (!props.order) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: '#f1f5f9',
+          padding: 24,
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Camera size={40} color="#94a3b8" />
+        <Text
+          style={{
+            fontSize: 16,
+            fontWeight: '700',
+            color: '#0f172a',
+            marginTop: 12,
+          }}
+        >
+          No Delivery Order Selected
+        </Text>
+        <Text
+          style={{
+            fontSize: 12,
+            color: '#64748b',
+            textAlign: 'center',
+            marginTop: 6,
+            marginBottom: 20,
+            lineHeight: 18,
+          }}
+        >
+          There are currently no active deliveries in your manifest. Select an order from your deliveries queue to scan containers.
+        </Text>
+        <Pressable
+          onPress={props.onBackToDeliveries}
+          style={{
+            backgroundColor: '#0284c7',
+            paddingHorizontal: 20,
+            paddingVertical: 10,
+            borderRadius: 8,
+          }}
+        >
+          <Text style={{ color: '#ffffff', fontSize: 13, fontWeight: '700' }}>
+            Back to Deliveries
+          </Text>
+        </Pressable>
+      </View>
+    );
+  }
+
+  const currentOrder = props.order;
+  const billBreakdown = calculateOrderBillBreakdown(currentOrder.verifiedCount);
 
   // Build explicit list of detected container indices [1..N]
   const detectedIndices: number[] = [];
-  for (let index = 1; index <= props.order.verifiedCount; index = index + 1) {
+  for (let index = 1; index <= currentOrder.verifiedCount; index = index + 1) {
     detectedIndices.push(index);
   }
 
@@ -85,10 +137,10 @@ export function RiderAiPhotoCountScreen(props: RiderAiPhotoCountScreenProps) {
 
       // If Gemini detected containers, update the verified count
       if (result.detectedCount > 0) {
-        props.onUpdateVerifiedCount(props.order.id, result.detectedCount);
+        props.onUpdateVerifiedCount(currentOrder.id, result.detectedCount);
       } else {
         // If 0 detected, keep current count or set to 0 and notify
-        props.onUpdateVerifiedCount(props.order.id, result.detectedCount);
+        props.onUpdateVerifiedCount(currentOrder.id, result.detectedCount);
       }
     } catch (error: unknown) {
       const message =
@@ -171,9 +223,9 @@ export function RiderAiPhotoCountScreen(props: RiderAiPhotoCountScreenProps) {
    * Increments verified count manually
    */
   function handleIncrementCount() {
-    const nextCount = props.order.verifiedCount + 1;
+    const nextCount = currentOrder.verifiedCount + 1;
     if (nextCount <= 99) {
-      props.onUpdateVerifiedCount(props.order.id, nextCount);
+      props.onUpdateVerifiedCount(currentOrder.id, nextCount);
     }
   }
 
@@ -181,9 +233,9 @@ export function RiderAiPhotoCountScreen(props: RiderAiPhotoCountScreenProps) {
    * Decrements verified count manually
    */
   function handleDecrementCount() {
-    const nextCount = props.order.verifiedCount - 1;
+    const nextCount = currentOrder.verifiedCount - 1;
     if (nextCount >= 0) {
-      props.onUpdateVerifiedCount(props.order.id, nextCount);
+      props.onUpdateVerifiedCount(currentOrder.id, nextCount);
     }
   }
 
@@ -198,10 +250,10 @@ export function RiderAiPhotoCountScreen(props: RiderAiPhotoCountScreenProps) {
           <ArrowLeft size={18} color="#0f172a" />
           <View>
             <Text style={cardStyles.secondaryActionTitle}>
-              AI Photo Container Count (Order #{props.order.orderNumber})
+              AI Photo Container Count (Order #{currentOrder.orderNumber})
             </Text>
             <Text style={cardStyles.secondaryActionSub}>
-              Customer: {props.order.customerName}
+              Customer: {currentOrder.customerName}
             </Text>
           </View>
         </View>
@@ -275,8 +327,8 @@ export function RiderAiPhotoCountScreen(props: RiderAiPhotoCountScreenProps) {
         <View style={riderStyles.aiConfidenceBanner}>
           <CheckCircle2 size={14} color="#34d399" />
           <Text style={riderStyles.aiConfidenceText}>
-            {props.order.verifiedCount} containers detected •{' '}
-            {geminiResult ? geminiResult.confidence : props.order.aiConfidencePercent}% AI Confidence
+            {currentOrder.verifiedCount} containers detected •{' '}
+            {geminiResult ? geminiResult.confidence : currentOrder.aiConfidencePercent}% AI Confidence
           </Text>
         </View>
       </View>
@@ -354,10 +406,10 @@ export function RiderAiPhotoCountScreen(props: RiderAiPhotoCountScreenProps) {
         <View style={riderStyles.adjusterControlsRow}>
           <Pressable
             onPress={handleDecrementCount}
-            disabled={props.order.verifiedCount <= 0 || isAnalyzing}
+            disabled={currentOrder.verifiedCount <= 0 || isAnalyzing}
             style={[
               riderStyles.adjusterButton,
-              props.order.verifiedCount <= 0 ? { opacity: 0.4 } : null,
+              currentOrder.verifiedCount <= 0 ? { opacity: 0.4 } : null,
             ]}
           >
             <Minus size={20} color="#0f172a" />
@@ -365,7 +417,7 @@ export function RiderAiPhotoCountScreen(props: RiderAiPhotoCountScreenProps) {
 
           <View style={riderStyles.adjusterDisplayBox}>
             <Text style={riderStyles.adjusterNumber}>
-              {props.order.verifiedCount}
+              {currentOrder.verifiedCount}
             </Text>
             <Text style={riderStyles.adjusterUnitsLabel}>
               5-Gallon Containers
@@ -374,10 +426,10 @@ export function RiderAiPhotoCountScreen(props: RiderAiPhotoCountScreenProps) {
 
           <Pressable
             onPress={handleIncrementCount}
-            disabled={props.order.verifiedCount >= 99 || isAnalyzing}
+            disabled={currentOrder.verifiedCount >= 99 || isAnalyzing}
             style={[
               riderStyles.adjusterButton,
-              props.order.verifiedCount >= 99 ? { opacity: 0.4 } : null,
+              currentOrder.verifiedCount >= 99 ? { opacity: 0.4 } : null,
             ]}
           >
             <Plus size={20} color="#0f172a" />
@@ -388,13 +440,13 @@ export function RiderAiPhotoCountScreen(props: RiderAiPhotoCountScreenProps) {
       {/* 4. Auto-Generated Pre-Dispatch Bill (#INV) */}
       <View style={cardStyles.whitePanelCard}>
         <Text style={cardStyles.sectionLabel}>
-          AUTO-GENERATED BILL (PRE-DISPATCH #{props.order.invoiceNumber})
+          AUTO-GENERATED BILL (PRE-DISPATCH #{currentOrder.invoiceNumber})
         </Text>
 
         <View style={cardStyles.billRow}>
           <Text style={cardStyles.billRowLabel}>
-            {props.order.verifiedCount} containers refilled (× PHP{' '}
-            {props.order.unitPrice})
+            {currentOrder.verifiedCount} containers refilled (× PHP{' '}
+            {currentOrder.unitPrice})
           </Text>
           <Text style={cardStyles.billRowValue}>
             PHP {billBreakdown.subtotalAmount.toFixed(2)}
@@ -434,7 +486,7 @@ export function RiderAiPhotoCountScreen(props: RiderAiPhotoCountScreenProps) {
           >
             <Zap size={16} color="#ffffff" />
             <Text style={riderStyles.stopPrimaryButtonText}>
-              ISSUE INVOICE #{props.order.invoiceNumber}
+              ISSUE INVOICE #{currentOrder.invoiceNumber}
             </Text>
           </Pressable>
         </View>

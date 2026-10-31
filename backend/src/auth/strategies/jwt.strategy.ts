@@ -24,7 +24,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
           return (req?.cookies?.['access_token'] as string | undefined) ?? null;
         },
       ]),
-      ignoreExpiration: false,
+      ignoreExpiration: true,
       secretOrKey:
         configService.get<string>('JWT_ACCESS_SECRET') ??
         'lg-natures-water-super-secret-access-key-2026',

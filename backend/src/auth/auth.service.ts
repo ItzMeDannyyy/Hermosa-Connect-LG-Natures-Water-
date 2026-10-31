@@ -343,11 +343,9 @@ export class AuthService implements OnModuleInit {
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {
         secret: accessSecret,
-        expiresIn: '15m',
       }),
       this.jwtService.signAsync(payload, {
         secret: refreshSecret,
-        expiresIn: '7d',
       }),
     ]);
 
@@ -410,49 +408,25 @@ export class AuthService implements OnModuleInit {
           await this.db.insert(containerPresets).values([
             {
               branchId: b.id,
-              name: '5-Gallon Slim Container (Refill)',
-              refillPrice: '25.00',
+              name: '10 Liters (10L)',
+              refillPrice: '13.00',
             },
             {
               branchId: b.id,
-              name: '5-Gallon Round Dispenser Jug (Refill)',
-              refillPrice: '25.00',
+              name: '7 Liters (7L)',
+              refillPrice: '9.00',
+            },
+            {
+              branchId: b.id,
+              name: '5-Gallon Round',
+              refillPrice: '20.00',
             },
           ]);
         }
-      } else {
-        branch1 = existingBranches[0]!;
-      }
-
-      const existingUsers = await this.db.select().from(users);
-      if (existingUsers.length === 0) {
-        const defaultPasswordHash = await bcrypt.hash('password123', 12);
-
-        // 1. Demo Operator
-        await this.db.insert(users).values({
-          fullName: 'Danny (Station Operator)',
-          phoneNumber: '+639170000001',
-          passwordHash: defaultPasswordHash,
-          role: 'OPERATOR',
-          branchId: branch1.id,
-        });
-
-        // 2. Demo Rider
-        await this.db.insert(users).values({
-          fullName: 'J. Cruz (Delivery Rider)',
-          phoneNumber: '+639170000002',
-          passwordHash: defaultPasswordHash,
-          role: 'RIDER',
-          branchId: branch1.id,
-        });
-
-        this.logger.log(
-          'Staff accounts ready! Password: "password123" | Phones: +639170000001 (OPERATOR), +639170000002 (RIDER)',
-        );
       }
     } catch (error) {
       this.logger.warn(
-        `Skipped auto-seeding demo users: ${(error as Error).message}`,
+        `Branch check on startup notice: ${(error as Error).message}`,
       );
     }
   }

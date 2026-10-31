@@ -98,10 +98,10 @@ export function RegisterCustomerModalDrawer(
             </div>
             <div>
               <h2 className="text-[14px] font-semibold text-[#0f172a] leading-none">
-                Counter POS &amp; Order Entry
+                Walk-In Counter POS
               </h2>
               <span className="text-[11px] text-[#64748b] mt-0.5 block">
-                Next Document: #ORD-{props.nextOrderNumber}
+                Quick Gallon Selection &amp; Instant Sales
               </span>
             </div>
           </div>

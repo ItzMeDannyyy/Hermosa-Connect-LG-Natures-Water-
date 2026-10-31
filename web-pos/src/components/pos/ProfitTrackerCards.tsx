@@ -9,17 +9,43 @@
  * ============================================================================
  */
 
-import { Banknote, DollarSign, Droplets, ReceiptText } from 'lucide-react';
+import { Banknote, Calendar, DollarSign, Droplets, ReceiptText } from 'lucide-react';
 import type { ProfitSummaryMetrics } from '../../types/pos.types';
 
 interface ProfitTrackerCardsProps {
   metrics: ProfitSummaryMetrics;
 }
 
+export function formatCurrentStationDate(date = new Date()): string {
+  const year = date.getFullYear();
+  const month = date.toLocaleDateString('en-US', { month: 'long' });
+  const day = String(date.getDate()).padStart(2, '0');
+  const weekday = date.toLocaleDateString('en-US', { weekday: 'long' });
+  return `${year}, ${month} ${day} - ${weekday}`;
+}
+
 export function ProfitTrackerCards(props: ProfitTrackerCardsProps) {
+  const formattedTodayDate = formatCurrentStationDate();
+
   return (
-    <section className="bg-white border border-[#e2e8f0] rounded-[10px] overflow-hidden">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-[#e2e8f0]">
+    <div className="flex flex-col gap-2">
+      {/* Date Header Strip Before Cards */}
+      <div className="flex items-center justify-between px-1">
+        <div className="flex items-center gap-2 text-[#0f172a]">
+          <Calendar size={15} className="text-[#0284c7]" />
+          <span className="text-[13px] sm:text-[14px] font-bold text-[#0f172a] num-mono tracking-tight">
+            {formattedTodayDate}
+          </span>
+        </div>
+        <div className="flex items-center gap-1.5 text-[11px] text-[#64748b]">
+          <span className="w-2 h-2 rounded-full bg-[#15803d]" />
+          <span>Live Station Sales</span>
+        </div>
+      </div>
+
+      {/* Cards: Gross Sales, Cash Collected, Unpaid Receivables, Refills Dispensed */}
+      <section className="bg-white border border-[#e2e8f0] rounded-[10px] overflow-hidden">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-[#e2e8f0]">
         {/* Metric 1: Gross Sales Revenue */}
         <div className="p-4 flex flex-col justify-between">
           <div className="flex items-center justify-between text-[12px] font-medium text-[#64748b]">
@@ -103,5 +129,6 @@ export function ProfitTrackerCards(props: ProfitTrackerCardsProps) {
         </div>
       </div>
     </section>
-  );
+  </div>
+);
 }

@@ -20,7 +20,9 @@ import {
   Plus,
   ReceiptText,
   ShieldCheck,
+  Truck,
   UserPlus,
+  Users,
 } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
@@ -37,6 +39,7 @@ interface TopNavigationBarProps {
   onOpenStaffModal: () => void;
   onOpenEndOfDayModal: () => void;
   onOpenRegisterCustomer?: () => void;
+  onOpenDeliveryCustomers?: () => void;
   onSwitchRole: (role: UserRole) => void;
   onLogout: () => void;
 }
@@ -46,7 +49,8 @@ export function TopNavigationBar(props: TopNavigationBarProps) {
   const location = useLocation();
 
   const isLogs = location.pathname.startsWith('/pos/logs');
-  const isDashboard = !isLogs;
+  const isDeliveryCustomers = location.pathname.startsWith('/pos/delivery-customers');
+  const isDashboard = !isLogs && !isDeliveryCustomers;
 
   const rawBranchName =
     props.currentBranch !== null ? props.currentBranch.name : 'Station 1';
@@ -138,6 +142,18 @@ export function TopNavigationBar(props: TopNavigationBarProps) {
             <ReceiptText size={15} />
             <span>Transaction Logs</span>
           </Link>
+
+          <Link
+            to="/pos/delivery-customers"
+            className={`h-full px-3.5 inline-flex items-center gap-2 text-[13px] font-medium border-b-2 transition-colors ${
+              isDeliveryCustomers
+                ? 'border-[#0284c7] text-[#0f172a] font-semibold'
+                : 'border-transparent text-[#64748b] hover:text-[#0f172a]'
+            }`}
+          >
+            <Users size={15} />
+            <span>Delivery Customers</span>
+          </Link>
         </nav>
 
         {/* ====================================================================
@@ -155,15 +171,29 @@ export function TopNavigationBar(props: TopNavigationBarProps) {
             <span>EOD Report</span>
           </button>
 
-          {/* Quick Register Order Button */}
+          {/* Quick Add Delivery Customers Button */}
+          {props.onOpenDeliveryCustomers && (
+            <button
+              type="button"
+              onClick={props.onOpenDeliveryCustomers}
+              className="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[6px] border border-[#bae6fd] bg-[#f0f9ff] hover:bg-[#e0f2fe] text-[#0369a1] text-[12px] font-semibold cursor-pointer transition-colors"
+              title="Add Delivery Customers & Manage Barangay Rotation"
+            >
+              <Truck size={14} className="text-[#0284c7]" />
+              <span>Delivery Customers</span>
+            </button>
+          )}
+
+          {/* Quick Walk-In Order Button */}
           {props.onOpenRegisterCustomer && (
             <button
               type="button"
               onClick={props.onOpenRegisterCustomer}
               className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-[6px] bg-[#0f172a] hover:bg-[#1e293b] text-[#ffffff] text-[12px] font-semibold cursor-pointer transition-colors"
+              title="Open Walk-In Counter POS"
             >
               <Plus size={14} />
-              <span>New Order</span>
+              <span>Walk-In POS</span>
             </button>
           )}
 

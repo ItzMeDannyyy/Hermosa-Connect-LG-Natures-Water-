@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -11,8 +12,11 @@ import { Roles } from '../auth/decorators/roles.decorator.js';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../auth/guards/roles.guard.js';
 import {
+  BulkCreateDeliveryCustomersDto,
   ConvertOrderReceiptDto,
+  CreateDeliveryCustomerDto,
   CreatePosOrderDto,
+  UpdateDeliveryCustomerDto,
   UpdateOrderAiCountDto,
 } from './dto/pos.dto.js';
 import { PosService } from './pos.service.js';
@@ -78,4 +82,60 @@ export class PosController {
   ) {
     return this.posService.convertInvoiceToOfficialReceipt(orderId, dto);
   }
+
+  /**
+   * GET /api/pos/delivery-customers
+   * Retrieves all delivery customers sorted by Barangay with vehicle rotation counts
+   */
+  @Get('delivery-customers')
+  @Roles('OPERATOR', 'RIDER')
+  async getDeliveryCustomers() {
+    return this.posService.getDeliveryCustomers();
+  }
+
+  /**
+   * POST /api/pos/delivery-customers
+   * Adds an individual delivery customer
+   */
+  @Post('delivery-customers')
+  @Roles('OPERATOR')
+  async createDeliveryCustomer(@Body() dto: CreateDeliveryCustomerDto) {
+    return this.posService.createDeliveryCustomer(dto);
+  }
+
+  /**
+   * POST /api/pos/delivery-customers/bulk
+   * Bulk adds delivery customers from spreadsheet
+   */
+  @Post('delivery-customers/bulk')
+  @Roles('OPERATOR')
+  async bulkCreateDeliveryCustomers(
+    @Body() dto: BulkCreateDeliveryCustomersDto,
+  ) {
+    return this.posService.bulkCreateDeliveryCustomers(dto);
+  }
+
+  /**
+   * PATCH /api/pos/delivery-customers/:id
+   * Updates a delivery customer
+   */
+  @Patch('delivery-customers/:id')
+  @Roles('OPERATOR')
+  async updateDeliveryCustomer(
+    @Param('id') id: string,
+    @Body() dto: UpdateDeliveryCustomerDto,
+  ) {
+    return this.posService.updateDeliveryCustomer(id, dto);
+  }
+
+  /**
+   * DELETE /api/pos/delivery-customers/:id
+   * Deletes a delivery customer
+   */
+  @Delete('delivery-customers/:id')
+  @Roles('OPERATOR')
+  async deleteDeliveryCustomer(@Param('id') id: string) {
+    return this.posService.deleteDeliveryCustomer(id);
+  }
 }
+

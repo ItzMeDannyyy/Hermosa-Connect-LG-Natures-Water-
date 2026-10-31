@@ -84,3 +84,85 @@ export class UpdateOrderAiCountDto {
   @Max(100)
   verifiedCount!: number;
 }
+
+export class CreateDeliveryCustomerDto {
+  @IsString()
+  @IsNotEmpty()
+  name!: string;
+
+  @IsOptional()
+  @IsString()
+  phoneNumber?: string;
+
+  @IsString()
+  @IsNotEmpty()
+  barangay!: string;
+
+  @IsOptional()
+  @IsString()
+  deliveryAddress?: string;
+
+  @IsOptional()
+  @IsIn(['FOTON', 'SIDECAR'])
+  vehicleType?: 'FOTON' | 'SIDECAR';
+
+  @IsOptional()
+  @IsString()
+  scheduledDeliveryTime?: string;
+
+  @IsOptional()
+  @IsString()
+  notes?: string;
+}
+
+export class BulkCreateDeliveryCustomersDto {
+  @IsNotEmpty()
+  customers!: Array<{
+    name: string;
+    phoneNumber?: string;
+    barangay?: string;
+    deliveryAddress?: string;
+    vehicleType?: 'FOTON' | 'SIDECAR';
+    scheduledDeliveryTime?: string;
+    notes?: string;
+  }>;
+
+  @IsOptional()
+  @IsIn(['FOTON', 'SIDECAR'])
+  defaultVehicleType?: 'FOTON' | 'SIDECAR';
+
+  @IsOptional()
+  @IsString()
+  defaultBarangay?: string;
+}
+
+export class UpdateDeliveryCustomerDto {
+  @IsOptional()
+  @IsString()
+  name?: string;
+
+  @IsOptional()
+  @IsString()
+  phoneNumber?: string;
+
+  @IsOptional()
+  @IsString()
+  barangay?: string;
+
+  @IsOptional()
+  @IsString()
+  deliveryAddress?: string;
+
+  @IsOptional()
+  @IsIn(['FOTON', 'SIDECAR'])
+  vehicleType?: 'FOTON' | 'SIDECAR';
+
+  @IsOptional()
+  @IsString()
+  scheduledDeliveryTime?: string;
+
+  @IsOptional()
+  @IsString()
+  notes?: string;
+}
+

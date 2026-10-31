@@ -88,7 +88,7 @@ export default function MobileApplicationIndexScreen() {
     }
   }
 
-  function getActiveSelectedOrder(): MobileOrderItem {
+  function getActiveSelectedOrder(): MobileOrderItem | undefined {
     for (let index = 0; index < orders.length; index = index + 1) {
       const candidateOrder = orders[index];
       if (
@@ -98,7 +98,7 @@ export default function MobileApplicationIndexScreen() {
         return candidateOrder;
       }
     }
-    return orders[0]!;
+    return orders[0];
   }
 
   async function handleLoginSubmit(phoneNumber: string, password: string) {
@@ -310,8 +310,9 @@ export default function MobileApplicationIndexScreen() {
                   void handleUpdateOrderVerifiedCount(orderId, newCount);
                 }}
                 onIssueInvoiceAndProceedToDoorstep={() => {
+                  const invoiceTag = activeOrder?.invoiceNumber ? ` #${activeOrder.invoiceNumber}` : '';
                   showToastBanner(
-                    `Pre-Dispatch Invoice #${activeOrder.invoiceNumber} locked! Ready for doorstep delivery.`,
+                    `Pre-Dispatch Invoice${invoiceTag} locked! Ready for doorstep delivery.`,
                   );
                   setActiveRiderTab('DOORSTEP_OR');
                 }}

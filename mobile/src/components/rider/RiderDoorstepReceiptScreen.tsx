@@ -18,6 +18,7 @@ import {
   PieChart,
   Plus,
   Printer,
+  Receipt,
   Send,
 } from 'lucide-react-native';
 import React, { useState } from 'react';
@@ -38,7 +39,7 @@ import type {
 } from '../../types/mobile.types';
 
 interface RiderDoorstepReceiptScreenProps {
-  order: MobileOrderItem;
+  order?: MobileOrderItem | null;
   onConfirmOfficialReceipt: (
     orderId: string,
     selectedPaymentState: PaymentStateType,
@@ -54,13 +55,66 @@ export function RiderDoorstepReceiptScreen(
   props: RiderDoorstepReceiptScreenProps,
 ) {
   const [selectedPaymentState, setSelectedPaymentState] =
-    useState<PaymentStateType>(props.order.paymentState);
+    useState<PaymentStateType>(props.order?.paymentState ?? 'PAID_CASH');
   const [emptyCollected, setEmptyCollected] = useState<number>(
-    props.order.emptyContainersToPickup,
+    props.order?.emptyContainersToPickup ?? 0,
   );
   const [partialPaidInput, setPartialPaidInput] = useState<string>(
-    String(props.order.amountPaid),
+    String(props.order?.amountPaid ?? 0),
   );
+
+  if (!props.order) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: '#f1f5f9',
+          padding: 24,
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Receipt size={40} color="#94a3b8" />
+        <Text
+          style={{
+            fontSize: 16,
+            fontWeight: '700',
+            color: '#0f172a',
+            marginTop: 12,
+          }}
+        >
+          No Delivery Order Selected
+        </Text>
+        <Text
+          style={{
+            fontSize: 12,
+            color: '#64748b',
+            textAlign: 'center',
+            marginTop: 6,
+            marginBottom: 20,
+            lineHeight: 18,
+          }}
+        >
+          There are currently no active deliveries in your manifest to generate a doorstep receipt. Select an order from your deliveries queue.
+        </Text>
+        <Pressable
+          onPress={props.onBackToDeliveries}
+          style={{
+            backgroundColor: '#0284c7',
+            paddingHorizontal: 20,
+            paddingVertical: 10,
+            borderRadius: 8,
+          }}
+        >
+          <Text style={{ color: '#ffffff', fontSize: 13, fontWeight: '700' }}>
+            Back to Deliveries
+          </Text>
+        </Pressable>
+      </View>
+    );
+  }
+
+  const currentOrder = props.order;
 
   const parsedPartialPaid = Number(partialPaidInput);
   const safePartialPaid = Number.isNaN(parsedPartialPaid)
@@ -68,12 +122,12 @@ export function RiderDoorstepReceiptScreen(
     : parsedPartialPaid;
 
   const paymentComputation = calculateDoorstepPaymentAmounts(
-    props.order.totalDue,
+    currentOrder.totalDue,
     selectedPaymentState,
     safePartialPaid,
   );
 
-  const officialReceiptCode = `OR-${props.order.orderNumber}`;
+  const officialReceiptCode = `OR-${currentOrder.orderNumber}`;
 
   function handleAdjustEmptyCollected(delta: number) {
     let nextValue = emptyCollected + delta;
@@ -88,7 +142,7 @@ export function RiderDoorstepReceiptScreen(
 
   function handleConfirmAndSendReceipt() {
     props.onConfirmOfficialReceipt(
-      props.order.id,
+      currentOrder.id,
       selectedPaymentState,
       paymentComputation.amountPaid,
       paymentComputation.balanceDue,
@@ -107,10 +161,10 @@ export function RiderDoorstepReceiptScreen(
           <ArrowLeft size={18} color="#0f172a" />
           <View>
             <Text style={cardStyles.secondaryActionTitle}>
-              Confirm Delivery &bull; Order #{props.order.orderNumber}
+              Confirm Delivery &bull; Order #{currentOrder.orderNumber}
             </Text>
             <Text style={cardStyles.secondaryActionSub}>
-              Customer: {props.order.customerName} &bull; #{props.order.invoiceNumber} &rarr; #{officialReceiptCode}
+              Customer: {currentOrder.customerName} &bull; #{currentOrder.invoiceNumber} &rarr; #{officialReceiptCode}
             </Text>
           </View>
         </View>
@@ -121,7 +175,7 @@ export function RiderDoorstepReceiptScreen(
         <View style={cardStyles.billRow}>
           <Text style={cardStyles.billRowLabel}>AI Verified Refills</Text>
           <Text style={cardStyles.billRowValue}>
-            {props.order.verifiedCount} Containers Refilled
+            {currentOrder.verifiedCount} Containers Refilled
           </Text>
         </View>
 
@@ -159,7 +213,7 @@ export function RiderDoorstepReceiptScreen(
         <View style={cardStyles.billTotalRow}>
           <Text style={cardStyles.billTotalLabel}>Total Due</Text>
           <Text style={cardStyles.billTotalValue}>
-            PHP {props.order.totalDue.toFixed(2)}
+            PHP {currentOrder.totalDue.toFixed(2)}
           </Text>
         </View>
       </View>
@@ -300,37 +354,37 @@ export function RiderDoorstepReceiptScreen(
           <View style={cardStyles.billRow}>
             <Text style={cardStyles.billRowLabel}>Customer:</Text>
             <Text style={cardStyles.billRowValue}>
-              {props.order.customerName}
+              {currentOrder.customerName}
             </Text>
           </View>
 
           <View style={cardStyles.billRow}>
             <Text style={cardStyles.billRowLabel}>Rider / Hub:</Text>
             <Text style={cardStyles.billRowValue}>
-              {props.order.assignedRiderName} &bull; Station 1 Hub
+              {currentOrder.assignedRiderName} &bull; Station 1 Hub
             </Text>
           </View>
 
           <View style={cardStyles.billRow}>
             <Text style={cardStyles.billRowLabel}>
-              {props.order.verifiedCount} containers refilled
+              {currentOrder.verifiedCount} containers refilled
             </Text>
             <Text style={cardStyles.billRowValue}>
-              PHP {props.order.subtotalAmount.toFixed(2)}
+              PHP {currentOrder.subtotalAmount.toFixed(2)}
             </Text>
           </View>
 
           <View style={cardStyles.billRow}>
             <Text style={cardStyles.billRowLabel}>Delivery fee</Text>
             <Text style={cardStyles.billRowValue}>
-              PHP {props.order.deliveryFee.toFixed(2)}
+              PHP {currentOrder.deliveryFee.toFixed(2)}
             </Text>
           </View>
 
           <View style={cardStyles.billTotalRow}>
             <Text style={cardStyles.billTotalLabel}>TOTAL DUE</Text>
             <Text style={cardStyles.billTotalValue}>
-              PHP {props.order.totalDue.toFixed(2)}
+              PHP {currentOrder.totalDue.toFixed(2)}
             </Text>
           </View>
 

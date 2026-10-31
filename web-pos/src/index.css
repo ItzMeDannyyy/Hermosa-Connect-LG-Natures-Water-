@@ -314,7 +314,7 @@ body {
 .edge-pos-trigger {
   position: fixed;
   right: 0;
-  top: 50%;
+  top: calc(50% - 85px);
   transform: translate3d(0, -50%, 0);
   z-index: 45;
   background-color: #0f172a;
@@ -323,7 +323,7 @@ body {
   border-right: 0;
   border-top-left-radius: 8px;
   border-bottom-left-radius: 8px;
-  padding: 14px 9px;
+  padding: 12px 9px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -341,7 +341,7 @@ body {
   writing-mode: vertical-rl;
   text-orientation: mixed;
   transform: rotate(180deg);
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 600;
   letter-spacing: 0.02em;
   white-space: nowrap;
@@ -352,6 +352,50 @@ body {
   height: 6px;
   border-radius: 9999px;
   background-color: #15803d;
+}
+
+/* Edge Floating Delivery Customers Tab */
+.edge-delivery-trigger {
+  position: fixed;
+  right: 0;
+  top: calc(50% + 85px);
+  transform: translate3d(0, -50%, 0);
+  z-index: 45;
+  background-color: #0369a1;
+  color: #ffffff;
+  border: 1px solid #0284c7;
+  border-right: 0;
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
+  padding: 12px 9px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: transform 180ms var(--ease-out), background-color 150ms ease;
+}
+
+.edge-delivery-trigger:hover {
+  transform: translate3d(-4px, -50%, 0);
+  background-color: #0284c7;
+}
+
+.edge-delivery-trigger__label {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.edge-delivery-trigger__pip {
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background-color: #38bdf8;
 }
 
 /* Login Drawer */
