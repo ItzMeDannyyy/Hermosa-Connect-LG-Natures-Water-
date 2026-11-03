@@ -4,6 +4,7 @@
   "private": true,
   "description": "LG Nature's Water Monorepo - Backend, Web POS & Mobile",
   "scripts": {
+    "dev:all": "concurrently -n \"BACKEND,WEB,MOBILE\" -c \"blue,green,magenta\" \"npm run start:backend\" \"npm run start:web-pos\" \"npm run start:mobile\"",
     "database:reset": "npm run database:reset --prefix backend",
     "database:data": "npm run database:data --prefix backend",
     "start:backend": "npm run start:dev --prefix backend",
@@ -11,5 +12,8 @@
     "start:mobile": "npm run start --prefix mobile",
     "build:backend": "npm run build --prefix backend",
     "build:web-pos": "npm run build --prefix web-pos"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.6"
   }
 }

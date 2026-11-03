@@ -453,19 +453,19 @@ export function DeliveryCustomersSpreadsheetPage({
             <thead className="bg-[#f8fafc] text-[11px] font-semibold text-[#475569] border-b border-[#cbd5e1] sticky top-0 z-30">
               <tr>
                 {/* Sticky Identification Columns */}
-                <th className="py-2.5 px-2 text-center w-[40px] border-r border-[#e2e8f0] sticky left-0 bg-[#f8fafc] z-30">
+                <th className="py-2.5 px-2 text-center w-[44px] min-w-[44px] max-w-[44px] border-r border-[#e2e8f0] sticky left-0 bg-[#f8fafc] z-30">
                   #
                 </th>
-                <th className="py-2.5 px-3 min-w-[190px] border-r border-[#e2e8f0] sticky left-[40px] bg-[#f8fafc] z-30">
+                <th className="py-2.5 px-3 w-[190px] min-w-[190px] max-w-[190px] whitespace-nowrap border-r border-[#e2e8f0] sticky left-[44px] bg-[#f8fafc] z-30">
                   Customer Name
                 </th>
-                <th className="py-2.5 px-3 min-w-[140px] border-r border-[#e2e8f0] sticky left-[230px] bg-[#f8fafc] z-30">
+                <th className="py-2.5 px-3 w-[146px] min-w-[146px] max-w-[146px] whitespace-nowrap border-r border-[#e2e8f0] sticky left-[234px] bg-[#f8fafc] z-30">
                   Barangay
                 </th>
-                <th className="py-2.5 px-3 min-w-[130px] border-r border-[#e2e8f0] hidden sm:table-cell">
+                <th className="py-2.5 pl-4 pr-3.5 w-[155px] min-w-[155px] max-w-[155px] whitespace-nowrap border-r border-[#e2e8f0] hidden sm:table-cell sm:sticky sm:left-[380px] bg-[#f8fafc] z-30">
                   Phone (Optional)
                 </th>
-                <th className="py-2.5 px-2 text-center w-[75px] border-r border-[#cbd5e1]">
+                <th className="py-2.5 px-2.5 text-center w-[84px] min-w-[84px] whitespace-nowrap border-r border-[#cbd5e1]">
                   Rotation
                 </th>
 
@@ -555,28 +555,32 @@ export function DeliveryCustomersSpreadsheetPage({
                       className="hover:bg-[#fafafa] transition-colors group"
                     >
                       {/* Row # */}
-                      <td className="py-2 px-2 text-center text-[#94a3b8] font-mono text-[10.5px] border-r border-[#e2e8f0] sticky left-0 bg-white group-hover:bg-[#fafafa] z-20">
+                      <td className="py-2 px-2 text-center w-[44px] min-w-[44px] max-w-[44px] text-[#94a3b8] font-mono text-[10.5px] border-r border-[#e2e8f0] sticky left-0 bg-white group-hover:bg-[#fafafa] z-20">
                         {idx + 1}
                       </td>
 
                       {/* Customer Name */}
-                      <td className="py-2 px-3 font-semibold text-[#0f172a] border-r border-[#e2e8f0] sticky left-[40px] bg-white group-hover:bg-[#fafafa] z-20 truncate max-w-[200px]">
-                        <span title={customer.name}>{customer.name}</span>
+                      <td className="py-2 px-3 w-[190px] min-w-[190px] max-w-[190px] font-semibold text-[#0f172a] border-r border-[#e2e8f0] sticky left-[44px] bg-white group-hover:bg-[#fafafa] z-20">
+                        <div className="truncate max-w-[164px]" title={customer.name}>
+                          {customer.name}
+                        </div>
                       </td>
 
                       {/* Barangay */}
-                      <td className="py-2 px-3 border-r border-[#e2e8f0] sticky left-[230px] bg-white group-hover:bg-[#fafafa] z-20 truncate max-w-[150px]">
-                        <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-[#f1f5f9] text-[#475569] border border-[#e2e8f0]">
-                          {customer.barangay}
-                        </span>
+                      <td className="py-2 px-3 w-[146px] min-w-[146px] max-w-[146px] border-r border-[#e2e8f0] sticky left-[234px] bg-white group-hover:bg-[#fafafa] z-20">
+                        <div className="truncate max-w-[120px]">
+                          <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-[#f1f5f9] text-[#475569] border border-[#e2e8f0]">
+                            {customer.barangay}
+                          </span>
+                        </div>
                       </td>
 
                       {/* Phone Number (Optional) */}
-                      <td className="py-2 px-3 border-r border-[#e2e8f0] hidden sm:table-cell text-[#475569] truncate max-w-[150px]">
+                      <td className="py-2 pl-4 pr-3.5 w-[155px] min-w-[155px] max-w-[155px] whitespace-nowrap border-r border-[#e2e8f0] hidden sm:table-cell sm:sticky sm:left-[380px] bg-white group-hover:bg-[#fafafa] z-20 text-[#475569]">
                         {customer.phoneNumber ? (
-                          <span className="text-[11px] font-mono text-[#0f172a] flex items-center gap-1">
-                            <Phone size={10} className="text-[#64748b]" />
-                            {customer.phoneNumber}
+                          <span className="text-[11px] font-mono text-[#0f172a] flex items-center gap-1.5 truncate">
+                            <Phone size={11} className="text-[#64748b] shrink-0" />
+                            <span className="truncate">{customer.phoneNumber}</span>
                           </span>
                         ) : (
                           <span className="text-[10px] text-[#94a3b8] italic">
@@ -586,7 +590,7 @@ export function DeliveryCustomersSpreadsheetPage({
                       </td>
 
                       {/* Vehicle Rotation Badge */}
-                      <td className="py-2 px-2 text-center border-r border-[#cbd5e1]">
+                      <td className="py-2 px-2.5 text-center w-[84px] min-w-[84px] whitespace-nowrap border-r border-[#cbd5e1]">
                         <span
                           className={`text-[9.5px] font-semibold px-1.5 py-0.5 rounded border uppercase inline-flex items-center gap-1 ${
                             customer.vehicleType === 'FOTON'

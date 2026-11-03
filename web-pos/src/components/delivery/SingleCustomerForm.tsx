@@ -162,14 +162,14 @@ export function SingleCustomerForm({
         <div className="relative">
           <Phone
             size={14}
-            className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#94a3b8]"
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-[#94a3b8] pointer-events-none"
           />
           <input
             type="tel"
             value={phoneNumber}
             onChange={(e) => setPhoneNumber(e.target.value)}
             placeholder="+639171234567 or 09171234567"
-            className="w-full pl-8 pr-3 py-1.5 bg-white border border-[#cbd5e1] rounded-[6px] text-[12px] text-[#0f172a] focus:outline-none focus:border-[#0284c7] focus:ring-1 focus:ring-[#0284c7]"
+            className="w-full pl-9 pr-3 py-1.5 bg-white border border-[#cbd5e1] rounded-[6px] text-[12px] text-[#0f172a] focus:outline-none focus:border-[#0284c7] focus:ring-1 focus:ring-[#0284c7]"
           />
         </div>
       </div>

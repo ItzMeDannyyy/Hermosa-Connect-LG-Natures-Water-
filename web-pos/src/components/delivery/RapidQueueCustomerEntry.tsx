@@ -201,7 +201,7 @@ export function RapidQueueCustomerEntry({
           <div className="relative flex-1">
             <Phone
               size={13}
-              className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#94a3b8]"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-[#94a3b8] pointer-events-none"
             />
             <input
               type="tel"
@@ -209,7 +209,7 @@ export function RapidQueueCustomerEntry({
               onChange={(e) => setPhoneNumber(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Optional phone number (press Enter)..."
-              className="w-full pl-8 pr-3 py-1.5 bg-white border border-[#cbd5e1] rounded-[6px] text-[11.5px] text-[#0f172a] focus:outline-none focus:border-[#0284c7]"
+              className="w-full pl-9 pr-3 py-1.5 bg-white border border-[#cbd5e1] rounded-[6px] text-[11.5px] text-[#0f172a] focus:outline-none focus:border-[#0284c7]"
             />
           </div>
 
