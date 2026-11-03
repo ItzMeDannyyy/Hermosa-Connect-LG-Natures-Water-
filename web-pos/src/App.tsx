@@ -40,7 +40,6 @@ import { LiveOrderQueuePanel } from './components/pos/LiveOrderQueuePanel';
 import { ProfitTrackerCards } from './components/pos/ProfitTrackerCards';
 import { RegisterCustomerModalDrawer } from './components/pos/RegisterCustomerModalDrawer';
 import { TopNavigationBar } from './components/pos/TopNavigationBar';
-import { TransactionLogsPanel } from './components/pos/TransactionLogsPanel';
 import {
   INITIAL_POS_ORDERS,
   calculateProfitSummaryMetrics,
@@ -351,33 +350,35 @@ function PosApplicationRouterContent() {
         />
 
         {/* Pinned Right Tabs for Quick POS Entry & Delivery Customers */}
-        <button
-          type="button"
-          onClick={() => setIsRegisterDrawerOpen(true)}
-          className="edge-pos-trigger"
-          title="Open Walk-In Counter POS"
-          aria-label="Walk-In POS"
-        >
-          <div className="edge-pos-trigger__pip" />
-          <Droplets size={15} className="text-[#38bdf8]" />
-          <span className="edge-pos-trigger__label">
-            Walk-In POS
-          </span>
-        </button>
+        <div className="edge-triggers-stack">
+          <button
+            type="button"
+            onClick={() => setIsRegisterDrawerOpen(true)}
+            className="edge-pos-trigger"
+            title="Open Walk-In Counter POS"
+            aria-label="Walk-In POS"
+          >
+            <div className="edge-pos-trigger__pip" />
+            <Droplets size={16} className="text-[#38bdf8] shrink-0" />
+            <span className="edge-pos-trigger__label">
+              Walk-In POS
+            </span>
+          </button>
 
-        <button
-          type="button"
-          onClick={() => setIsDeliveryCustomersDrawerOpen(true)}
-          className="edge-delivery-trigger"
-          title="Add Delivery Customers & Barangay Rotation"
-          aria-label="Add Delivery Customers"
-        >
-          <div className="edge-delivery-trigger__pip" />
-          <Truck size={15} className="text-[#38bdf8]" />
-          <span className="edge-delivery-trigger__label">
-            Add Delivery Customers
-          </span>
-        </button>
+          <button
+            type="button"
+            onClick={() => setIsDeliveryCustomersDrawerOpen(true)}
+            className="edge-delivery-trigger"
+            title="Add Delivery Customers & Barangay Rotation"
+            aria-label="Add Delivery Customers"
+          >
+            <div className="edge-delivery-trigger__pip" />
+            <Truck size={16} className="text-[#38bdf8] shrink-0" />
+            <span className="edge-delivery-trigger__label">
+              Add Delivery Customers
+            </span>
+          </button>
+        </div>
 
         {/* Register Customer Drawer */}
         <RegisterCustomerModalDrawer
@@ -436,20 +437,6 @@ function PosApplicationRouterContent() {
               <LiveOrderQueuePanel
                 orders={orders}
                 onConvertInvoiceToReceipt={handleConvertInvoiceToReceipt}
-                onOpenRegisterCustomer={() => setIsRegisterDrawerOpen(true)}
-              />,
-            )}
-          </ProtectedOperatorRoute>
-        }
-      />
-
-      <Route
-        path="/pos/logs"
-        element={
-          <ProtectedOperatorRoute currentUser={currentUser}>
-            {renderPosShell(
-              <TransactionLogsPanel
-                orders={orders}
                 onOpenRegisterCustomer={() => setIsRegisterDrawerOpen(true)}
               />,
             )}

@@ -71,14 +71,6 @@ export interface PosOrderItem {
   createdAtIso?: string;
 }
 
-export interface TransactionLogsFilter {
-  dateRange: 'TODAY' | 'YESTERDAY' | 'LAST_7_DAYS' | 'ALL';
-  specificDate?: string;
-  searchQuery: string;
-  paymentStateFilter: 'ALL' | PaymentState;
-  sortOrder: 'NEWEST_FIRST' | 'OLDEST_FIRST';
-}
-
 export interface ProfitSummaryMetrics {
   totalOrdersCount: number;
   totalContainersRefilled: number;

@@ -277,13 +277,14 @@ body {
   color: #ffffff;
   border: 1px solid #334155;
   border-right: 0;
-  border-top-left-radius: 8px;
-  border-bottom-left-radius: 8px;
-  padding: 14px 9px;
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+  padding: 16px 13px;
+  min-width: 44px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 9px;
   cursor: pointer;
   transition: transform 180ms var(--ease-out), background-color 150ms ease;
 }
@@ -308,32 +309,46 @@ body {
   height: 6px;
   border-radius: 9999px;
   background-color: #15803d;
+  flex-shrink: 0;
+}
+
+/* Edge Floating Action Tabs Container (Walk-In POS + Add Delivery Customers) */
+.edge-triggers-stack {
+  position: fixed;
+  right: 0;
+  top: 50%;
+  transform: translate3d(0, -50%, 0);
+  z-index: 45;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+  pointer-events: none;
 }
 
 /* Edge Floating POS Action Tab */
 .edge-pos-trigger {
-  position: fixed;
-  right: 0;
-  top: calc(50% - 85px);
-  transform: translate3d(0, -50%, 0);
-  z-index: 45;
+  pointer-events: auto;
   background-color: #0f172a;
   color: #ffffff;
   border: 1px solid #334155;
   border-right: 0;
-  border-top-left-radius: 8px;
-  border-bottom-left-radius: 8px;
-  padding: 12px 9px;
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+  padding: 15px 13px;
+  min-width: 44px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 9px;
+  flex-shrink: 0;
   cursor: pointer;
+  box-shadow: -2px 4px 12px rgba(15, 23, 42, 0.12);
   transition: transform 180ms var(--ease-out), background-color 150ms ease;
 }
 
 .edge-pos-trigger:hover {
-  transform: translate3d(-4px, -50%, 0);
+  transform: translate3d(-4px, 0, 0);
   background-color: #1e293b;
 }
 
@@ -341,10 +356,12 @@ body {
   writing-mode: vertical-rl;
   text-orientation: mixed;
   transform: rotate(180deg);
-  font-size: 11.5px;
+  font-size: 12px;
   font-weight: 600;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.025em;
+  line-height: 1.2;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .edge-pos-trigger__pip {
@@ -352,32 +369,32 @@ body {
   height: 6px;
   border-radius: 9999px;
   background-color: #15803d;
+  flex-shrink: 0;
 }
 
 /* Edge Floating Delivery Customers Tab */
 .edge-delivery-trigger {
-  position: fixed;
-  right: 0;
-  top: calc(50% + 85px);
-  transform: translate3d(0, -50%, 0);
-  z-index: 45;
+  pointer-events: auto;
   background-color: #0369a1;
   color: #ffffff;
   border: 1px solid #0284c7;
   border-right: 0;
-  border-top-left-radius: 8px;
-  border-bottom-left-radius: 8px;
-  padding: 12px 9px;
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+  padding: 15px 13px;
+  min-width: 44px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 9px;
+  flex-shrink: 0;
   cursor: pointer;
+  box-shadow: -2px 4px 12px rgba(3, 105, 161, 0.15);
   transition: transform 180ms var(--ease-out), background-color 150ms ease;
 }
 
 .edge-delivery-trigger:hover {
-  transform: translate3d(-4px, -50%, 0);
+  transform: translate3d(-4px, 0, 0);
   background-color: #0284c7;
 }
 
@@ -385,10 +402,12 @@ body {
   writing-mode: vertical-rl;
   text-orientation: mixed;
   transform: rotate(180deg);
-  font-size: 11.5px;
+  font-size: 12px;
   font-weight: 600;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.025em;
+  line-height: 1.2;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .edge-delivery-trigger__pip {
@@ -396,6 +415,7 @@ body {
   height: 6px;
   border-radius: 9999px;
   background-color: #38bdf8;
+  flex-shrink: 0;
 }
 
 /* Login Drawer */
@@ -597,7 +617,9 @@ body {
   body {
     background-color: #ffffff;
   }
+  .edge-triggers-stack,
   .edge-pos-trigger,
+  .edge-delivery-trigger,
   .edge-login-trigger,
   header {
     display: none !important;
@@ -609,11 +631,14 @@ body {
   .login-drawer-panel.is-leaving,
   .register-drawer-panel.is-entering,
   .register-drawer-panel.is-leaving,
-  .pos-page-transition,
-  .edge-pos-trigger,
-  .edge-login-trigger {
+  .pos-page-transition {
     animation: none !important;
     transition: none !important;
     transform: none !important;
+  }
+  .edge-pos-trigger,
+  .edge-delivery-trigger,
+  .edge-login-trigger {
+    transition: none !important;
   }
 }

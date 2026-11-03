@@ -9,7 +9,6 @@
 import type {
   PosOrderItem,
   ProfitSummaryMetrics,
-  TransactionLogsFilter,
   WalkInContainerItem,
 } from '../types/pos.types';
 
@@ -95,87 +94,3 @@ export function filterActiveOrders(orders: PosOrderItem[]): PosOrderItem[] {
   return orders.filter(isOrderActive);
 }
 
-export function parseOrderTimestamp(order: PosOrderItem): number {
-  if (order.createdAtIso) {
-    const parsed = new Date(order.createdAtIso).getTime();
-    if (!isNaN(parsed)) return parsed;
-  }
-
-  const dateStr = order.orderDate ?? '2026-10-22';
-  const timeStr = order.deliveredAt ?? order.invoicedAt ?? '8:00 AM';
-
-  const match = timeStr.match(/(\d+):(\d+)\s*(AM|PM)/i);
-  if (match) {
-    let hours = parseInt(match[1], 10);
-    const minutes = parseInt(match[2], 10);
-    const period = match[3].toUpperCase();
-    if (period === 'PM' && hours < 12) hours += 12;
-    if (period === 'AM' && hours === 12) hours = 0;
-    const isoString = `${dateStr}T${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00`;
-    const parsed = new Date(isoString).getTime();
-    if (!isNaN(parsed)) return parsed;
-  }
-
-  return new Date(`${dateStr}T12:00:00`).getTime();
-}
-
-export function filterHistoricalOrders(
-  orders: PosOrderItem[],
-  filter: TransactionLogsFilter,
-): PosOrderItem[] {
-  const todayStr = '2026-10-22';
-  const yesterdayStr = '2026-10-21';
-
-  const filtered = orders.filter((order) => {
-    const orderDate = order.orderDate ?? todayStr;
-
-    if (filter.specificDate) {
-      if (orderDate !== filter.specificDate) return false;
-    } else if (filter.dateRange === 'TODAY') {
-      if (orderDate !== todayStr) return false;
-    } else if (filter.dateRange === 'YESTERDAY') {
-      if (orderDate !== yesterdayStr) return false;
-    } else if (filter.dateRange === 'LAST_7_DAYS') {
-      const orderMs = new Date(orderDate).getTime();
-      const cutoffMs = new Date('2026-10-15').getTime();
-      if (orderMs < cutoffMs) return false;
-    }
-
-    if (filter.paymentStateFilter !== 'ALL') {
-      if (order.paymentState !== filter.paymentStateFilter) return false;
-    }
-
-    if (filter.searchQuery.trim().length > 0) {
-      const q = filter.searchQuery.toLowerCase().trim();
-      const matchName = order.customerName.toLowerCase().includes(q);
-      const matchPhone = order.customerPhone.toLowerCase().includes(q);
-      const matchAddress = order.deliveryAddress.toLowerCase().includes(q);
-      const matchOrderNum = order.orderNumber.toLowerCase().includes(q);
-      const matchInv = order.invoiceNumber.toLowerCase().includes(q);
-      const matchRcpt = order.receiptNumber?.toLowerCase().includes(q) ?? false;
-      if (
-        !matchName &&
-        !matchPhone &&
-        !matchAddress &&
-        !matchOrderNum &&
-        !matchInv &&
-        !matchRcpt
-      ) {
-        return false;
-      }
-    }
-
-    return true;
-  });
-
-  filtered.sort((a, b) => {
-    const timeA = parseOrderTimestamp(a);
-    const timeB = parseOrderTimestamp(b);
-    if (filter.sortOrder === 'OLDEST_FIRST') {
-      return timeA - timeB;
-    }
-    return timeB - timeA;
-  });
-
-  return filtered;
-}

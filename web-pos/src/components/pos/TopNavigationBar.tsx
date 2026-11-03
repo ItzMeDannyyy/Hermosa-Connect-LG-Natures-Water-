@@ -4,7 +4,7 @@
  * PURPOSE: Station Top Navigation Bar adhering to tasteskill framed-sheet design.
  *          - Quiet 56px height with clean, functional spacing.
  *          - Clear product mark: LG Nature's Water · Station #01 (Loyola Heights).
- *          - Tabbed navigation (Orders & Queue, Transaction Logs)
+ *          - Tabbed navigation (Orders & Queue, Delivery Customers)
  *            with quiet active underlines.
  *          - Quick station utility actions: New Order, End-of-Day Z-Reading.
  *          - Strictly Lucide vector icons, zero Unicode emojis.
@@ -18,7 +18,6 @@ import {
   LogOut,
   Monitor,
   Plus,
-  ReceiptText,
   ShieldCheck,
   Truck,
   UserPlus,
@@ -48,9 +47,8 @@ export function TopNavigationBar(props: TopNavigationBarProps) {
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState<boolean>(false);
   const location = useLocation();
 
-  const isLogs = location.pathname.startsWith('/pos/logs');
   const isDeliveryCustomers = location.pathname.startsWith('/pos/delivery-customers');
-  const isDashboard = !isLogs && !isDeliveryCustomers;
+  const isDashboard = !isDeliveryCustomers;
 
   const rawBranchName =
     props.currentBranch !== null ? props.currentBranch.name : 'Station 1';
@@ -129,18 +127,6 @@ export function TopNavigationBar(props: TopNavigationBarProps) {
                 {props.activeOrdersCount}
               </span>
             )}
-          </Link>
-
-          <Link
-            to="/pos/logs"
-            className={`h-full px-3.5 inline-flex items-center gap-2 text-[13px] font-medium border-b-2 transition-colors ${
-              isLogs
-                ? 'border-[#0284c7] text-[#0f172a] font-semibold'
-                : 'border-transparent text-[#64748b] hover:text-[#0f172a]'
-            }`}
-          >
-            <ReceiptText size={15} />
-            <span>Transaction Logs</span>
           </Link>
 
           <Link
